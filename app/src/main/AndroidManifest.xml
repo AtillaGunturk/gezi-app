@@ -1,0 +1,1 @@
+```xml\n<manifest xmlns:android="http://schemas.android.com/apk/res/android"\n    package="com.atilla.geziharitam">\n\n  <application android:label="Gezi Haritam"\n      android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar">\n      <activity android:name=".MainActivity"\n          android:exported="true"\n          android:configChanges="orientation
