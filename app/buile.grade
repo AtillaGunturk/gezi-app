@@ -1,0 +1,1 @@
+gradle\nplugins { id 'com.android.application' }\nandroid {\n  compileSdk 34\n  defaultConfig {\n    applicationId \"com.atilla.geziharitam\"\n    minSdk 23\n    targetSdk 34\n    versionCode 1\n    versionName \"1.0\"\n  }\n  buildTypes { release { minifyEnabled false } }\n}\ndependencies { implementation 'androidx.appcompat:appcompat:1.7.0' }\n
