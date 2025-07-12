@@ -1,0 +1,17 @@
+name: Build APK
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-java@v4
+      with:
+        distribution: temurin
+        java-version: 17
+    - uses: android-actions/setup-android@v3
+    - run: ./gradlew assembleRelease
+    - uses: actions/upload-artifact@v4
+      with:
+        name: gezi-apk
+        path: app/build/outputs/apk/release/app-release.apk
