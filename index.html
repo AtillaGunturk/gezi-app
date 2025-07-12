@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Gezi Haritam</title>
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 0;
+      height: 100%;
+    }
+    #harita {
+      height: 60vh;
+    }
+    form {
+      padding: 1em;
+      background: #f0f0f0;
+      margin-bottom: 1em;
+    }
+    input[type="text"],
+    input[type="number"],
+    textarea {
+      width: 100%;
+      padding: 4px;
+      margin-bottom: 4px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    img {
+      max-width: 100%;
+      height: auto;
+      margin: 0.5em 0;
+    }
+    #bilgiPaneli {
+      padding: 1em;
+      background: #fafafa;
+      border-top: 1px solid #ccc;
+      min-height: 150px;
+    }
+    #fotoAlani div {
+      margin-bottom: 8px;
+    }
+    
+  /* Küçük ön izleme */
+  .thumb {
+    max-width: 120px;
+    cursor: zoom-in;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin: 4px;
+    transition: transform .2s;
+  }
+  .thumb:hover { transform: scale(1.05); }
+
+  /* Tam ekran katman */
+  #lightbox {
+    display: none;                  /* Başta gizli */
+    position: fixed;
+    inset: 0;                       /* tüm ekran */
+    background: rgba(0,0,0,.8);
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+  }
+  #lightbox img {
+    max-width: 90vw;
+    max-height: 90vh;
+    border-radius: 6px;
+    cursor: zoom-out;
+    box-shadow: 0 0 12px #000;
+  }
+</style>
+  
+</head>
+<body>
+  <h2>Gezdiğim Yerler</h2>
+<label for="ilSec">İl Seç: </label>
+<select id="ilSec">
+  <option value="">Seçiniz...</option>
+</select>
+<button type="button" onclick="verileriDisariAktar()">
+  📤 Verileri Dışa Aktar
+</button>
+<input type="file" id="jsonInput" accept="application/json" style="display:none"
+       onchange="verileriIceAktar(this.files[0])">
+<button type="button" onclick="document.getElementById('jsonInput').click()">
+  📥 Verileri İçe Aktar
+</button>
+  <div id="harita"></div>
+
+  <form id="yerForm" onsubmit="return false;">
+    <h3 id="formBaslik">Yeni Yer Ekle</h3>
+
+    <table>
+      <tbody>
+        <tr>
+          <th>Şehir: </th>
+          <td><input type="text" id="isim" required /></td>
+          <th>Açıklama:</th>
+          <td><input type="text" id="aciklama" required /></td>
+        </tr>
+
+        <tr>
+          <th>Enlem:</th>
+          <td><input type="number" id="enlem" step="0.0001" required /></td>
+          <th>Boylam:</th>
+          <td><input type="number" id="boylam" step="0.0001" required /></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div id="fotoAlani"></div>
+
+    <button type="button" onclick="yeniFotoSatiriEkle()">+ Fotoğraf Ekle</button>
+    <button type="button" onclick="yeniYerKaydet()">Kaydet</button>
+  </form>
+
+  <div id="bilgiPaneli">🗺️ Haritadan bir yeri seçtiğinizde detayları burada görünecek.</div>
+  <div id="lightbox" onclick="this.style.display='none'">
+  <img src="">
+</div>
+  <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script defer src="il.js"></script>
+  <script defer src="veriler1.js">
+    
+  </script>
+</body>
+</html>
