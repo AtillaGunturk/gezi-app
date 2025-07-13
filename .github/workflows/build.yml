@@ -37,7 +37,7 @@ jobs:
                      --no-daemon \
                      --stacktrace \
                      --info \
-                     --debug
+                     --debug | tail -n 100
 
       # 6) APK oluştur (manifest geçerse)
       - name: Assemble Release
