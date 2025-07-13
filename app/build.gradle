@@ -14,13 +14,6 @@ android {
         versionName "1.0"
     }
 
-    /* --- Java 17 derleyici ayarları --- */
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
-    }
-
-    /* --- APK’yı debug keystore ile imzala --- */
     signingConfigs {
         debug {
             storeFile file(System.getProperty("user.home") + "/.android/debug.keystore")
@@ -32,12 +25,15 @@ android {
 
     buildTypes {
         release {
-            signingConfig signingConfigs.debug   // ← imza ayarı
+            signingConfig signingConfigs.debug  // ← BU SATIR ŞART
             minifyEnabled false
-            proguardFiles getDefaultProguardFile(
-                'proguard-android-optimize.txt'
-            ), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 }
 
