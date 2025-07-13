@@ -1,8 +1,17 @@
+// Android Gradle Plugin’ini indirecek depo tanımları — satır sırası önemli
 pluginManagement {
     repositories {
-        google()        //  ← Android Gradle Plugin buradan indirilir
+        google()            // ☑️ Zorunlu
         mavenCentral()
         gradlePluginPortal()
+    }
+}
+
+dependencyResolutionManagement {              // Gradle 7+ gerekir
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
     }
 }
 
