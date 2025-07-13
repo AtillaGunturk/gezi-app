@@ -6,7 +6,8 @@
 
     <application
         android:label="Gezi Haritam"
-        android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar"
+        <application
+    android:theme="@style/Theme.GeziHaritam…>
         android:allowBackup="true"
         android:supportsRtl="true">
 
