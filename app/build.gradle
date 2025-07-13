@@ -1,6 +1,4 @@
-plugins {
-    id 'com.android.application'
-}
+plugins { id 'com.android.application' }
 
 android {
     namespace 'com.atillagunturk.geziapp'
@@ -25,7 +23,10 @@ android {
         }
     }
 }
-
+repositories {          // ← EKLE
+    google()
+    mavenCentral()
+}
 dependencies {
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'androidx.webkit:webkit:1.7.0' // WebView için
