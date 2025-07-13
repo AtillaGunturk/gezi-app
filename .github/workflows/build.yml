@@ -32,18 +32,26 @@ jobs:
         run: |
           chmod +x gradlew
           ./gradlew :app:processReleaseMainManifest \
-                     --no-daemon --stacktrace --info --debug | tail -n 100
+                     --no-daemon \
+                     --stacktrace \
+                     --info \
+                     --debug | tail -n 100
 
       - name: Release APK oluştur
+        if: ${{ success() }}
         run: |
           chmod +x gradlew
-          ./gradlew :app:assembleRelease --no-daemon --stacktrace --info
+          ./gradlew :app:assembleRelease \
+                     --no-daemon \
+                     --stacktrace \
+                     --info
 
-      - name: Oluşan APK/AAB dosyalarını listele
+      - name: Üretilen APK'yı tara
         run: find app/build/outputs -type f | grep -E '\.(apk|aab)$' || true
 
       - name: APK'yı upload et
         uses: actions/upload-artifact@v4
+        if: ${{ success() }}
         with:
-       		name: gezi-unsigned-apk
-  			  path: app/build/outputs/apk/release/app-release-unsigned.apk
+          name: gezi-unsigned-apk
+          path: app/build/outputs/apk/release/app-release-unsigned.apk
