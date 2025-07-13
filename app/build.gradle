@@ -1,7 +1,32 @@
-plugins { id 'com.android.application' }
+plugins {
+    id 'com.android.application'
+}
 
-android { /* compileSdk, defaultConfig … */ }
+android {
+    namespace 'com.atillagunturk.geziapp'
+    compileSdk 34
 
-repositories { google(); mavenCentral() }
+    defaultConfig {
+        applicationId "com.atillagunturk.geziapp"
+        minSdk 21
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
 
-dependencies { implementation 'androidx.appcompat:appcompat:1.7.0' }
+        // Eğer asset klasöründeki html dosyalarını WebView'de göstereceksen:
+        // assets/index.html gibi
+        assetDirectories = ['src/main/assets']
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.webkit:webkit:1.7.0' // WebView için
+}
