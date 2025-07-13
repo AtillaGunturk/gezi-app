@@ -3,25 +3,20 @@ plugins {
 }
 
 android {
-    namespace 'com.atilla.geziharitam'   // Manifest’teki package ile tutarlı
+    namespace "com.atilla.gunturk.geziharitam"
     compileSdk 34
 
     defaultConfig {
-        applicationId "com.atilla.geziharitam"
+        applicationId "com.atilla.gunturk.geziharitam"
         minSdk 24
         targetSdk 34
         versionCode 1
         versionName "1.0"
     }
 
-
-    signingConfigs {
-        debug {
-            storeFile file(System.getProperty("user.home") + "/.android/debug.keystore")
-            storePassword "android"
-            keyAlias "androiddebugkey"
-            keyPassword "android"
-        }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     buildTypes {
@@ -31,7 +26,17 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+}
+    signingConfigs {
+        debug {
+            storeFile file(System.getProperty("user.home") + "/.android/debug.keystore")
+            storePassword "android"
+            keyAlias "androiddebugkey"
+            keyPassword "android"
+        }
     }
+
+    
     
 	proguardFile
     compileOptions {            // Java 17 kullanıyorsanız ekleyin
