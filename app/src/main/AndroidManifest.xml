@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- (İsteğe bağlı) minSdk / targetSdk artık build.gradle'da tanımlanıyor,
-         ama eski projeler için burada tutulabilir -->
+    <!-- (İsteğe bağlı) minSdk/targetSdk artık build.gradle’da -->
     <!-- <uses-sdk android:minSdkVersion="24" android:targetSdkVersion="34" /> -->
 
     <application
@@ -18,15 +17,12 @@
             android:launchMode="singleTop"
             android:windowSoftInputMode="adjustResize">
 
-            <!-- Ana giriş noktası -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
 
         </activity>
-
-        <!--  Diğer activity / service / provider / receiver etiketleri buraya -->
 
     </application>
 
