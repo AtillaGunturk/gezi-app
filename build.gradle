@@ -1,22 +1,7 @@
 plugins { id 'com.android.application' }
 
-android {
-    compileSdk 34
-    defaultConfig {
-        applicationId "com.atilla.geziharitam"
-        minSdk 23
-        targetSdk 34
-        versionCode 1
-        versionName "1.0"
-    }
-    buildTypes { release { minifyEnabled false } }
-}
+android { /* compileSdk, defaultConfig … */ }
 
-repositories {          // ☑️ Burada da google() olmalı
-    google()
-    mavenCentral()
-}
+repositories { google(); mavenCentral() }
 
-dependencies {
-    implementation 'androidx.appcompat:appcompat:1.7.0'
-}
+dependencies { implementation 'androidx.appcompat:appcompat:1.7.0' }
