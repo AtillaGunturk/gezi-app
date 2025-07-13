@@ -1,1 +1,2 @@
-gradle\npluginManagement { repositories { google(); mavenCentral() } }\nrootProject.name='GeziApp'\ninclude ':app'\n
+rootProject.name = 'GeziApp'
+include ':app'
