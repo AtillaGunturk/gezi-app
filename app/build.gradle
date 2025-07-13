@@ -1,12 +1,13 @@
 plugins { id 'com.android.application' }
 
 android {
-    namespace 'com.atillagunturk.geziapp'
+    
     compileSdk 34
+    namespace 'com.atillagunturk.geziharitam'
 
     defaultConfig {
-        applicationId "com.atillagunturk.geziapp"
-        minSdk 21
+        applicationId "com.atillagunturk.geziharitam"
+        minSdk 24
         targetSdk 34
         versionCode 1
         versionName "1.0"
