@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="com.atilla.gunturk.geziharitam">
 
-    <!-- (İsteğe bağlı) minSdk/targetSdk artık build.gradle’da -->
-    <!-- <uses-sdk android:minSdkVersion="24" android:targetSdkVersion="34" /> -->
+    <!-- minSdk/targetSdk değerleri build.gradle(:app) içinde -->
 
     <application
         android:label="Gezi Haritam"
-        <application
-    android:theme="@style/Theme.GeziHaritam…>
+        android:theme="@style/Theme.GeziHaritam"
         android:allowBackup="true"
         android:supportsRtl="true">
 
