@@ -45,5 +45,5 @@ jobs:
       - name: APK'yı upload et
         uses: actions/upload-artifact@v4
         with:
-          name: gezi-apk
-          path: app/build/outputs/apk/release/app-release.apk
+       		name: gezi-unsigned-apk
+  			  path: app/build/outputs/apk/release/app-release-unsigned.apk
