@@ -1,2 +1,10 @@
+pluginManagement {
+    repositories {
+        google()        //  ← Android Gradle Plugin buradan indirilir
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
 rootProject.name = 'GeziApp'
 include ':app'
