@@ -1,2 +1,9 @@
-rootProject.name='scratchtest'
+pluginManagement {
+    repositories {
+        google()        // ← şart!
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+rootProject.name = 'GeziApp'
 include ':app'
