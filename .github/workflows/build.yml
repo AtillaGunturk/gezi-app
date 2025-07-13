@@ -10,34 +10,49 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+      # 1) Kodu çek
+      - uses: actions/checkout@v4
 
-    - uses: actions/setup-java@v4
-      with:
-        distribution: temurin
-        java-version: 17
+      # 2) JDK 17
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
 
-    - uses: android-actions/setup-android@v3
+      # 3) Android SDK
+      - uses: android-actions/setup-android@v3
 
-    # Gradle cache + wrapper
-    - uses: gradle/actions/setup-gradle@v3
-      with:
-        build-root-directory: .   # wrapper hangi klasördeyse
+      # 4) Gradle cache + wrapper (cache devre dışı → log temiz)
+      - uses: gradle/actions/setup-gradle@v3
+        with:
+          build-root-directory: .
+          cache-disabled: true      # <- geçici olarak kapat
 
-    # Manifest adımı (opsiyonel)
-    - name: Process manifest (debug)
-      run: |
-        chmod +x gradlew
-        ./gradlew --stacktrace :app:processReleaseMainManifest
+      # 5) Manifest adımı – ayrıntılı LOG
+      - name: Manifesti ayrıntılı işle
+        working-directory: .
+        run: |
+          chmod +x gradlew
+          ./gradlew :app:processReleaseMainManifest \
+                     --no-daemon \
+                     --stacktrace \
+                     --info \
+                     --debug
 
-    # APK oluştur
-    - name: Assemble Release
-      run: |
-        chmod +x gradlew
-        ./gradlew --stacktrace :app:assembleRelease
+      # 6) APK oluştur (manifest geçerse)
+      - name: Assemble Release
+        if: ${{ success() }}
+        working-directory: .
+        run: |
+          chmod +x gradlew
+          ./gradlew :app:assembleRelease \
+                     --no-daemon \
+                     --stacktrace \
+                     --info
 
-    # Çıktıyı yükle
-    - uses: actions/upload-artifact@v4
-      with:
-        name: gezi-apk
-        path: app/build/outputs/apk/release/app-release.apk
+      # 7) APK'yı çıktı olarak yükle
+      - uses: actions/upload-artifact@v4
+        if: ${{ success() }}
+        with:
+          name: gezi-apk
+          path: app/build/outputs/apk/release/app-release.apk
