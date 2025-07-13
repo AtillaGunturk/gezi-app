@@ -1,3 +1,4 @@
+# build.yml
 name: Build APK
 on:
   push: {branches: [main]}
@@ -17,10 +18,25 @@ jobs:
 
     - uses: android-actions/setup-android@v3
 
-    - uses: gradle/gradle-build-action@v3
+    # 👇  BURAYI DEĞİŞTİRİYORUZ
+    - name: Process manifest only (debugging)
+      uses: gradle/gradle-build-action@v3
+      with:
+        # Tek adım: manifest birleşimi - flag’lerle
+        arguments: |
+          --stacktrace
+          --info
+          :app:processReleaseMainManifest
+        gradle-version: 8.6
+        build-root-directory: .
+
+    # İkinci adımda normal release APK’sı (hata düzelince)
+    - name: Assemble Release
+      uses: gradle/gradle-build-action@v3
+      if: ${{ success() }}          # manifest sorunsuzsa çalışsın
       with:
         arguments: assembleRelease
-        gradle-version: 8.6          # 🟢 Wrapper yoksa MUTLAKA ekle
+        gradle-version: 8.6
         build-root-directory: .
 
     - uses: actions/upload-artifact@v4
