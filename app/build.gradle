@@ -29,9 +29,7 @@ android {
         targetCompatibility JavaVersion.VERSION_17
     }
 
-    kotlinOptions {             // Projeniz Kotlin içeriyorsa
-        jvmTarget = '17'
-    }
+    
 }
 
 repositories {
