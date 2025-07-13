@@ -1,9 +1,5 @@
 pluginManagement {
-    repositories {
-        google()        // ← şart!
-        mavenCentral()
-        gradlePluginPortal()
-    }
+    repositories { google(); mavenCentral(); gradlePluginPortal() }
 }
 rootProject.name = 'GeziApp'
 include ':app'
