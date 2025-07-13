@@ -3,10 +3,10 @@ plugins { id 'com.android.application' }
 android {
     
     compileSdk 34
-    namespace 'com.atillagunturk.geziharitam'
+    namespace 'com.atilla.geziharitam'
 
     defaultConfig {
-        applicationId "com.atillagunturk.geziharitam"
+        applicationId "com.atilla.geziharitam"
         minSdk 24
         targetSdk 34
         versionCode 1
