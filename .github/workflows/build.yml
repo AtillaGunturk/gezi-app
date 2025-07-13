@@ -32,34 +32,18 @@ jobs:
         run: |
           chmod +x gradlew
           ./gradlew :app:processReleaseMainManifest \
-                     --no-daemon \
-                     --stacktrace \
-                     --info \
-                     --debug | tail -n 100
+                     --no-daemon --stacktrace --info --debug | tail -n 100
 
       - name: Release APK oluştur
-        if: ${{ success() }}
         run: |
           chmod +x gradlew
-          ./gradlew :app:assembleRelease \
-                     --no-daemon \
-                     --stacktrace \
-                     --info
+          ./gradlew :app:assembleRelease --no-daemon --stacktrace --info
 
       - name: Oluşan APK/AAB dosyalarını listele
-        run: find app/build/outputs -type f | grep -E "\.(apk|aab)$" || true
+        run: find app/build/outputs -type f | grep -E '\.(apk|aab)$' || true
 
       - name: APK'yı upload et
         uses: actions/upload-artifact@v4
-        if: ${{ success() }}
         with:
           name: gezi-apk
           path: app/build/outputs/apk/release/app-release.apk
-          # 6) APK oluştur
-- name: Assemble Release
-  if: ${{ success() }}
-  run: ./gradlew :app:assembleRelease --no-daemon --stacktrace --info
-
-# 🔍 6.5) Hangi dosyalar var? APK nereye gitti?
-- name: Üretilen APK'yı tara
-  run: find app/build/outputs -type f | grep -E '\.apk$' || true
