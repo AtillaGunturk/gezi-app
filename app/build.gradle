@@ -15,7 +15,7 @@ android {
 
         // Eğer asset klasöründeki html dosyalarını WebView'de göstereceksen:
         // assets/index.html gibi
-        assetDirectories = ['src/main/assets']
+      //  assetDirectories = ['src/main/assets']
     }
 
     buildTypes {
