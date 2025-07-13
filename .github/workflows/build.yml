@@ -1,6 +1,8 @@
 name: Build APK
+
 on:
-  push: {branches: [main]}
+  push:
+    branches: [main]
   workflow_dispatch:
 
 jobs:
@@ -17,20 +19,24 @@ jobs:
 
     - uses: android-actions/setup-android@v3
 
-    # ✅ Gradle'ı kuruyoruz
+    # Gradle cache + wrapper
     - uses: gradle/actions/setup-gradle@v3
       with:
-        gradle-version: 8.6
+        build-root-directory: .   # wrapper hangi klasördeyse
 
-    # ✅ Sadece manifest işleme (hata ayıklama için)
-    - name: Process manifest only (debugging)
-      run: ./gradlew --stacktrace --info :app:processReleaseMainManifest
+    # Manifest adımı (opsiyonel)
+    - name: Process manifest (debug)
+      run: |
+        chmod +x gradlew
+        ./gradlew --stacktrace :app:processReleaseMainManifest
 
-    # ✅ APK oluşturma (eğer manifest işlemesi başarılıysa)
+    # APK oluştur
     - name: Assemble Release
-      if: ${{ success() }}
-      run: ./gradlew assembleRelease
+      run: |
+        chmod +x gradlew
+        ./gradlew --stacktrace :app:assembleRelease
 
+    # Çıktıyı yükle
     - uses: actions/upload-artifact@v4
       with:
         name: gezi-apk
