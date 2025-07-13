@@ -55,3 +55,11 @@ jobs:
         with:
           name: gezi-apk
           path: app/build/outputs/apk/release/app-release.apk
+          # 6) APK oluştur
+- name: Assemble Release
+  if: ${{ success() }}
+  run: ./gradlew :app:assembleRelease --no-daemon --stacktrace --info
+
+# 🔍 6.5) Hangi dosyalar var? APK nereye gitti?
+- name: Üretilen APK'yı tara
+  run: find app/build/outputs -type f | grep -E '\.apk$' || true
