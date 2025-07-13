@@ -31,5 +31,5 @@ repositories {          // ← EKLE
 dependencies {
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'androidx.webkit:webkit:1.7.0' // WebView için
-    implementation "com.google.android.material:material:1.13.0"   // diğer bağımlılıklar…
+    implementation "com.google.android.material:material:1.9.0"   // diğer bağımlılıklar…
 }
