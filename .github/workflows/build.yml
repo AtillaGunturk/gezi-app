@@ -1,10 +1,11 @@
 name: Build APK
-on: [push]
+on:
+  push: {branches: [main]}
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v4
 
@@ -13,12 +14,15 @@ jobs:
         distribution: temurin
         java-version: 17
 
-    - uses: android-actions/setup-android@v3
+    - uses: android-actions/setup-android@v3   # SDK yüklendi
 
+    #  🔹 Gradle wrapper KULLANMADAN derle
     - uses: gradle/gradle-build-action@v3
       with:
-        arguments: assembleRelease
+        arguments: assembleRelease          # ← APK üret
+        build-root-directory: .             # projeni kökten derle
 
+    #  🔹 APK’yı artefakt olarak kaydet
     - uses: actions/upload-artifact@v4
       with:
         name: gezi-apk
