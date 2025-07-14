@@ -14,27 +14,22 @@ android {
         versionName "1.0"
     }
 
-
     signingConfigs {
         release {
-            // gradle.properties dosyasından okunuyor
-            storeFile rootProject.file("android/debug.keystore")
+            storeFile file(project.property("MY_STORE_FILE"))
             storePassword project.property("MY_STORE_PASSWORD")
             keyAlias project.property("MY_KEY_ALIAS")
             keyPassword project.property("MY_KEY_PASSWORD")
-            v1SigningEnabled true   // isteğe bağlı ama açık olsun
-            v2SigningEnabled true
         }
     }
 
     buildTypes {
         release {
-            signingConfig signingConfigs.release   // <── ÖNEMLİ
+            signingConfig signingConfigs.release
             minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-
-
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
