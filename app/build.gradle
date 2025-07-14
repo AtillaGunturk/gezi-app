@@ -14,12 +14,14 @@ android {
         versionName "1.0"
     }
 
+
+
     signingConfigs {
-        debug {
-            storeFile file(System.getProperty("user.home") + "/.android/debug.keystore")
-            storePassword "android"
-            keyAlias "androiddebugkey"
-            keyPassword "android"
+        release {
+            storeFile file(project.property("MY_STORE_FILE"))
+            storePassword project.property("MY_STORE_PASSWORD")
+            keyAlias project.property("MY_KEY_ALIAS")
+            keyPassword project.property("MY_KEY_PASSWORD")
         }
     }
 
