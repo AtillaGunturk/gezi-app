@@ -39,6 +39,10 @@ jobs:
           echo "✅ debug.keystore oluşturuldu: app/android/debug.keystore"
         env:
           DEBUG_KEYSTORE_B64: ${{ secrets.DEBUG_KEYSTORE_B64 }}
+          - name: Dosya kontrolü
+  run: |
+    ls -l app/android/debug.keystore
+    file app/android/debug.keystore
 
       # 6️⃣ 🧪 Keystore doğrulama
       - name: Keystore'u test et
