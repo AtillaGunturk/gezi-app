@@ -15,22 +15,27 @@ android {
     }
 
 
-
     signingConfigs {
         release {
+            // gradle.properties dosyasından okunuyor
             storeFile file(project.property("MY_STORE_FILE"))
             storePassword project.property("MY_STORE_PASSWORD")
             keyAlias project.property("MY_KEY_ALIAS")
             keyPassword project.property("MY_KEY_PASSWORD")
+            v1SigningEnabled true   // isteğe bağlı ama açık olsun
+            v2SigningEnabled true
         }
     }
 
     buildTypes {
-    release {
-        minifyEnabled false
-        proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        release {
+            signingConfig signingConfigs.release   // <── ÖNEMLİ
+            minifyEnabled false
+        }
     }
-    }
+}
+
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
