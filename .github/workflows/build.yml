@@ -42,8 +42,10 @@ jobs:
                      --debug | tail -n 100
 
       # ──🔑 Keystore'u diske yaz ───────────────────────────────────
-      - name: Keystore dosyasını oluştur
-        run: echo "$DEBUG_KEYSTORE_B64" | base64 -d > android/debug.keystore
+- name: Keystore dosyasını oluştur
+        run: |
+          mkdir -p android            # ← klasörü oluştur
+          echo "$DEBUG_KEYSTORE_B64" | base64 -d > android/debug.keystore
         env:
           DEBUG_KEYSTORE_B64: ${{ secrets.DEBUG_KEYSTORE_B64 }}
 
