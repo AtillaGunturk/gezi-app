@@ -34,16 +34,16 @@ jobs:
       # 5️⃣ 🔑 Keystore dosyasını oluştur
       - name: Keystore dosyasını oluştur
         run: |
-          mkdir -p android
-          echo "$DEBUG_KEYSTORE_B64" | base64 -d > android/debug.keystore
-          echo "✅ debug.keystore başarıyla oluşturuldu: android/debug.keystore"
+          mkdir -p app/android
+          echo "$DEBUG_KEYSTORE_B64" | base64 -d > app/android/debug.keystore
+          echo "✅ debug.keystore başarıyla oluşturuldu: app/android/debug.keystore"
         env:
           DEBUG_KEYSTORE_B64: ${{ secrets.DEBUG_KEYSTORE_B64 }}
 
       # 6️⃣ 🔍 Keystore dosyasını doğrula
       - name: Keystore var mı?
         run: |
-          if [ -f android/debug.keystore ]; then
+          if [ -f app/android/debug.keystore ]; then
             echo "✅ debug.keystore dosyası bulundu!"
           else
             echo "❌ debug.keystore dosyası bulunamadı!"
