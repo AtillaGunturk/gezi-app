@@ -43,6 +43,11 @@ jobs:
           DEBUG_KEYSTORE_B64: ${{ secrets.DEBUG_KEYSTORE_B64 }}
 
       # ──🔑 Parolaları gradle.properties içine yaz ─────────────────
+- name: Keystore dosyasını oluştur
+        run: echo "$DEBUG_KEYSTORE_B64" | base64 -d > android/debug.keystore
+        env:
+          DEBUG_KEYSTORE_B64: ${{ secrets.DEBUG_KEYSTORE_B64 }}
+
       - name: gradle.properties içine parolaları yaz
         run: |
           cat <<EOF >> gradle.properties
@@ -54,6 +59,7 @@ jobs:
         env:
           DEBUG_KEYSTORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
           DEBUG_KEY_ALIAS: ${{ secrets.DEBUG_KEY_ALIAS }}
+
 
       - name: Release APK oluştur
         if: ${{ success() }}
