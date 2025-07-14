@@ -39,13 +39,14 @@ jobs:
           echo "✅ debug.keystore oluşturuldu: app/android/debug.keystore"
         env:
           DEBUG_KEYSTORE_B64: ${{ secrets.DEBUG_KEYSTORE_B64 }}
-          - name: Dosya kontrolü
-  run: |
-    ls -l app/android/debug.keystore
-    file app/android/debug.keystore
-    
-          
-      # 6️⃣ 🧪 Keystore doğrulama
+
+      # 6️⃣ 🧪 Dosya kontrolü
+      - name: Dosya kontrolü
+        run: |
+          ls -lh app/android/debug.keystore
+          file app/android/debug.keystore
+
+      # 7️⃣ 🧪 Keystore doğrulama
       - name: Keystore'u test et
         run: |
           keytool -list -keystore app/android/debug.keystore \
@@ -54,14 +55,8 @@ jobs:
         env:
           DEBUG_KEYSTORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
           DEBUG_KEY_ALIAS: ${{ secrets.DEBUG_KEY_ALIAS }}
-          - name: Dosya kontrolü
-  run: |
-    ls -l app/android/debug.keystore
-    file app/android/debug.keystore
 
-
-
-      # 7️⃣ gradle.properties dosyasını yaz
+      # 8️⃣ gradle.properties dosyasını yaz
       - name: gradle.properties oluştur
         run: |
           cat <<EOF > gradle.properties
@@ -76,13 +71,13 @@ jobs:
           DEBUG_KEYSTORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
           DEBUG_KEY_ALIAS: ${{ secrets.DEBUG_KEY_ALIAS }}
 
-      # 8️⃣ APK oluştur
+      # 9️⃣ APK oluştur
       - name: Release APK oluştur
         run: |
           chmod +x gradlew
           ./gradlew :app:assembleRelease --no-daemon --stacktrace --info
 
-      # 9️⃣ APK'yı upload et
+      # 🔟 APK'yı upload et
       - name: APK'yı upload et
         uses: actions/upload-artifact@v4
         with:
