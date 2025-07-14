@@ -10,36 +10,47 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Kaynak kodu al
+      # 1️⃣ Kaynak kodu al
       - name: Kodu çek
         uses: actions/checkout@v4
 
-      # JDK 17 kurulumu
+      # 2️⃣ JDK 17 kurulumu
       - name: JDK 17 Kur
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
 
-      # Android SDK kurulumu
+      # 3️⃣ Android SDK kurulumu
       - name: Android SDK Kur
         uses: android-actions/setup-android@v3
 
-      # Gradle cache (devre dışı)
+      # 4️⃣ Gradle cache (devre dışı)
       - name: Gradle Cache (devre dışı)
         uses: gradle/actions/setup-gradle@v3
         with:
           cache-disabled: true
 
-      # 🔑 Keystore dosyasını oluştur
+      # 5️⃣ 🔑 Keystore dosyasını oluştur
       - name: Keystore dosyasını oluştur
         run: |
           mkdir -p android
           echo "$DEBUG_KEYSTORE_B64" | base64 -d > android/debug.keystore
+          echo "✅ debug.keystore başarıyla oluşturuldu: android/debug.keystore"
         env:
           DEBUG_KEYSTORE_B64: ${{ secrets.DEBUG_KEYSTORE_B64 }}
 
-      # 🔑 Parolaları gradle.properties içine yaz
+      # 6️⃣ 🔍 Keystore dosyasını doğrula
+      - name: Keystore var mı?
+        run: |
+          if [ -f android/debug.keystore ]; then
+            echo "✅ debug.keystore dosyası bulundu!"
+          else
+            echo "❌ debug.keystore dosyası bulunamadı!"
+            exit 1
+          fi
+
+      # 7️⃣ 🔑 Parolaları gradle.properties içine yaz
       - name: gradle.properties oluştur
         run: |
           cat <<EOF > gradle.properties
@@ -54,16 +65,13 @@ jobs:
           DEBUG_KEYSTORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
           DEBUG_KEY_ALIAS: ${{ secrets.DEBUG_KEY_ALIAS }}
 
-      # 🧱 Release APK oluştur
+      # 8️⃣ 🧱 Release APK oluştur
       - name: Release APK oluştur
         run: |
           chmod +x gradlew
-          ./gradlew :app:assembleRelease \
-                     --no-daemon \
-                     --stacktrace \
-                     --info
+          ./gradlew :app:assembleRelease --no-daemon --stacktrace --info
 
-      # 📦 APK dosyasını yükle
+      # 9️⃣ 📦 APK dosyasını yükle
       - name: APK'yı upload et
         uses: actions/upload-artifact@v4
         with:
