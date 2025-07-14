@@ -29,7 +29,12 @@ jobs:
       - name: Gradle Cache (devre dışı)
         uses: gradle/actions/setup-gradle@v3
         with:
-          cache-disabled: true
+          cache-disabled: true 
+        - name: Secret uzunluğu kontrolü
+  run: echo "DEBUG_KEYSTORE_B64 length = ${#DEBUG_KEYSTORE_B64}"
+  env:
+    DEBUG_KEYSTORE_B64: ${{ secrets.DEBUG_KEYSTORE_B64 }}
+
 
       # 5️⃣ 🔑 Keystore dosyasını oluştur
       - name: Keystore dosyasını oluştur
