@@ -10,18 +10,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Kaynak kodu al
+      # 1️⃣ Kodu çek
       - name: Kodu çek
         uses: actions/checkout@v4
 
-      # 2️⃣ JDK 17 kurulumu
+      # 2️⃣ Java 17 Kur
       - name: JDK 17 Kur
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
 
-      # 3️⃣ Android SDK kurulumu
+      # 3️⃣ Android SDK
       - name: Android SDK Kur
         uses: android-actions/setup-android@v3
 
@@ -36,25 +36,25 @@ jobs:
         run: |
           mkdir -p app/android
           echo "$DEBUG_KEYSTORE_B64" | base64 -d > app/android/debug.keystore
-          echo "✅ debug.keystore başarıyla oluşturuldu: app/android/debug.keystore"
+          echo "✅ debug.keystore oluşturuldu: app/android/debug.keystore"
         env:
           DEBUG_KEYSTORE_B64: ${{ secrets.DEBUG_KEYSTORE_B64 }}
 
-      # 6️⃣ 🔍 Keystore dosyasını doğrula
-      - name: Keystore var mı?
+      # 6️⃣ 🧪 Keystore doğrulama
+      - name: Keystore'u test et
         run: |
-          if [ -f app/android/debug.keystore ]; then
-            echo "✅ debug.keystore dosyası bulundu!"
-          else
-            echo "❌ debug.keystore dosyası bulunamadı!"
-            exit 1
-          fi
+          keytool -list -keystore app/android/debug.keystore \
+            -storepass "${DEBUG_KEYSTORE_PASSWORD}" \
+            -alias "${DEBUG_KEY_ALIAS}" -v | head -n 20
+        env:
+          DEBUG_KEYSTORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
+          DEBUG_KEY_ALIAS: ${{ secrets.DEBUG_KEY_ALIAS }}
 
-      # 7️⃣ 🔑 Parolaları gradle.properties içine yaz
+      # 7️⃣ gradle.properties dosyasını yaz
       - name: gradle.properties oluştur
         run: |
           cat <<EOF > gradle.properties
-          MY_STORE_FILE=android/debug.keystore
+          MY_STORE_FILE=app/android/debug.keystore
           MY_STORE_PASSWORD=${DEBUG_KEYSTORE_PASSWORD}
           MY_KEY_ALIAS=${DEBUG_KEY_ALIAS}
           MY_KEY_PASSWORD=${DEBUG_KEYSTORE_PASSWORD}
@@ -65,13 +65,13 @@ jobs:
           DEBUG_KEYSTORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
           DEBUG_KEY_ALIAS: ${{ secrets.DEBUG_KEY_ALIAS }}
 
-      # 8️⃣ 🧱 Release APK oluştur
+      # 8️⃣ APK oluştur
       - name: Release APK oluştur
         run: |
           chmod +x gradlew
           ./gradlew :app:assembleRelease --no-daemon --stacktrace --info
 
-      # 9️⃣ 📦 APK dosyasını yükle
+      # 9️⃣ APK'yı upload et
       - name: APK'yı upload et
         uses: actions/upload-artifact@v4
         with:
