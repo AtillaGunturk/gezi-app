@@ -18,7 +18,7 @@ android {
     signingConfigs {
         release {
             // gradle.properties dosyasından okunuyor
-            storeFile =../android/DEBUG_KEYSTORE_B64
+            storeFile rootProject.file("../android/debug.keystore")
             storePassword project.property("MY_STORE_PASSWORD")
             keyAlias project.property("MY_KEY_ALIAS")
             keyPassword project.property("MY_KEY_PASSWORD")
