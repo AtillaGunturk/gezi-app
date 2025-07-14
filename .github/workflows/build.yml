@@ -14,7 +14,7 @@ jobs:
       - name: Kodu çek
         uses: actions/checkout@v4
 
-      # ──☕ JDK kurulumu ────────────────────────────────────────────
+      # ──☕ JDK kur ─────────────────────────────────────────────────
       - name: JDK 17 Kur
         uses: actions/setup-java@v4
         with:
@@ -31,17 +31,7 @@ jobs:
         with:
           cache-disabled: true
 
-      # ──📜 Manifesti işle (sadece log) ────────────────────────────
-      - name: Manifesti işle (log için)
-        run: |
-          chmod +x gradlew
-          ./gradlew :app:processReleaseMainManifest \
-                     --no-daemon \
-                     --stacktrace \
-                     --info \
-                     --debug | tail -n 100
-
-      # ──🔑 Keystore'u diske yaz ───────────────────────────────────
+      # ──🔑 Keystore’u diske yaz – ÖNCE! ───────────────────────────
       - name: Keystore dosyasını oluştur
         run: |
           mkdir -p android
@@ -49,10 +39,10 @@ jobs:
         env:
           DEBUG_KEYSTORE_B64: ${{ secrets.DEBUG_KEYSTORE_B64 }}
 
-      # ──🔑 Parolaları gradle.properties'e ekle ────────────────────
+      # ──🔑 Parolaları gradle.properties’e ekle – ÖNCE! ────────────
       - name: gradle.properties içine parolaları yaz
         run: |
-          cat <<EOF >> gradle.properties
+          cat <<EOF > gradle.properties
           MY_STORE_FILE=android/debug.keystore
           MY_STORE_PASSWORD=${DEBUG_KEYSTORE_PASSWORD}
           MY_KEY_ALIAS=${DEBUG_KEY_ALIAS}
@@ -62,7 +52,21 @@ jobs:
           DEBUG_KEYSTORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
           DEBUG_KEY_ALIAS: ${{ secrets.DEBUG_KEY_ALIAS }}
 
-      # ──🏗️  Release APK oluştur ───────────────────────────────────
+      # (İsteğe bağlı) kontrol amaçlı dosyayı göster
+      # - name: Debug: gradle.properties içeriği
+      #   run: cat gradle.properties
+
+      # ──📜 Manifesti işle (log) ───────────────────────────────────
+      - name: Manifesti işle (log için)
+        run: |
+          chmod +x gradlew
+          ./gradlew :app:processReleaseMainManifest \
+                     --no-daemon \
+                     --stacktrace \
+                     --info \
+                     --debug | tail -n 100
+
+      # ──🏗️ Release APK oluştur ────────────────────────────────────
       - name: Release APK oluştur
         run: |
           chmod +x gradlew
@@ -72,11 +76,11 @@ jobs:
                      --info
 
       # ──🔍 Oluşturulan dosyaları listele ──────────────────────────
-      - name: Üretilen APK'yı tara
+      - name: Üretilen APK’ları tara
         run: find app/build/outputs -type f | grep -E '\.(apk|aab)$' || true
 
-      # ──⬆️  İmzalı APK'yı yükle ───────────────────────────────────
-      - name: APK'yı upload et
+      # ──⬆️ İmzalı APK’yı yükle ───────────────────────────────────
+      - name: APK’yı upload et
         uses: actions/upload-artifact@v4
         with:
           name: gezi-signed-apk
