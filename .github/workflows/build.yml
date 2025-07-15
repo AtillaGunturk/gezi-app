@@ -8,88 +8,76 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-    # 1️⃣  Kodu çek
-    - name: Kodu çek
-      uses: actions/checkout@v4
+    # 1️⃣ Kodu çek
+    - uses: actions/checkout@v4
 
-    # 2️⃣  Java 17 Kur
-    - name: JDK 17 Kur
-      uses: actions/setup-java@v4
+    # 2️⃣ JDK 17
+    - uses: actions/setup-java@v4
       with:
         distribution: temurin
         java-version: 17
 
-    # 3️⃣  Android SDK
-    - name: Android SDK Kur
-      uses: android-actions/setup-android@v3
+    # 3️⃣ Android SDK
+    - uses: android-actions/setup-android@v3
 
-    # 4️⃣  Gradle cache (devre dışı)
-    - name: Gradle Cache (devre dışı)
-      uses: gradle/actions/setup-gradle@v3
+    # 4️⃣ Gradle cache (devre dışı)
+    - uses: gradle/actions/setup-gradle@v3
       with:
         cache-disabled: true
 
     # 4.1 🔍 Secret uzunlukları
     - name: Secret uzunluğu kontrolü
       run: |
-        echo "DEBUG_KEYSTORE_B64 length = ${#DEBUG_KEYSTORE_B64}"
-        echo "DEBUG_KEYSTORE_PASSWORD length = ${#DEBUG_KEYSTORE_PASSWORD}"
+        echo "B64 len  = ${#DEBUG_KEYSTORE_B64}"
+        echo "PWD len  = ${#DEBUG_KEYSTORE_PASSWORD}"
+        echo "ALIAS    = ${DEBUG_KEY_ALIAS:-<EMPTY>}"
       env:
-        DEBUG_KEYSTORE_B64: ${{ secrets.DEBUG_KEYSTORE_B64 }}
+        DEBUG_KEYSTORE_B64:   ${{ secrets.DEBUG_KEYSTORE_B64 }}
         DEBUG_KEYSTORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
+        DEBUG_KEY_ALIAS:      ${{ secrets.DEBUG_KEY_ALIAS }}
 
-    # 5️⃣  🔑 Keystore dosyasını oluştur
-    - name: Keystore dosyasını oluştur
+    # 5️⃣ Keystore yaz
+    - name: Keystore yaz
       run: |
         mkdir -p app/android
         printf '%s' "$DEBUG_KEYSTORE_B64" | base64 -d > app/android/debug.keystore
-        echo "✅ debug.keystore oluşturuldu: app/android/debug.keystore"
+        ls -lh app/android/debug.keystore
+        file   app/android/debug.keystore
       env:
         DEBUG_KEYSTORE_B64: ${{ secrets.DEBUG_KEYSTORE_B64 }}
 
-    # 6️⃣  🧪 Dosya kontrolü
-    - name: Dosya kontrolü
-      run: |
-        ls -lh app/android/debug.keystore
-        file app/android/debug.keystore
-
-    # 7️⃣  🧪 Keystore doğrulama
-    - name: Keystore'u test et
+    # 6️⃣ keytool test
+    - name: keytool test
       run: |
         keytool -list -keystore app/android/debug.keystore \
-          -storepass "${DEBUG_KEYSTORE_PASSWORD}" \
-          -keypass  "${DEBUG_KEYSTORE_PASSWORD}" \
-          -alias "${DEBUG_KEY_ALIAS}" -v | head -n 20
+          -storepass "$DEBUG_KEYSTORE_PASSWORD" \
+          -keypass  "$DEBUG_KEYSTORE_PASSWORD" \
+          -alias "$DEBUG_KEY_ALIAS" -v | head -n 12
       env:
         DEBUG_KEYSTORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
-        DEBUG_KEY_ALIAS: ${{ secrets.DEBUG_KEY_ALIAS }}
+        DEBUG_KEY_ALIAS:         ${{ secrets.DEBUG_KEY_ALIAS }}
 
-    # 8️⃣  gradle.properties dosyasını yaz
+    # 7️⃣ gradle.properties
     - name: gradle.properties oluştur
       run: |
-        cat <<EOF > gradle.properties
+        cat > gradle.properties <<EOF
         MY_STORE_FILE=app/android/debug.keystore
         MY_STORE_PASSWORD=${DEBUG_KEYSTORE_PASSWORD}
         MY_KEY_ALIAS=${DEBUG_KEY_ALIAS}
-        MY_KEY_PASSWORD=${DEBUG_KEYSTORE_PASSWORD}
         android.useAndroidX=true
         android.enableJetifier=true
         EOF
       env:
         DEBUG_KEYSTORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
-        DEBUG_KEY_ALIAS: ${{ secrets.DEBUG_KEY_ALIAS }}
+        DEBUG_KEY_ALIAS:         ${{ secrets.DEBUG_KEY_ALIAS }}
 
-    # 9️⃣  APK oluştur
-    - name: Release APK oluştur
-      run: |
-        chmod +x gradlew
-        ./gradlew :app:assembleRelease --no-daemon --stacktrace --info
+    # 8️⃣ APK oluştur
+    - name: assembleRelease
+      run: ./gradlew :app:assembleRelease --no-daemon --stacktrace --info
 
-    # 🔟  APK'yı upload et
-    - name: APK'yı upload et
-      uses: actions/upload-artifact@v4
+    # 9️⃣ APK upload
+    - uses: actions/upload-artifact@v4
       with:
         name: gezi-signed-apk
         path: app/build/outputs/apk/release/app-release.apk
