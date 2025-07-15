@@ -74,11 +74,13 @@ jobs:
 
 
       # 8️⃣ APK oluştur
-    - name: assembleRelease
-      run: |
-        chmod +x ./gradlew
-        ./gradlew :app:assembleRelease --no-daemon --stacktrace --info
-
+- name: assembleRelease
+  run: |
+    chmod +x ./gradlew
+    ./gradlew :app:assembleRelease --no-daemon --stacktrace --info
+  env:                      # <-- yeni blok
+    MY_STORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
+    MY_KEY_ALIAS:     ${{ secrets.DEBUG_KEY_ALIAS }}
 
     # 9️⃣ APK upload
     - uses: actions/upload-artifact@v4
