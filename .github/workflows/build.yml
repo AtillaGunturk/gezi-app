@@ -32,4 +32,58 @@ jobs:
       run: |
         echo "B64 len  = ${#DEBUG_KEYSTORE_B64}"
         echo "PWD len  = ${#DEBUG_KEYSTORE_PASSWORD}"
-        echo "ALIAS    = ${DEBUG_KEY_ALIAS
+        echo "ALIAS    = ${DEBUG_KEY_ALIAS:-<EMPTY>}"
+      env:
+        DEBUG_KEYSTORE_B64:   ${{ secrets.DEBUG_KEYSTORE_B64 }}
+        DEBUG_KEYSTORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
+        DEBUG_KEY_ALIAS:      ${{ secrets.DEBUG_KEY_ALIAS }}
+
+    # 5️⃣ Keystore yaz
+    - name: Keystore yaz
+      run: |
+        mkdir -p app/android
+        printf '%s' "$DEBUG_KEYSTORE_B64" | base64 -d > app/android/debug.keystore
+        ls -lh app/android/debug.keystore
+        file   app/android/debug.keystore
+      env:
+        DEBUG_KEYSTORE_B64: ${{ secrets.DEBUG_KEYSTORE_B64 }}
+
+    # 6️⃣ keytool test
+    - name: keytool test
+      run: |
+        keytool -list -keystore app/android/debug.keystore \
+          -storepass "$DEBUG_KEYSTORE_PASSWORD" \
+          -keypass  "$DEBUG_KEYSTORE_PASSWORD" \
+          -alias "$DEBUG_KEY_ALIAS" -v | head -n 12
+      env:
+        DEBUG_KEYSTORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
+        DEBUG_KEY_ALIAS:         ${{ secrets.DEBUG_KEY_ALIAS }}
+
+    # 7️⃣ gradle.properties
+    - name: gradle.properties oluştur
+      run: |
+        cat > gradle.properties <<EOF
+        MY_STORE_FILE=app/android/debug.keystore
+        MY_STORE_PASSWORD=${DEBUG_KEYSTORE_PASSWORD}
+        MY_KEY_ALIAS=${DEBUG_KEY_ALIAS}
+        android.useAndroidX=true
+        android.enableJetifier=true
+        EOF
+      env:
+        DEBUG_KEYSTORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
+        DEBUG_KEY_ALIAS:         ${{ secrets.DEBUG_KEY_ALIAS }}
+
+    # 8️⃣ APK oluştur
+    - name: assembleRelease
+      run: |
+        chmod +x ./gradlew
+        ./gradlew :app:assembleRelease --no-daemon --stacktrace --info
+      env:
+        MY_STORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
+        MY_KEY_ALIAS:     ${{ secrets.DEBUG_KEY_ALIAS }}
+
+    # 9️⃣ APK upload
+    - uses: actions/upload-artifact@v4
+      with:
+        name: gezi-signed-apk
+        path: app/build/outputs/apk/release/app-release.apk
