@@ -15,23 +15,23 @@ android {
     }
 
     signingConfigs {
-        release {
-            storeFile file("android/debug.keystore")
-            storeType "JKS"
-            storePassword project.property("MY_STORE_PASSWORD")
-            keyAlias project.property("MY_KEY_ALIAS")
-            keyPassword project.property("MY_KEY_PASSWORD")
-        }
+    release {
+        storeFile file("android/debug.keystore")
+        // JKS varsayılan, storeType satırı gerekmez
+        storePassword System.getenv("MY_STORE_PASSWORD")
+        keyAlias      System.getenv("MY_KEY_ALIAS")
+        keyPassword   System.getenv("MY_STORE_PASSWORD")
     }
+}
 
-    buildTypes {
-        release {
-            signingConfig signingConfigs.release
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        }
+buildTypes {
+    release {
+        signingConfig signingConfigs.release
+        minifyEnabled false
+        proguardFiles getDefaultProguardFile('proguard-android.txt'),
+                      'proguard-rules.pro'
     }
-
+}
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
