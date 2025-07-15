@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-
+<uses-permission android:name="android.permission.INTERNET"/>
+    
     <!-- minSdk/targetSdk değerleri build.gradle(:app) içinde -->
 
     <application
@@ -22,8 +23,7 @@
             </intent-filter>
 
         </activity>
-        <uses-permission android:name="android.permission.INTERNET"/>
-
+        
     </application>
 
 </manifest>
