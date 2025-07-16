@@ -58,13 +58,11 @@ jobs:
 
       - name: 8 - gradle.properties oluştur
         run: |
-          cat > gradle.properties <<"EOF"
-MY_STORE_FILE=app/android/debug.keystore
-MY_STORE_PASSWORD=${DEBUG_KEYSTORE_PASSWORD}
-MY_KEY_ALIAS=${DEBUG_KEY_ALIAS}
-android.useAndroidX=true
-android.enableJetifier=true
-EOF
+          echo "MY_STORE_FILE=app/android/debug.keystore" > gradle.properties
+          echo "MY_STORE_PASSWORD=${DEBUG_KEYSTORE_PASSWORD}" >> gradle.properties
+          echo "MY_KEY_ALIAS=${DEBUG_KEY_ALIAS}" >> gradle.properties
+          echo "android.useAndroidX=true" >> gradle.properties
+          echo "android.enableJetifier=true" >> gradle.properties
         env:
           DEBUG_KEYSTORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
           DEBUG_KEY_ALIAS: ${{ secrets.DEBUG_KEY_ALIAS }}
