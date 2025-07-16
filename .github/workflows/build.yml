@@ -73,6 +73,9 @@ jobs:
         DEBUG_KEYSTORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
         DEBUG_KEY_ALIAS:         ${{ secrets.DEBUG_KEY_ALIAS }}
 
+    #7-1 temizle
+   - name: Clean project
+     run: ./gradlew clean
     # 8️⃣ APK oluştur
     - name: assembleRelease
       run: |
