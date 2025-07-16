@@ -90,3 +90,4 @@ EOF
         with:
           name: gezi-signed-apk
           path: app/build/outputs/apk/release/app-release.apk
+
