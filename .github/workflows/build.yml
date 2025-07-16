@@ -27,7 +27,7 @@ jobs:
         with:
           cache-disabled: true
 
-      # 4.1 🔍 Secret uzunlukları
+      # 5️⃣ Secret uzunlukları (kontrol amaçlı)
       - name: Secret uzunluğu kontrolü
         run: |
           echo "B64 len  = ${#DEBUG_KEYSTORE_B64}"
@@ -38,7 +38,7 @@ jobs:
           DEBUG_KEYSTORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
           DEBUG_KEY_ALIAS: ${{ secrets.DEBUG_KEY_ALIAS }}
 
-      # 5️⃣ Keystore yaz
+      # 6️⃣ Keystore yaz
       - name: Keystore yaz
         run: |
           mkdir -p app/android
@@ -48,7 +48,7 @@ jobs:
         env:
           DEBUG_KEYSTORE_B64: ${{ secrets.DEBUG_KEYSTORE_B64 }}
 
-      # 6️⃣ keytool test
+      # 7️⃣ keytool test
       - name: keytool test
         run: |
           keytool -list -keystore app/android/debug.keystore \
@@ -59,7 +59,7 @@ jobs:
           DEBUG_KEYSTORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
           DEBUG_KEY_ALIAS: ${{ secrets.DEBUG_KEY_ALIAS }}
 
-      # 7️⃣ gradle.properties oluştur
+      # 8️⃣ gradle.properties oluştur
       - name: gradle.properties oluştur
         run: |
           cat > gradle.properties <<EOF
@@ -73,12 +73,17 @@ EOF
           DEBUG_KEYSTORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
           DEBUG_KEY_ALIAS: ${{ secrets.DEBUG_KEY_ALIAS }}
 
-      # 7-1️⃣ Projeyi temizle
-      - name: Clean project
-        run: ./gradlew clean
+      # 9️⃣ Temizle (Gradle + build klasörleri + önbellek)
+      - name: Temizlik (clean & klasör sil)
+        run: |
+          ./gradlew clean
+          echo "📁 Siliniyor: app/build, build, ~/.gradle/caches/"
+          rm -rf app/build
+          rm -rf build
+          rm -rf ~/.gradle/caches
 
-      # 8️⃣ APK oluştur
-      - name: assembleRelease
+      # 🔟 APK oluştur (Release)
+      - name: APK derle (assembleRelease)
         run: |
           chmod +x ./gradlew
           ./gradlew :app:assembleRelease --no-daemon --stacktrace --info
@@ -86,7 +91,7 @@ EOF
           MY_STORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
           MY_KEY_ALIAS: ${{ secrets.DEBUG_KEY_ALIAS }}
 
-      # 9️⃣ APK yükle
+      # 1️⃣1️⃣ APK'yı yükle (GitHub artefaktı)
       - uses: actions/upload-artifact@v4
         with:
           name: gezi-signed-apk
