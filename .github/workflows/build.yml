@@ -58,7 +58,7 @@ jobs:
 
       - name: 8 - gradle.properties oluştur
         run: |
-          cat > gradle.properties <<EOF
+          cat > gradle.properties <<"EOF"
 MY_STORE_FILE=app/android/debug.keystore
 MY_STORE_PASSWORD=${DEBUG_KEYSTORE_PASSWORD}
 MY_KEY_ALIAS=${DEBUG_KEY_ALIAS}
