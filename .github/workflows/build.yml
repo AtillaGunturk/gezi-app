@@ -39,10 +39,11 @@ jobs:
 
       - name: 6 - Keystore yaz
         run: |
-          mkdir -p app/android
-          printf '%s' "$DEBUG_KEYSTORE_B64" | base64 -d > app/android/debug.keystore
-          ls -lh app/android/debug.keystore
-          file app/android/debug.keystore
+          mkdir -p android
+          printf '%s' "$DEBUG_KEYSTORE_B64" | base64 -d > android/debug.keystore
+          ls -lh android/debug.keystore
+          file android/debug.keystore
+          working-directory: app
         env:
           DEBUG_KEYSTORE_B64: ${{ secrets.DEBUG_KEYSTORE_B64 }}
 
