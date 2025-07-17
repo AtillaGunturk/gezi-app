@@ -56,6 +56,8 @@ jobs:
           DEBUG_KEYSTORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
           DEBUG_KEY_ALIAS: ${{ secrets.DEBUG_KEY_ALIAS }}
 
+      - name: Gradle Wrapper'a çalıştırma izni ver
+        run: chmod +x ./gradlew
       - name: 8 - gradle.properties oluştur
         run: |
           echo "MY_STORE_FILE=app/android/debug.keystore" > gradle.properties
