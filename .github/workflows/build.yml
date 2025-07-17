@@ -38,7 +38,7 @@ jobs:
           DEBUG_KEY_ALIAS: ${{ secrets.DEBUG_KEY_ALIAS }}
 
       - name: 6 - Keystore yaz
-      working-directory: app
+        working-directory: app
         run: |
           mkdir -p android
           printf '%s' "$DEBUG_KEYSTORE_B64" | base64 -d > android/debug.keystore
