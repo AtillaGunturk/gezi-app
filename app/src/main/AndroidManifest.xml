@@ -10,7 +10,6 @@
 
     <application
         android:label="Gezi Haritam"
-        android:icon="@mipmap/tr2"
         android:theme="@style/Theme.GeziHaritam"
         android:allowBackup="true"
         android:supportsRtl="true">
