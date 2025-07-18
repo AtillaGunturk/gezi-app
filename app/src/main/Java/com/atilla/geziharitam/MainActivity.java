@@ -1,8 +1,17 @@
-@Override
-protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
+package com.atilla.gunturk.geziharitam;
 
-    TextView tv = new TextView(this);
-    tv.setText("Merhaba, uygulama çalışıyor!");
-    setContentView(tv);
+import android.os.Bundle;
+import android.widget.TextView;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+public class MainActivity extends AppCompatActivity {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        
+        TextView tv = new TextView(this);
+        tv.setText("Uygulama çalıştı!");
+        setContentView(tv);
+    }
 }
