@@ -1,5 +1,5 @@
 <resources>
-    <style name="Theme.GeziHaritam" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="Theme.GeziHaritam" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="colorPrimary">#3F51B5</item>
         <item name="colorPrimaryDark">#303F9F</item>
         <item name="colorAccent">#FF4081</item>
