@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -47,6 +48,19 @@ public class MainActivity extends AppCompatActivity {
         settings.setAllowFileAccess(true);
         settings.setDomStorageEnabled(true);
 
+        // Android 4.1+ için file access ayarları
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            settings.setAllowFileAccessFromFileURLs(true);
+            settings.setAllowUniversalAccessFromFileURLs(true);
+        }
+
+        // WebViewClient ve WebChromeClient atama
+        wv.setWebViewClient(new WebViewClient());
+
+        wv.setWebChromeClient(new WebChromeClient() {
+            // Eğer istersen dosya seçici için onShowFileChooser override yapılabilir
+        });
+
         if (!hasAllPerms()) {
             ActivityCompat.requestPermissions(this, PERMS, REQ_PERMS);
         } else {
@@ -73,7 +87,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadWebPage() {
-        wv.setWebViewClient(new WebViewClient());  // Bu satır olmazsa WebView çalışmaz!
         wv.loadUrl("file:///android_asset/index.html");
     }
-}
+            }
