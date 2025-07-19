@@ -3,11 +3,11 @@ plugins {
 }
 
 android {
-    namespace "com.atilla.gunturk.geziharitam"
+    namespace "com.atilla.geziharitam"
     compileSdk 34
 
     defaultConfig {
-        applicationId "com.atilla.gunturk.geziharitam"
+        applicationId "com.atilla.geziharitam"
         minSdk 24
         targetSdk 34
         versionCode 1
