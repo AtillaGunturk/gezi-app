@@ -1,4 +1,4 @@
-!package com.atilla.geziharitam;
+package com.atilla.geziharitam;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
@@ -6,6 +6,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -23,8 +24,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // İzin dizisini API seviyesine göre ayarla
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {  // Android 13+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             PERMS = new String[]{
                     Manifest.permission.ACCESS_FINE_LOCATION,
                     Manifest.permission.READ_MEDIA_IMAGES,
@@ -40,7 +40,6 @@ public class MainActivity extends AppCompatActivity {
             };
         }
 
-        // WebView oluştur ve ayarla
         wv = new WebView(this);
         setContentView(wv);
         WebSettings settings = wv.getSettings();
@@ -48,7 +47,6 @@ public class MainActivity extends AppCompatActivity {
         settings.setAllowFileAccess(true);
         settings.setDomStorageEnabled(true);
 
-        // İzinleri kontrol et
         if (!hasAllPerms()) {
             ActivityCompat.requestPermissions(this, PERMS, REQ_PERMS);
         } else {
@@ -56,7 +54,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // İzin kontrolü
     private boolean hasAllPerms() {
         for (String p : PERMS) {
             if (ContextCompat.checkSelfPermission(this, p) != PackageManager.PERMISSION_GRANTED) {
@@ -66,24 +63,17 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    // İzin sonucu
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        if (requestCode == REQ_PERMS) {
-            if (hasAllPerms()) {
-                loadWebPage();
-            } else {
-                // İzin reddedildi, gerekirse kullanıcıya bilgi ver
-            }
+        if (requestCode == REQ_PERMS && hasAllPerms()) {
+            loadWebPage();
         }
     }
 
-    // WebView ile sayfayı yükle
     private void loadWebPage() {
-        wv.setWebViewClient(new WebViewClient()); // Bu satır gerekli!
+        wv.setWebViewClient(new WebViewClient());  // Bu satır olmazsa WebView çalışmaz!
         wv.loadUrl("file:///android_asset/index.html");
     }
-    }
+}
