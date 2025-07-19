@@ -1,4 +1,4 @@
-package com.atilla.geziharitam;
+!package com.atilla.geziharitam;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
@@ -83,6 +83,7 @@ public class MainActivity extends AppCompatActivity {
 
     // WebView ile sayfayı yükle
     private void loadWebPage() {
+        wv.setWebViewClient(new WebViewClient()); // Bu satır gerekli!
         wv.loadUrl("file:///android_asset/index.html");
     }
     }
