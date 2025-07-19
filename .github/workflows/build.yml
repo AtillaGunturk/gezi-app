@@ -79,8 +79,26 @@ jobs:
           rm -rf build
           rm -rf ~/.gradle/caches
 
-      - name: 11 - APK oluştur (assembleRelease)
-        run: ./gradlew :app:assembleRelease --no-daemon --stacktrace --info
+      - name: 11 - APK oluştur (assembleRelease) - Hata & Uyarı Denetimi
+        run: |
+          echo "🚀 Derleme başlatılıyor..."
+          ./gradlew :app:assembleRelease --no-daemon --stacktrace --info > build.log 2>&1 || {
+            echo "❌ Derleme başarısız oldu. Son 30 satır:"
+            tail -n 30 build.log
+            exit 1
+          }
+
+          echo "🧐 Warning taraması yapılıyor..."
+          WARNINGS=$(grep -i "warning" build.log | grep -v "deprecation")
+
+          if [ -n "$WARNINGS" ]; then
+            echo "⚠️ Uyarılar bulundu:"
+            echo "$WARNINGS" | tail -n 10
+            # Eğer uyarıları da hata gibi görmek istersen aşağıdaki satırı aktif et:
+            # exit 2
+          else
+            echo "✅ Önemli uyarı bulunamadı."
+          fi
         env:
           MY_STORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
           MY_KEY_ALIAS: ${{ secrets.DEBUG_KEY_ALIAS }}
@@ -90,3 +108,10 @@ jobs:
         with:
           name: gezi-signed-apk
           path: app/build/outputs/apk/release/app-release.apk
+
+      - name: 13 - build.log dosyasını yükle
+        uses: actions/upload-artifact@v4
+        if: always() # her durumda yükle (başarılı ya da değil)
+        with:
+          name: build-log
+          path: build.log
