@@ -78,6 +78,7 @@ jobs:
           rm -rf app/build
           rm -rf build
           rm -rf ~/.gradle/caches
+      
       - name: 11 - APK dosyasını kontrol et
         run: |
           echo "📦 APK dosyası listeleniyor:"
