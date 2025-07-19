@@ -27,37 +27,24 @@ jobs:
         with:
           cache-disabled: true
 
-      - name: 5 - Secret uzunluğu kontrolü (isteğe bağlı)
-        run: |
-          echo "B64 len  = ${#DEBUG_KEYSTORE_B64}"
-          echo "PWD len  = ${#DEBUG_KEYSTORE_PASSWORD}"
-          echo "ALIAS    = ${DEBUG_KEY_ALIAS:-<EMPTY>}"
-        env:
-          DEBUG_KEYSTORE_B64: ${{ secrets.DEBUG_KEYSTORE_B64 }}
-          DEBUG_KEYSTORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
-          DEBUG_KEY_ALIAS: ${{ secrets.DEBUG_KEY_ALIAS }}
-
-      - name: 6 - Keystore dosyasını yaz
+      - name: 5 - Keystore dosyasını yaz
         working-directory: app
         run: |
           mkdir -p android
           printf '%s' "$DEBUG_KEYSTORE_B64" | base64 -d > android/debug.keystore
-          ls -lh android/debug.keystore
-          file android/debug.keystore
         env:
           DEBUG_KEYSTORE_B64: ${{ secrets.DEBUG_KEYSTORE_B64 }}
 
-      - name: 7 - keytool ile keystore kontrolü
+      - name: 6 - keytool ile test
         run: |
           keytool -list -keystore app/android/debug.keystore \
             -storepass "$DEBUG_KEYSTORE_PASSWORD" \
-            -keypass "$DEBUG_KEYSTORE_PASSWORD" \
             -alias "$DEBUG_KEY_ALIAS" -v | head -n 12
         env:
           DEBUG_KEYSTORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
           DEBUG_KEY_ALIAS: ${{ secrets.DEBUG_KEY_ALIAS }}
 
-      - name: 8 - gradle.properties oluştur
+      - name: 7 - gradle.properties oluştur
         working-directory: app
         run: |
           echo "MY_STORE_PASSWORD=${DEBUG_KEYSTORE_PASSWORD}" > gradle.properties
@@ -68,30 +55,27 @@ jobs:
           DEBUG_KEYSTORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
           DEBUG_KEY_ALIAS: ${{ secrets.DEBUG_KEY_ALIAS }}
 
-      - name: 9 - Gradle Wrapper’a çalıştırma izni ver
+      - name: 8 - Gradle Wrapper’a çalıştırma izni ver
         run: chmod +x ./gradlew
 
-      - name: 10 - Temizlik (clean & build klasörleri)
-        run: |
-          ./gradlew clean
-          echo "📁 Siliniyor: app/build, build, ~/.gradle/caches/"
-          rm -rf app/build
-          rm -rf build
-          rm -rf ~/.gradle/caches
-      
-      - name: 11 - APK dosyasını kontrol et
-        run: |
-          echo "📦 APK dosyası listeleniyor:"
-          ls -lh app/build/outputs/apk/release/ || echo "❌ APK dizini bulunamadı"
+      - name: 9 - Temizlik
+        run: ./gradlew clean
 
-      - name: 12 - APK’yı GitHub Artifact olarak yükle
-        if: success() && exists('app/build/outputs/apk/release/app-release.apk')
+      - name: 10 - APK derle (ve log kaydet)
+        run: |
+          ./gradlew :app:assembleRelease --no-daemon --stacktrace --info | tee build.log
+        env:
+          MY_STORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
+          MY_KEY_ALIAS: ${{ secrets.DEBUG_KEY_ALIAS }}
+
+      - name: 11 - APK varsa yükle
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: gezi-signed-apk
           path: app/build/outputs/apk/release/app-release.apk
 
-      - name: 13 - build.log dosyasını yükle
+      - name: 12 - build.log dosyasını yükle
         if: always()
         uses: actions/upload-artifact@v4
         with:
