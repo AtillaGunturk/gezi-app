@@ -13,13 +13,13 @@ jobs:
       - name: 1 - Kodu çek
         uses: actions/checkout@v4
 
-      - name: 2 - JDK 17
+      - name: 2 - JDK 17 kurulumu
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
 
-      - name: 3 - Android SDK
+      - name: 3 - Android SDK kurulumu
         uses: android-actions/setup-android@v3
 
       - name: 4 - Gradle cache (devre dışı)
@@ -27,7 +27,7 @@ jobs:
         with:
           cache-disabled: true
 
-      - name: 5 - Secret uzunluğu kontrolü
+      - name: 5 - Secret uzunluğu kontrolü (isteğe bağlı)
         run: |
           echo "B64 len  = ${#DEBUG_KEYSTORE_B64}"
           echo "PWD len  = ${#DEBUG_KEYSTORE_PASSWORD}"
@@ -37,18 +37,17 @@ jobs:
           DEBUG_KEYSTORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
           DEBUG_KEY_ALIAS: ${{ secrets.DEBUG_KEY_ALIAS }}
 
-      - name: 6 - Keystore yaz
+      - name: 6 - Keystore dosyasını yaz
         working-directory: app
         run: |
           mkdir -p android
           printf '%s' "$DEBUG_KEYSTORE_B64" | base64 -d > android/debug.keystore
           ls -lh android/debug.keystore
           file android/debug.keystore
-          
         env:
           DEBUG_KEYSTORE_B64: ${{ secrets.DEBUG_KEYSTORE_B64 }}
 
-      - name: 7 - keytool test
+      - name: 7 - keytool ile keystore kontrolü
         run: |
           keytool -list -keystore app/android/debug.keystore \
             -storepass "$DEBUG_KEYSTORE_PASSWORD" \
@@ -58,11 +57,10 @@ jobs:
           DEBUG_KEYSTORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
           DEBUG_KEY_ALIAS: ${{ secrets.DEBUG_KEY_ALIAS }}
 
-      
       - name: 8 - gradle.properties oluştur
+        working-directory: app
         run: |
-          echo "MY_STORE_FILE=app/android/debug.keystore" > gradle.properties
-          echo "MY_STORE_PASSWORD=${DEBUG_KEYSTORE_PASSWORD}" >> gradle.properties
+          echo "MY_STORE_PASSWORD=${DEBUG_KEYSTORE_PASSWORD}" > gradle.properties
           echo "MY_KEY_ALIAS=${DEBUG_KEY_ALIAS}" >> gradle.properties
           echo "android.useAndroidX=true" >> gradle.properties
           echo "android.enableJetifier=true" >> gradle.properties
@@ -70,9 +68,10 @@ jobs:
           DEBUG_KEYSTORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
           DEBUG_KEY_ALIAS: ${{ secrets.DEBUG_KEY_ALIAS }}
 
-      - name: Gradle Wrapper'a çalıştırma izni ver
+      - name: 9 - Gradle Wrapper’a çalıştırma izni ver
         run: chmod +x ./gradlew
-      - name: 9 - Temizlik (clean & klasör sil)
+
+      - name: 10 - Temizlik (clean & build klasörleri)
         run: |
           ./gradlew clean
           echo "📁 Siliniyor: app/build, build, ~/.gradle/caches/"
@@ -80,15 +79,13 @@ jobs:
           rm -rf build
           rm -rf ~/.gradle/caches
 
-      - name: 10 - APK derle (assembleRelease)
-        run: |
-          chmod +x ./gradlew
-          ./gradlew :app:assembleRelease --no-daemon --stacktrace --info
+      - name: 11 - APK oluştur (assembleRelease)
+        run: ./gradlew :app:assembleRelease --no-daemon --stacktrace --info
         env:
           MY_STORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
           MY_KEY_ALIAS: ${{ secrets.DEBUG_KEY_ALIAS }}
 
-      - name: 11 - APK'yı yükle (GitHub artefaktı)
+      - name: 12 - APK’yı GitHub Artifact olarak yükle
         uses: actions/upload-artifact@v4
         with:
           name: gezi-signed-apk
