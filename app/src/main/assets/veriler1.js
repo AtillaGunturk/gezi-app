@@ -292,3 +292,12 @@ async function verileriIceAktar(file) {
     alert("Dosya okunamadı: " + e);
   }
 }
+window.ayrintiGoster        = ayrintiGoster;
+window.fotoSil              = fotoSil;
+window.markerSil            = markerSil;
+window.fotoEkleBaslat       = fotoEkleBaslat;
+window.düzenlemeModu        = düzenlemeModu;
+window.yeniFotoSatiriEkle   = yeniFotoSatiriEkle;
+window.yeniYerKaydet        = yeniYerKaydet;
+window.verileriDisariAktar  = verileriDisariAktar;
+window.verileriIceAktar     = verileriIceAktar;
