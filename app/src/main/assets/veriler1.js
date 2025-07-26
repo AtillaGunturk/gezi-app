@@ -248,18 +248,26 @@ ilSelect.addEventListener("change", () => {
 
 /* ---------- VERİLERİ DIŞA AKTAR --------------------------- */
 function verileriDisariAktar() {
-  if (!veriler || veriler.length === 0) {
-    alert("Henüz kaydedilmiş yer yok!");
-    return;
-  }
+  const veri = {
+    yerler: yerler || [],
+    versiyon: "1.0"
+  };
 
-  const json = JSON.stringify(veriler, null, 2);
+  const json = JSON.stringify(veri, null, 2);
 
-  if (typeof AndroidExport !== "undefined" && AndroidExport.exportVeri) {
-    AndroidExport.exportVeri(json);
-    alert("✅ Veriler başarıyla dışa aktarıldı! Dosya: /Download/gezi-verileri.json");
+  // Android WebView arayüzü üzerinden dışa aktarım
+  if (
+    typeof window.AndroidExport === "object" &&
+    typeof window.AndroidExport.exportVeri === "function"
+  ) {
+    try {
+      AndroidExport.exportVeri(json);
+      alert("✅ Veriler başarıyla dışa aktarıldı!\n📂 /Download/gezi-verileri.json");
+    } catch (e) {
+      alert("❌ Android'e aktarım sırasında hata oluştu:\n" + e.message);
+    }
   } else {
-    // Tarayıcı modu
+    // Tarayıcı ortamı için JSON indirme
     const blob = new Blob([json], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -269,7 +277,7 @@ function verileriDisariAktar() {
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
-    alert("✅ Veriler başarıyla indirildi!");
+    alert("✅ Veriler başarıyla indirildi (tarayıcı modu)!");
   }
 }
 /* ---------- VERİLERİ İÇE AKTAR --------------------------- */
