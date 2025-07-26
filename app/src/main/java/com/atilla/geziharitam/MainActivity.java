@@ -1,6 +1,7 @@
 package com.atilla.geziharitam;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -8,14 +9,16 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.webkit.DownloadListener;
 import android.webkit.JavascriptInterface;
+import android.webkit.MimeTypeMap;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -26,41 +29,38 @@ import java.io.FileOutputStream;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final int REQ_PERMS = 1;
-    private static final int FILE_CHOOSER_REQUEST_CODE = 2;
-
-    private WebView wv;
+    private WebView webView;
     private ValueCallback<Uri[]> filePathCallback;
+    private static final int FILE_CHOOSER_REQUEST_CODE = 1;
+    private static final int PERMISSION_REQUEST_CODE = 123;
 
-    private String[] PERMISSIONS = {
-            Manifest.permission.WRITE_EXTERNAL_STORAGE,
-            Manifest.permission.READ_EXTERNAL_STORAGE
-    };
-
+    @SuppressLint("SetJavaScriptEnabled")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        wv = new WebView(this);
-        setContentView(wv);
+        // İzinleri kontrol et
+        checkPermissions();
 
-        WebSettings settings = wv.getSettings();
-        settings.setJavaScriptEnabled(true);
-        settings.setDomStorageEnabled(true);
-        settings.setAllowFileAccess(true);
-        settings.setAllowContentAccess(true);
+        webView = new WebView(this);
+        setContentView(webView);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            settings.setAllowFileAccessFromFileURLs(true);
-            settings.setAllowUniversalAccessFromFileURLs(true);
-        }
+        webView.getSettings().setJavaScriptEnabled(true);
+        webView.getSettings().setAllowFileAccess(true);
+        webView.getSettings().setDomStorageEnabled(true);
+        webView.getSettings().setAllowContentAccess(true);
+        webView.getSettings().setAllowUniversalAccessFromFileURLs(true);
+        webView.getSettings().setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
 
-        wv.setWebViewClient(new WebViewClient());
-
-        wv.setWebChromeClient(new WebChromeClient() {
+        webView.setWebViewClient(new WebViewClient());
+        webView.setWebChromeClient(new WebChromeClient() {
+            // Dosya seçici
             @Override
-            public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> callback, FileChooserParams params) {
-                filePathCallback = callback;
+            public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> filePathCallback, FileChooserParams fileChooserParams) {
+                if (MainActivity.this.filePathCallback != null) {
+                    MainActivity.this.filePathCallback.onReceiveValue(null);
+                }
+                MainActivity.this.filePathCallback = filePathCallback;
                 Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
                 intent.setType("*/*");
                 intent.addCategory(Intent.CATEGORY_OPENABLE);
@@ -69,68 +69,81 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        wv.addJavascriptInterface(new AndroidExportInterface(), "AndroidExport");
+        webView.addJavascriptInterface(new WebAppInterface(this), "Android");
 
-        if (hasPermissions()) {
-            loadWebPage();
-        } else {
-            ActivityCompat.requestPermissions(this, PERMISSIONS, REQ_PERMS);
-        }
-    }
+        webView.setDownloadListener((url, userAgent, contentDisposition, mimetype, contentLength) -> {
+            Toast.makeText(this, "İndirme desteklenmiyor: " + url, Toast.LENGTH_SHORT).show();
+        });
 
-    private boolean hasPermissions() {
-        for (String perm : PERMISSIONS) {
-            if (ContextCompat.checkSelfPermission(this, perm) != PackageManager.PERMISSION_GRANTED) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private void loadWebPage() {
-        wv.clearCache(true);
-        wv.loadUrl("file:///android_asset/index.html");
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == REQ_PERMS && hasPermissions()) {
-            loadWebPage();
-        }
+        webView.loadUrl("file:///android_asset/index.html");
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        if (requestCode == FILE_CHOOSER_REQUEST_CODE && filePathCallback != null) {
-            Uri[] results = null;
-            if (resultCode == Activity.RESULT_OK && data != null) {
-                Uri result = data.getData();
-                if (result != null) {
-                    results = new Uri[]{result};
-                }
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == FILE_CHOOSER_REQUEST_CODE) {
+            if (filePathCallback != null) {
+                Uri[] result = (resultCode == Activity.RESULT_OK && data != null) ? new Uri[]{data.getData()} : new Uri[]{};
+                filePathCallback.onReceiveValue(result);
+                filePathCallback = null;
             }
-            filePathCallback.onReceiveValue(results);
-            filePathCallback = null;
-        } else {
-            super.onActivityResult(requestCode, resultCode, data);
         }
     }
 
-    public class AndroidExportInterface {
+    // JavaScript'ten JSON verisini Android'e yazdırmak için
+    public class WebAppInterface {
+        Activity activity;
+
+        WebAppInterface(Activity activity) {
+            this.activity = activity;
+        }
+
         @JavascriptInterface
-        public void exportVeri(String json) {
+        public void exportJson(String jsonContent, String fileName) {
             try {
-                File dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-                if (!dir.exists()) dir.mkdirs();
-                File file = new File(dir, "gezi-verileri.json");
+                if (!fileName.endsWith(".json")) {
+                    fileName += ".json";
+                }
+
+                File downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+                if (!downloadsDir.exists()) downloadsDir.mkdirs();
+
+                File file = new File(downloadsDir, fileName);
                 FileOutputStream fos = new FileOutputStream(file);
-                fos.write(json.getBytes("UTF-8"));
+                fos.write(jsonContent.getBytes());
                 fos.close();
-                System.out.println("✅ JSON dosyası kaydedildi: " + file.getAbsolutePath());
+
+                Toast.makeText(activity, "Dosya kaydedildi: " + file.getAbsolutePath(), Toast.LENGTH_LONG).show();
             } catch (Exception e) {
                 e.printStackTrace();
+                Toast.makeText(activity, "Hata oluştu: " + e.getMessage(), Toast.LENGTH_LONG).show();
             }
         }
     }
-}
+
+    private void checkPermissions() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_VIDEO) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+
+                ActivityCompat.requestPermissions(this,
+                        new String[]{
+                                Manifest.permission.READ_MEDIA_IMAGES,
+                                Manifest.permission.READ_MEDIA_VIDEO,
+                                Manifest.permission.READ_MEDIA_AUDIO
+                        }, PERMISSION_REQUEST_CODE);
+            }
+        } else {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+
+                ActivityCompat.requestPermissions(this,
+                        new String[]{
+                                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                                Manifest.permission.READ_EXTERNAL_STORAGE
+                        }, PERMISSION_REQUEST_CODE);
+            }
+        }
+    }
+            }
