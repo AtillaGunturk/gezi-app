@@ -2,139 +2,81 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
   <title>Gezi Haritam</title>
   <link
     rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
   />
- 
   <style>
-  /* Genel font ve yapı */
-body {
-  font-family: sans-serif;
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  background: #ffffff;
-  color: #222;
-}
-
-/* Harita boyutu */
-#harita {
-  height: 45vh;
-  min-height: 300px;
-  width: 100%;
-}
-
-/* Form genel görünüm */
-form {
-  padding: 1em;
-  background: #f0f0f0;
-  margin-bottom: 1em;
-  box-sizing: border-box;
-}
-
-/* Giriş alanları */
-input[type="text"],
-input[type="number"],
-textarea,
-select,
-button {
-  font-size: 18px;
-  padding: 10px;
-  margin-bottom: 8px;
-  width: 100%;
-  box-sizing: border-box;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-}
-
-/* Butonlar */
-button {
-  background-color: #3498db;
-  color: white;
-  border: none;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-button:hover {
-  background-color: #2980b9;
-}
-
-/* Tablo form düzeni: PC/tablet için */
-form table {
-  width: 100%;
-  border-collapse: collapse;
-}
-form th, form td {
-  padding: 4px;
-  text-align: left;
-  vertical-align: top;
-}
-
-/* Mobilde formu satır satır yap */
-@media (max-width: 600px) {
-  form table,
-  form table tbody,
-  form table tr,
-  form table th,
-  form table td {
-    display: block;
-    width: 100%;
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 0;
+      height: 100%;
+    }
+    #harita {
+      height: 50vh;
+    }
+    form {
+      padding: 1em;
+      background: #f0f0f0;
+      margin-bottom: 1em;
+    }
+    input[type="text"],
+    input[type="number"],
+    textarea {
+      width: 100%;
+      padding: 4px;
+      margin-bottom: 4px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    img {
+      max-width: 100%;
+      height: auto;
+      margin: 0.5em 0;
+    }
+    #bilgiPaneli {
+      padding: 1em;
+      background: #fafafa;
+      border-top: 1px solid #ccc;
+      min-height: 150px;
+    }
+    #fotoAlani div {
+      margin-bottom: 8px;
+    }
+    
+  /* Küçük ön izleme */
+  .thumb {
+    max-width: 120px;
+    cursor: zoom-in;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin: 4px;
+    transition: transform .2s;
   }
+  .thumb:hover { transform: scale(1.05); }
 
-  form th {
-    font-weight: bold;
-    margin-top: 12px;
+  /* Tam ekran katman */
+  #lightbox {
+    display: none;                  /* Başta gizli */
+    position: fixed;
+    inset: 0;                       /* tüm ekran */
+    background: rgba(0,0,0,.8);
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
   }
-
-  form td {
-    margin-bottom: 8px;
+  #lightbox img {
+    max-width: 90vw;
+    max-height: 90vh;
+    border-radius: 6px;
+    cursor: zoom-out;
+    box-shadow: 0 0 12px #000;
   }
-}
-
-/* Görsel önizlemeler */
-.thumb {
-  max-width: 120px;
-  cursor: zoom-in;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  margin: 4px;
-  transition: transform 0.2s;
-}
-.thumb:hover {
-  transform: scale(1.05);
-}
-
-/* Lightbox */
-#lightbox {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.8);
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-}
-#lightbox img {
-  max-width: 90vw;
-  max-height: 90vh;
-  border-radius: 6px;
-  cursor: zoom-out;
-  box-shadow: 0 0 12px #000;
-}
-
-/* Bilgi paneli */
-#bilgiPaneli {
-  padding: 1em;
-  background: #fafafa;
-  border-top: 1px solid #ccc;
-  min-height: 150px;
-}
 </style>
+  
 </head>
 <body>
   <h2>Gezdiğim Yerler</h2>
@@ -158,7 +100,7 @@ form th, form td {
     <table>
       <tbody>
         <tr>
-          <th>İsim: </th>
+          <th>İsmi: </th>
           <td><input type="text" id="isim" required /></td>
           <th>Açıklama:</th>
           <td><input type="text" id="aciklama" required /></td>

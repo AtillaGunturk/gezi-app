@@ -248,36 +248,35 @@ ilSelect.addEventListener("change", () => {
 
 /* ---------- VERİLERİ DIŞA AKTAR --------------------------- */
 function verileriDisariAktar() {
-  const veri = {
-    yerler: yerler || [],
-    versiyon: "1.0"
-  };
+  if (veriler.length === 0) {
+    alert("Henüz kaydedilmiş yer yok!");
+    return;
+  }
 
-  const json = JSON.stringify(veri, null, 2);
+  const json = JSON.stringify(veriler, null, 2);      //  pretty-print
+  const blob = new Blob([json], { type: "application/json" });
 
-  // Android WebView arayüzü üzerinden dışa aktarım
-  if (
-    typeof window.AndroidExport === "object" &&
-    typeof window.AndroidExport.exportVeri === "function"
-  ) {
-    try {
-      AndroidExport.exportVeri(json);
-      alert("✅ Veriler başarıyla dışa aktarıldı!\n📂 /Download/gezi-verileri.json");
-    } catch (e) {
-      alert("❌ Android'e aktarım sırasında hata oluştu:\n" + e.message);
-    }
-  } else {
-    // Tarayıcı ortamı için JSON indirme
-    const blob = new Blob([json], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "gezi-verileri.json";
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-    alert("✅ Veriler başarıyla indirildi (tarayıcı modu)!");
+  // ↓ 1)  Tarayıcıda indir
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement("a");
+  a.href     = url;
+  a.download = "gezi-verileri.json";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a)
+  
+  URL.revokeObjectURL(url);
+  
+  alert("✅ Veriler başarıyla dışa aktarıldı!");
+
+  // ↓ 2)  (Opsiyonel) Capacitor kuruluysa paylaş
+  if (window.Share && Share.share) {
+    Share.share({
+      title: "Gezi Verilerim",
+      text:  "İşte gezdiğim tüm yerler!",
+      files: [blob],                  // Android 14+ için `files`
+      dialogTitle: "Paylaş"
+    }).catch(() => {/* kullanıcı vazgeçti */});
   }
 }
 /* ---------- VERİLERİ İÇE AKTAR --------------------------- */
@@ -300,12 +299,3 @@ async function verileriIceAktar(file) {
     alert("Dosya okunamadı: " + e);
   }
 }
-window.ayrintiGoster        = ayrintiGoster;
-window.fotoSil              = fotoSil;
-window.markerSil            = markerSil;
-window.fotoEkleBaslat       = fotoEkleBaslat;
-window.düzenlemeModu        = düzenlemeModu;
-window.yeniFotoSatiriEkle   = yeniFotoSatiriEkle;
-window.yeniYerKaydet        = yeniYerKaydet;
-window.verileriDisariAktar  = verileriDisariAktar;
-window.verileriIceAktar     = verileriIceAktar;
