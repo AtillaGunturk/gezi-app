@@ -33,7 +33,7 @@ jobs:
       - name: 6 - gradle.properties oluştur
         working-directory: app
         run: |
-          echo "MY_STORE_PASSWORD=${DEBUG_KEYSTORE_PASSWORD}" > gradle.properties
+          echo "MY_STORE_PASSWORD=${DEBUG_KEYSTORE_PASSWORD}" >> gradle.properties
           echo "MY_KEY_ALIAS=${DEBUG_KEY_ALIAS}" >> gradle.properties
           echo "android.useAndroidX=true" >> gradle.properties
           echo "android.enableJetifier=true" >> gradle.properties
