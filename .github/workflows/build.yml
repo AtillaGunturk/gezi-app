@@ -50,7 +50,7 @@ jobs:
          rm -rf ~/.gradle/daemon
          rm -rf ~/.gradle/native
          rm -rf ~/.gradle/wrapper
-
+         rm -rf app/src/main/assets/*
          # build klasörleri temizliği
          rm -rf app/build
          rm -rf build
