@@ -13,7 +13,7 @@ jobs:
       - name: 1 - Kodu çek
         uses: actions/checkout@v4
         with:
-            ref:main
+            ref: main
 
       - name: 2 - JDK 17 kurulumu
         uses: actions/setup-java@v4
