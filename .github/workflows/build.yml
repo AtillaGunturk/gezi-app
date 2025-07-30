@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: 1 - Kodu çek
         uses: actions/checkout@v4
+        with:
+            ref:main
 
       - name: 2 - JDK 17 kurulumu
         uses: actions/setup-java@v4
@@ -42,8 +44,10 @@ jobs:
           DEBUG_KEY_ALIAS: ${{ secrets.DEBUG_KEY_ALIAS }}
 
       - name: 7 - Temizlik (clean)
-        run: ./gradlew clean
-
+        run: |
+          ./gradlew clean
+          rm -rf ~/.gradle/caches
+          rm -rf app/build
       - name: 8 - Keystore dosyasını yaz
         working-directory: app
         run: |
