@@ -45,9 +45,25 @@ jobs:
 
       - name: 7 - Temizlik (clean)
         run: |
-          ./gradlew clean
-          rm -rf ~/.gradle/caches
-          rm -rf app/build
+         ./gradlew clean --no-daemon
+         rm -rf ~/.gradle/caches
+         rm -rf ~/.gradle/daemon
+         rm -rf ~/.gradle/native
+         rm -rf ~/.gradle/wrapper
+
+         # build klasörleri temizliği
+         rm -rf app/build
+         rm -rf build
+
+          # IDE dosyaları ve temp dosyalar (varsa)
+         rm -rf .idea/
+         rm -rf *.iml
+
+          # Geçici dosyalar
+         find . -name "*.lock" -delete
+         find . -name "*.log" -delete
+         find . -name "*.tmp" -delete
+        
       - name: 8 - Keystore dosyasını yaz
         working-directory: app
         run: |
