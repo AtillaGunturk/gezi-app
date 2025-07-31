@@ -1,0 +1,103 @@
+name: Build APK
+
+on:
+  push:
+    branches: [main, develop, feature/*]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 1 - Kodu çek
+        uses: actions/checkout@v4
+        with:
+            ref: main
+
+      - name: 2 - JDK 17 kurulumu
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: 3 - Android SDK kurulumu
+        uses: android-actions/setup-android@v3
+
+      - name: 4 - Gradle cache (devre dışı)
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          cache-disabled: true
+
+      - name: 5 - Gradle Wrapper’a çalıştırma izni ver
+        run: chmod +x ./gradlew
+
+      - name: 6 - gradle.properties oluştur
+        working-directory: app
+        run: |
+          echo "MY_STORE_PASSWORD=${DEBUG_KEYSTORE_PASSWORD}" >> gradle.properties
+          echo "MY_KEY_ALIAS=${DEBUG_KEY_ALIAS}" >> gradle.properties
+          echo "android.useAndroidX=true" >> gradle.properties
+          echo "android.enableJetifier=true" >> gradle.properties
+        env:
+          DEBUG_KEYSTORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
+          DEBUG_KEY_ALIAS: ${{ secrets.DEBUG_KEY_ALIAS }}
+
+      - name: 7 - Temizlik (clean)
+        run: |
+         ./gradlew clean --no-daemon
+         rm -rf ~/.gradle/caches
+         rm -rf ~/.gradle/daemon
+         rm -rf ~/.gradle/native
+         rm -rf ~/.gradle/wrapper
+         
+         # build klasörleri temizliği
+         rm -rf app/build
+         rm -rf build
+
+          # IDE dosyaları ve temp dosyalar (varsa)
+         rm -rf .idea/
+         rm -rf *.iml
+
+          # Geçici dosyalar
+         find . -name "*.lock" -delete
+         find . -name "*.log" -delete
+         find . -name "*.tmp" -delete
+        
+      - name: 8 - Keystore dosyasını yaz
+        working-directory: app
+        run: |
+          mkdir -p android
+          printf '%s' "$DEBUG_KEYSTORE_B64" | base64 -d > android/debug.keystore
+        env:
+          DEBUG_KEYSTORE_B64: ${{ secrets.DEBUG_KEYSTORE_B64 }}
+
+      - name: 9 - keytool ile test
+        run: |
+          keytool -list -keystore app/android/debug.keystore \
+            -storepass "$DEBUG_KEYSTORE_PASSWORD" \
+            -alias "$DEBUG_KEY_ALIAS" -v | head -n 12
+        env:
+          DEBUG_KEYSTORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
+          DEBUG_KEY_ALIAS: ${{ secrets.DEBUG_KEY_ALIAS }}
+
+      - name: 10 - APK derle (ve log kaydet)
+        run: |
+          ./gradlew :app:assembleRelease --no-daemon --stacktrace --info | tee build.log
+        env:
+          MY_STORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
+          MY_KEY_ALIAS: ${{ secrets.DEBUG_KEY_ALIAS }}
+
+      - name: 11 - APK varsa yükle
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gezi-signed-apk
+          path: app/build/outputs/apk/release/app-release.apk
+
+      - name: 12 - build.log dosyasını yükle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: build.log
