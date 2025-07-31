@@ -44,10 +44,7 @@ android {
             res.srcDirs = ['src/main/res']
             assets.srcDirs= ['src/main/assets']
         }
-        release {
-            java.srcDirs = ['src/release/java']
-            res.srcDirs = ['src/release/res']
-        }
+        
     }
 
     // 🔧 META-INF çakışmalarını engeller
