@@ -14,7 +14,15 @@ jobs:
         uses: actions/checkout@v4
         with:
             ref: main
-
+      - name: 1.1 - Assets ve Java dosyalarını önceden temizle (önbellek sorunu için)
+        run: |
+          echo "Temizleme başlatılıyor..."
+          rm -f app/src/main/assets/index.html
+          rm -f app/src/main/assets/veriler1.js
+          rm -f app/src/main/assets/il.js
+          rm -f app/src/main/java/com/atilla/geziharitam/MainActivity.java
+          rm -f app/src/main/java/com/atilla/geziharitam/AndroidExport.java
+          echo "Temizleme tamamlandı. En güncel dosyalar tekrar yerleştirilecek."
       - name: 2 - JDK 17 kurulumu
         uses: actions/setup-java@v4
         with:
