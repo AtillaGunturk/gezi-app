@@ -1,4 +1,4 @@
-name: Build APK
+dosyalar: Build APK
 
 on:
   push:
@@ -75,7 +75,7 @@ jobs:
          rm -rf *.iml
 
           # Geçici dosyalar
-         find . -name-rck.lock" -delete
+         find . -name "*.lock" -delete
          find . -name "*.log" -delete
          find . -name "*.tmp" -delete
         
