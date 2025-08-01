@@ -17,7 +17,7 @@
         android:allowBackup="true"
         android:supportsRtl="true"
         android:requestLegacyExternalStorage="true"
-        android:theme="@android:style/Theme.Material.Light"> <!-- Sistem teması kullanıldı -->
+        android:theme="@android:style/Theme.Material.Light" 
         android:usesCleartextTraffic="true"
         android:requestLegacyExternalStorage="true"
     
