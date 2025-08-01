@@ -247,37 +247,55 @@ ilSelect.addEventListener("change", () => {
 })();
 
 /* ---------- VERİLERİ DIŞA AKTAR --------------------------- */
-
-let geciciVeri = [];
-
-function geciciVeriYukle(json) {
-  try {
-    geciciVeri = JSON.parse(json);
-    alert("Veri başarıyla yüklendi. 'Verileri Ekle' butonuna basarak ekleyebilirsiniz.");
-    // İstersen burada verileri önizle (örneğin tabloya eklemeden önce göster)
-  } catch (e) {
-    alert("JSON verisi geçersiz.");
+function verileriDisariAktar() {
+  if (veriler.length === 0) {
+    alert("Henüz kaydedilmiş yer yok!");
+    return;
   }
-}
 
-function verileriEkle() {
-  if (geciciVeri.length > 0) {
-    eskiveri = eskiveri.concat(geciciVeri);
-    alert("Veriler eklendi.");
-    // Sayfayı güncelle
-    guncelle();
-  } else {
-    alert("Yüklenecek veri yok.");
+  const json = JSON.stringify(veriler, null, 2);      //  pretty-print
+  const blob = new Blob([json], { type: "application/json" });
+
+  // ↓ 1)  Tarayıcıda indir
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement("a");
+  a.href     = url;
+  a.download = "gezi-verileri.json";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a)
+  
+  URL.revokeObjectURL(url);
+  
+  alert("✅ Veriler başarıyla dışa aktarıldı!");
+
+  // ↓ 2)  (Opsiyonel) Capacitor kuruluysa paylaş
+  if (window.Share && Share.share) {
+    Share.share({
+      title: "Gezi Verilerim",
+      text:  "İşte gezdiğim tüm yerler!",
+      files: [blob],                  // Android 14+ için `files`
+      dialogTitle: "Paylaş"
+    }).catch(() => {/* kullanıcı vazgeçti */});
   }
 }
 /* ---------- VERİLERİ İÇE AKTAR --------------------------- */
+async function verileriIceAktar(file) {
+  if (!file) return;
 
- function verileriYukle(json) {
   try {
-    eskiveri = JSON.parse(json);
-    alert("İçe aktarılan veriler yüklendi.");
-    guncelle(); // harita ve listeyi güncelle
+    const text   = await file.text();
+    const yeniV  = JSON.parse(text);
+
+    if (!Array.isArray(yeniV)) throw "Beklenmeyen format";
+
+    // Yerleri ekle (varsa çakışan id'leri çözmek için autoIncrement'e bel bağlayacağız)
+    yeniV.forEach(y => delete y.id);   // id'leri sıfırla
+    veriler.push(...yeniV);
+    await dbKaydet();
+    goster();
+    alert("Veriler içe aktarıldı!");
   } catch (e) {
-    alert("Veri yükleme hatası: " + e);
+    alert("Dosya okunamadı: " + e);
   }
- }  
+}
