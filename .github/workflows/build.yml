@@ -63,15 +63,19 @@ jobs:
          rm -rf ~/.gradle/wrapper
          
          # build klasörleri temizliği
+         rm -rf $HOME/.gradle       
+         rm -rf .gradle
          rm -rf app/build
          rm -rf build
+         rm -rf app/src/main/res/mipmap-anydpi-v26
+         ./gradlew cleanBuildCache
 
           # IDE dosyaları ve temp dosyalar (varsa)
          rm -rf .idea/
          rm -rf *.iml
 
           # Geçici dosyalar
-         find . -name "*.lock" -delete
+         find . -name-rck.lock" -delete
          find . -name "*.log" -delete
          find . -name "*.tmp" -delete
         
