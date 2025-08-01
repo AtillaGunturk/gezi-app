@@ -1,6 +1,7 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.atilla.geziharitam">
 
-    <!-- İzinler -->
+    <!-- Gerekli izinler -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -12,13 +13,15 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
-         <!-- android:icon="@mipmap/ic_launcher"
-        android:roundIcon="@mipmap/ic_launcher_round" -->
         android:label="Gezi Haritam"
-        android:theme="@style/Theme.geziharitam"
         android:allowBackup="true"
         android:supportsRtl="true"
-        android:requestLegacyExternalStorage="true">
+        android:requestLegacyExternalStorage="true"
+        <!-- Aşağıdaki satırda tema tanımlaması varsa res/values/styles.xml içinde Theme.geziharitam tanımlı olmalıdır -->
+        android:theme="@style/Theme.geziharitam">
+        <!-- İkonlar düzgün çalışmıyorsa aşağıdaki satırları devre dışı bırakabilirsiniz -->
+        <!-- android:icon="@mipmap/ic_launcher"
+             android:roundIcon="@mipmap/ic_launcher_round" -->
 
         <activity
             android:name=".MainActivity"
