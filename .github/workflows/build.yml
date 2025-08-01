@@ -2,7 +2,7 @@ name: Build APK
 
 on:
   push:
-    branches: [main, develop, feature/*]
+    branches: [main]
   workflow_dispatch:
 
 jobs:
@@ -12,79 +12,38 @@ jobs:
     steps:
       - name: 1 - Kodu çek
         uses: actions/checkout@v4
-        with:
-          ref: main
 
       - name: 2 - JDK 17 kurulumu
         uses: actions/setup-java@v4
         with:
+          java-version: '17'
           distribution: 'temurin'
-          java-version: 17
 
-      - name: 3 - Gradle önbellek temizliği
+      - name: 3 - Gradle önbelleğini temizle
         run: |
           rm -rf ~/.gradle/caches/
           rm -rf ~/.gradle/wrapper/
-          rm -rf app/build/
-          rm -rf app/.gradle/
-          rm -rf app/src/main/assets/index.html
-          rm -rf app/src/main/assets/veriler1.js
-          rm -rf app/src/main/java/com/atilla/geziharitam/MainActivity.java
-          rm -rf app/src/main/java/com/atilla/geziharitam/AndroidExport.java
 
-      - name: 4 - Güncel dosyaları yerleştir
+      - name: 4 - assets klasörünü oluştur ve index dosyalarını yerleştir
         run: |
           mkdir -p app/src/main/assets
-          mkdir -p app/src/main/java/com/atilla/geziharitam
+          printf '%s' "${{ secrets.INDEX_HTML }}" > app/src/main/assets/index.html
+          printf '%s' "${{ secrets.VERILER1_JS }}" > app/src/main/assets/veriler1.js
 
-          echo "${{ secrets.INDEX_HTML }}" > app/src/main/assets/index.html
-          echo "${{ secrets.VERILER1_JS }}" > app/src/main/assets/veriler1.js
-          echo "${{ secrets.MAIN_ACTIVITY }}" > app/src/main/java/com/atilla/geziharitam/MainActivity.java
-          echo "${{ secrets.ANDROID_EXPORT }}" > app/src/main/java/com/atilla/geziharitam/AndroidExport.java
-
-      - name: 5 - Gradle Wrapper izinleri
-        run: chmod +x ./gradlew
-
-      - name: 6 - gradle.properties oluştur
-        working-directory: app
+      - name: 5 - Keystore dosyasını oluştur
         run: |
-          echo "MY_STORE_PASSWORD=${DEBUG_KEYSTORE_PASSWORD}" >> gradle.properties
-          echo "MY_KEY_ALIAS=${DEBUG_KEY_ALIAS}" >> gradle.properties
-          echo "android.useAndroidX=true" >> gradle.properties
-          echo "android.enableJetifier=true" >> gradle.properties
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > my-release-key.jks
+
+      - name: 6 - Gradle ile APK oluştur (release)
+        run: ./gradlew clean assembleRelease
         env:
-          DEBUG_KEYSTORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
-          DEBUG_KEY_ALIAS: ${{ secrets.DEBUG_KEY_ALIAS }}
+          MY_KEY_ALIAS: ${{ secrets.MY_KEY_ALIAS }}
+          MY_KEY_PASSWORD: ${{ secrets.MY_KEY_PASSWORD }}
+          MY_STORE_PASSWORD: ${{ secrets.MY_STORE_PASSWORD }}
+          MY_STORE_FILE: my-release-key.jks
 
-      - name: 7 - Keystore dizinini oluştur
-        working-directory: app
-        run: |
-          mkdir -p android
-
-      - name: 8 - Keystore dosyasını yaz
-        working-directory: app
-        run: |
-          printf '%s' "$DEBUG_KEYSTORE_B64" | base64 -d > android/debug.keystore
-        env:
-          DEBUG_KEYSTORE_B64: ${{ secrets.DEBUG_KEYSTORE_B64 }}
-
-      - name: 9 - keytool ile test
-        run: |
-          keytool -list -keystore app/android/debug.keystore \
-            -storepass "$DEBUG_KEYSTORE_PASSWORD" \
-            -alias "$DEBUG_KEY_ALIAS" -v | head -n 12
-        env:
-          DEBUG_KEYSTORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
-          DEBUG_KEY_ALIAS: ${{ secrets.DEBUG_KEY_ALIAS }}
-
-      - name: 10 - APK derlemesi (release)
-        run: ./gradlew assembleRelease
-
-      - name: 11 - APK çıktılarını listele
-        run: ls -lh app/build/outputs/apk/release/
-
-      - name: 12 - APK dosyasını yükle
+      - name: 7 - Oluşan APK'yı dışa aktar
         uses: actions/upload-artifact@v4
         with:
-          name: gezi-haritam-apk
+          name: GeziHaritam-APK
           path: app/build/outputs/apk/release/app-release.apk
