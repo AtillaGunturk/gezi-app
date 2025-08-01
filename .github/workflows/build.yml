@@ -68,7 +68,7 @@ jobs:
          rm -rf app/build
          rm -rf build
          rm -rf app/src/main/res/mipmap-anydpi-v26
-         ./gradlew cleanBuildCache
+
 
           # IDE dosyaları ve temp dosyalar (varsa)
          rm -rf .idea/
