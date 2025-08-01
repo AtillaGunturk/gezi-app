@@ -1,0 +1,4 @@
+<!-- res/values/styles.xml içinde -->
+<style name="Theme.geziharitam" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+    <!-- Tema ayarları -->
+</style>
