@@ -16,6 +16,7 @@ import android.webkit.ValueCallback;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -25,6 +26,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_SELECT_FILE = 100;
     private static final int REQUEST_PERMISSIONS = 101;
+    private static final int REQUEST_MANAGE_ALL_FILES = 102;
 
     private ValueCallback<Uri[]> filePathCallback;
     private WebView webView;
@@ -34,7 +36,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Tüm izinleri kontrol et
         checkAndRequestPermissions();
 
         webView = new WebView(this);
@@ -45,12 +46,13 @@ public class MainActivity extends AppCompatActivity {
         settings.setAllowFileAccess(true);
         settings.setAllowContentAccess(true);
         settings.setDomStorageEnabled(true);
+        settings.setAllowFileAccessFromFileURLs(true);
+        settings.setAllowUniversalAccessFromFileURLs(true);
         settings.setMediaPlaybackRequiresUserGesture(false);
 
         webView.setWebViewClient(new WebViewClient());
 
         webView.setWebChromeClient(new WebChromeClient() {
-            // Dosya seçici (fotoğraf vb.)
             @Override
             public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> filePathCallback,
                                              FileChooserParams fileChooserParams) {
@@ -67,7 +69,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Android tarafındaki JS köprüsü
         webView.addJavascriptInterface(new AndroidExport(this, webView), "AndroidExport");
 
         webView.loadUrl("file:///android_asset/index.html");
@@ -81,6 +82,12 @@ public class MainActivity extends AppCompatActivity {
                         new Uri[]{data.getData()} : null;
                 filePathCallback.onReceiveValue(result);
                 filePathCallback = null;
+            }
+        } else if (requestCode == REQUEST_MANAGE_ALL_FILES) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                if (!android.os.Environment.isExternalStorageManager()) {
+                    Toast.makeText(this, "Dosya erişim izni verilmedi", Toast.LENGTH_LONG).show();
+                }
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data);
@@ -105,5 +112,32 @@ public class MainActivity extends AppCompatActivity {
                 ActivityCompat.requestPermissions(this, permissions, REQUEST_PERMISSIONS);
             }
         }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            if (!android.os.Environment.isExternalStorageManager()) {
+                Intent intent = new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+                startActivityForResult(intent, REQUEST_MANAGE_ALL_FILES);
+            }
+        }
     }
-                                   }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == REQUEST_PERMISSIONS) {
+            boolean allGranted = true;
+            for (int result : grantResults) {
+                if (result != PackageManager.PERMISSION_GRANTED) {
+                    allGranted = false;
+                    break;
+                }
+            }
+
+            if (!allGranted) {
+                Toast.makeText(this, "İzinler gerekli, lütfen verin.", Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+    }
