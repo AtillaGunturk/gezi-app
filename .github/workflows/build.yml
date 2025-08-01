@@ -21,6 +21,7 @@ jobs:
           rm -rf app/src/main/res/*
           mkdir -p app/src/main/res/layout
           mkdir -p app/src/main/res/values
+          echo '<?xml version="1.0" encoding="utf-8"?><resources><string name="app_name">Gezi Haritam</string></resources>' > app/src/main/res/values/strings.xml
           rm -f app/src/main/assets/index.html
           rm -f app/src/main/assets/veriler1.js
           rm -f app/src/main/assets/il.js
