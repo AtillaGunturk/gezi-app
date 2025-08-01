@@ -27,12 +27,7 @@ jobs:
           rm -rf ~/.gradle/wrapper/
           rm -rf app/build/
           rm -rf app/.gradle/
-          rm -rf app/src/main/assets/index.html
-          rm -rf app/src/main/assets/veriler1.js
-          rm -rf app/src/main/java/com/atilla/geziharitam/MainActivity.java
-          rm -rf app/src/main/java/com/atilla/geziharitam/AndroidExport.java
-
-      
+          
       
       - name: 5 - Gradle Wrapper izinleri
         run: chmod +x ./gradlew
