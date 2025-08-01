@@ -1,4 +1,4 @@
-name: Build APK
+value: Build APK
 
 on:
   push:
@@ -20,7 +20,7 @@ jobs:
           rm -rf app/build
           rm -rf app/src/main/res/*
           mkdir -p app/src/main/res/layout
-          mkdir -p app/src/main/res/value
+          mkdir -p app/src/main/res/values
           rm -f app/src/main/assets/index.html
           rm -f app/src/main/assets/veriler1.js
           rm -f app/src/main/assets/il.js
