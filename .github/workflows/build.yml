@@ -32,16 +32,7 @@ jobs:
           rm -rf app/src/main/java/com/atilla/geziharitam/MainActivity.java
           rm -rf app/src/main/java/com/atilla/geziharitam/AndroidExport.java
 
-      - name: 4 - Güncel dosyaları yerleştir
-        run: |
-          mkdir -p app/src/main/assets
-          mkdir -p app/src/main/java/com/atilla/geziharitam
-
-          printf '%s' "${{ secrets.INDEX_HTML }}" > app/src/main/assets/index.html
-          printf '%s' "${{ secrets.VERILER1_JS }}" > app/src/main/assets/veriler1.js
-          echo "${{ secrets.MAIN_ACTIVITY }}" > app/src/main/java/com/atilla/geziharitam/MainActivity.java
-          echo "${{ secrets.ANDROID_EXPORT }}" > app/src/main/java/com/atilla/geziharitam/AndroidExport.java
-
+      
       - name: 5 - Gradle Wrapper izinleri
         run: chmod +x ./gradlew
 
