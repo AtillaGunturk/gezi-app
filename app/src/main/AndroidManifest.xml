@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.atilla.geziharitam">
 
-    <!-- İzinler -->
+    <!-- Gerekli izinler -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -17,12 +17,7 @@
         android:allowBackup="true"
         android:supportsRtl="true"
         android:requestLegacyExternalStorage="true"
-        android:theme="@style/Theme.geziharitam">
-
-        <!-- İkon ayarları istenirse şöyle eklenebilir:
-             android:icon="@mipmap/ic_launcher"
-             android:roundIcon="@mipmap/ic_launcher_round"
-        -->
+        android:theme="@android:style/Theme.Material.Light"> <!-- Sistem teması kullanıldı -->
 
         <activity
             android:name=".MainActivity"
