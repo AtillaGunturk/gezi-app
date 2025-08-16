@@ -87,6 +87,12 @@ jobs:
         env:
           MY_STORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
           MY_KEY_ALIAS: ${{ secrets.DEBUG_KEY_ALIAS }}
+
+      - name: 10-1- çıktıları listele (debug)
+        run: |
+          echo " app/build/outputs altındaki dosyalar
+          find app/build/outputs -type f
+        
       - name: 11-Check APK
         run: |
           if [ ! -f app/build/outputs/apk/release/app-release.apk ]; then
