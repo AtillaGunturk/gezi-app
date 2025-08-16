@@ -23,6 +23,8 @@ jobs:
 
       - name: 3 - Android SDK kurulumu
         uses: android-actions/setup-android@v3
+         with:
+            cmdline-tools-version: 11.0
 
       - name: 4 - Gradle cache (devre dışı)
         uses: gradle/actions/setup-gradle@v3
