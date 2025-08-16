@@ -2,7 +2,7 @@ name: Build APK
 
 on:
   push:
-    branches: [ main, develop, feature/* ]
+    branches: [main, develop, feature/*]
   workflow_dispatch:
 
 jobs:
@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: 1 - Kodu çek
         uses: actions/checkout@v4
+        with:
+            ref: main
 
       - name: 2 - JDK 17 kurulumu
         uses: actions/setup-java@v4
@@ -41,17 +43,27 @@ jobs:
           DEBUG_KEYSTORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
           DEBUG_KEY_ALIAS: ${{ secrets.DEBUG_KEY_ALIAS }}
 
-      - name: 7 - Temizlik (cache + build)
+      - name: 7 - Temizlik (clean)
         run: |
-          ./gradlew clean --no-daemon || true
-          rm -rf ~/.gradle/caches
-          rm -rf ~/.gradle/daemon
-          rm -rf ~/.gradle/native
-          rm -rf ~/.gradle/wrapper
-          rm -rf app/build
-          rm -rf build
-          echo "✅ Temizlik tamamlandı"
+         ./gradlew clean --no-daemon
+         rm -rf ~/.gradle/caches
+         rm -rf ~/.gradle/daemon
+         rm -rf ~/.gradle/native
+         rm -rf ~/.gradle/wrapper
+         
+         # build klasörleri temizliği
+         rm -rf app/build
+         rm -rf build
 
+          # IDE dosyaları ve temp dosyalar (varsa)
+         rm -rf .idea/
+         rm -rf *.iml
+
+          # Geçici dosyalar
+         find . -name "*.lock" -delete
+         find . -name "*.log" -delete
+         find . -name "*.tmp" -delete
+        
       - name: 8 - Keystore dosyasını yaz
         working-directory: app
         run: |
@@ -69,36 +81,38 @@ jobs:
           DEBUG_KEYSTORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
           DEBUG_KEY_ALIAS: ${{ secrets.DEBUG_KEY_ALIAS }}
 
-      - name: 10 - APK ve AAB derle
+      - name: 10 - APK derle (ve log kaydet)
         run: |
-          ./gradlew :app:assembleRelease :app:bundleRelease --no-daemon --stacktrace | tee build.log
+          ./gradlew :app:assembleRelease --no-daemon --stacktrace --quiet | tee build.log
         env:
           MY_STORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
           MY_KEY_ALIAS: ${{ secrets.DEBUG_KEY_ALIAS }}
-
-      - name: 11 - Çıktıları listele (debug)
+      - name: 11-Check APK
         run: |
-          echo "📂 app/build/outputs altında bulunan dosyalar:"
-          find app/build/outputs -type f
-
-      - name: 12 - APK/AAB kontrol
-        run: |
-          if [ -f app/build/outputs/apk/release/app-release.apk ]; then
-            echo "✅ APK bulundu"
-          else
+          if [ ! -f app/build/outputs/apk/release/app-release.apk ]; then
             echo "❌ APK bulunamadı"
             exit 1
+          else
+           echo "✅ APK oluşturuldu"
           fi
 
-      - name: 13 - APK/AAB upload
+      - name: 12-search APK
+        run: |
+          find app/run/outputs -name "*.apk"
+          find app/build/outputs -name "*.aab"
+
+      
+    
+      - name: 13-APK varsa
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: gezi-signed-builds
+          name: gezi-signed-apk
           path: |
-            app/build/outputs/apk/release/*.apk
-            app/build/outputs/bundle/release/*.aab
+              app/build/outputs/apk/release/*.apk 
+              app/build/outputs/apk/release/*.aab
           if-no-files-found: ignore
+          
 
       - name: 14 - build.log dosyasını yükle
         if: always()
