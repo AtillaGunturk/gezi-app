@@ -93,7 +93,10 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: gezi-signed-apk
-          path: app/build/outputs/apk/release/app-release.apk
+          path: |
+              app/build/outputs/apk/release/app-release.apk 
+              app/build/outputs/apk/release/app-release.aab
+          
 
       - name: 12 - build.log dosyasını yükle
         if: always()
