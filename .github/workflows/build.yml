@@ -102,7 +102,7 @@ jobs:
       
     
       - name 13- APK varsa yükle
-        if: success()
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: gezi-signed-apk
