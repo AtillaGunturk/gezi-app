@@ -83,7 +83,7 @@ jobs:
 
       - name: 10 - APK derle (ve log kaydet)
         run: |
-          ./gradlew :app:assembleRelease --no-daemon --stacktrace --quiet | tee build.log
+          ./gradlew :app:assembleRelease :app:bundleRelease --no-daemon --stacktrace --quiet | tee build.log
         env:
           MY_STORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
           MY_KEY_ALIAS: ${{ secrets.DEBUG_KEY_ALIAS }}
