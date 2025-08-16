@@ -37,7 +37,7 @@ jobs:
           DEBUG_KEYSTORE_B64: ${{ secrets.DEBUG_KEYSTORE_B64 }}
 
       - name: 7 - APK derle (log ile birlikte)
-        run: ./gradlew clean :app:assembleRelease --stacktrace --no-daemon | tee build.log
+        run: ./gradlew clean :app:assembleRelease :app:bundleRelease --stacktrace --no-daemon | tee build.log
         env:
           MY_STORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
           MY_KEY_ALIAS: ${{ secrets.DEBUG_KEY_ALIAS }}
