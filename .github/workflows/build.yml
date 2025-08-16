@@ -97,8 +97,10 @@ jobs:
           fi
 
       - name: 12-search APK
-         run |
-         find app/build/outputs -name "*.apk"
+        run: |
+          find app/run/outputs -name "*.apk"
+          find app/build/outputs -name "*.aab"
+
       
     
       - name: 13-APK varsa
