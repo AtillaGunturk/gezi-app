@@ -90,7 +90,7 @@ jobs:
 
       - name: 10-1- çıktıları listele (debug)
         run: |
-          echo " app/build/outputs altındaki dosyalar
+          echo " app/build/outputs altındaki dosyalar"
           find app/build/outputs -type f
         
       - name: 11-Check APK
