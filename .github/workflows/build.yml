@@ -94,8 +94,8 @@ jobs:
         with:
           name: gezi-signed-apk
           path: |
-              app/build/outputs/apk/release/app-release.apk 
-              app/build/outputs/apk/release/app-release.aab
+              app/build/outputs/apk/release/*.apk 
+              app/build/outputs/apk/release/*.aab
           
 
       - name: 12 - build.log dosyasını yükle
