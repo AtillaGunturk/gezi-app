@@ -96,16 +96,12 @@ jobs:
            echo "✅ APK oluşturuldu"
           fi
 
-      - name: Upload AAB
-        uses: actions/upload-artifact@v3
-        with:
-         name: app-release-bundle
-         path: |  
-           app/build/outputs/bundle/release/app-release.aab
-           app/build/outputs/bundle/release/app-release.apk
+      - name: 12-search apk
+         run |
+         find app/build/outputs -name "*.apk"
+      
     
-    
-      - name: 12 - APK varsa yükle
+      - name 13- APK varsa yükle
         if: success()
         uses: actions/upload-artifact@v4
         with:
@@ -115,7 +111,7 @@ jobs:
               app/build/outputs/apk/release/*.aab
           
 
-      - name: 12 - build.log dosyasını yükle
+      - name: 14 - build.log dosyasını yükle
         if: always()
         uses: actions/upload-artifact@v4
         with:
