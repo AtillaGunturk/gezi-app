@@ -46,10 +46,6 @@ jobs:
       - name: 7 - Temizlik (clean)
         run: |
          ./gradlew clean --no-daemon
-         rm -rf ~/.gradle/caches
-         rm -rf ~/.gradle/daemon
-         rm -rf ~/.gradle/native
-         rm -rf ~/.gradle/wrapper
          
          # build klasörleri temizliği
          rm -rf app/build
