@@ -59,6 +59,8 @@ jobs:
          find . -name "*.lock" -delete
          find . -name "*.log" -delete
          find . -name "*.tmp" -delete
+         # Hatalı/kalıntı ikon dosyaları temizliği
+         find app/src/main/res -name "tr2.xml" -delete
         
       - name: 8 - Keystore dosyasını yaz
         working-directory: app
