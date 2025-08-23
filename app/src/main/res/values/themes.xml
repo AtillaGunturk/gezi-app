@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="Theme.geziharitam" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <!-- Uygulama çubuğu arka planı -->
+        <item name="colorPrimary">@color/purple_500</item>
+        <!-- Durum çubuğu -->
+        <item name="colorPrimaryVariant">@color/purple_700</item>
+        <!-- Yazı rengi -->
+        <item name="colorOnPrimary">@color/white</item>
+        <!-- Arka plan -->
+        <item name="android:colorBackground">@color/white</item>
+        <!-- Tema ayarları -->
+        <item name="android:windowLightStatusBar" tools:targetApi="23">true</item>
+    </style>
+</resources>
