@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Uygulama Temel Renkleri -->
+    <color name="colorPrimary">#E30A17</color>   <!-- Türk bayrağı kırmızısı -->
+    <color name="colorPrimaryDark">#A0000C</color>
+    <color name="colorAccent">#FFFFFF</color>   <!-- Beyaz -->
+
+    <!-- Varsayılan Tema Renkleri (Android şablonu için gerekli) -->
+    <color name="purple_500">#6200EE</color>
+    <color name="purple_700">#3700B3</color>
+    <color name="teal_200">#03DAC5</color>
+    <color name="teal_700">#018786</color>
+
+    <!-- Ekstra tonlar -->
+    <color name="black">#000000</color>
+    <color name="white">#FFFFFF</color>
+</resources>

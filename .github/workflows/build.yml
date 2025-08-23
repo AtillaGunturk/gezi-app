@@ -1,0 +1,132 @@
+name: Build APK
+
+on:
+  push:
+    branches: [main, develop, feature/*]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Kodu çek
+      - name: 1 - Kodu Çek
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      # 2. JDK kurulumu
+      - name: 2 - JDK 17 Kurulumu
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      # 3. Android SDK kurulumu
+      - name: 3 - Android SDK Kurulumu
+        uses: android-actions/setup-android@v3
+
+      # 4. Gradle ayarları (cache kapalı)
+      - name: 4 - Gradle Ayarları
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          cache-disabled: true
+
+      # 5. Gradle Wrapper’a izin ver
+      - name: 5 - Gradle Wrapper İzni
+        run: chmod +x ./gradlew
+
+      # 6. gradle.properties oluştur
+      - name: 6 - Gradle Properties Oluştur
+        working-directory: app
+        run: |
+          echo "MY_STORE_PASSWORD=${DEBUG_KEYSTORE_PASSWORD}" >> gradle.properties
+          echo "MY_KEY_ALIAS=${DEBUG_KEY_ALIAS}" >> gradle.properties
+          echo "android.useAndroidX=true" >> gradle.properties
+          echo "android.enableJetifier=true" >> gradle.properties
+        env:
+          DEBUG_KEYSTORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
+          DEBUG_KEY_ALIAS: ${{ secrets.DEBUG_KEY_ALIAS }}
+
+      # 7. Temizlik
+      - name: 7 - Temizlik
+        run: |
+          ./gradlew --stop || true
+          rm -rf app/build build .gradle .idea *.iml ~/.gradle ~/.android
+          ./gradlew clean --no-daemon --refresh-dependencies
+
+      # ✅ 7.1 - Assets klasörünü kontrol et
+      - name: 7.1 - Assets Klasörünü Kontrol Et
+        run: |
+          echo ">>> app/src/main/assets içeriği:"
+          ls -l app/src/main/assets || echo "Assets klasörü yok!"
+
+      # 8. Keystore yaz
+      - name: 8 - Keystore Dosyası Oluştur
+        working-directory: app
+        run: |
+          mkdir -p android
+          printf '%s' "$DEBUG_KEYSTORE_B64" | base64 -d > android/debug.keystore
+        env:
+          DEBUG_KEYSTORE_B64: ${{ secrets.DEBUG_KEYSTORE_B64 }}
+
+      # 9. Keystore test
+      - name: 9 - Keystore Test
+        run: |
+          keytool -list -keystore app/android/debug.keystore \
+            -storepass "$DEBUG_KEYSTORE_PASSWORD" \
+            -alias "$DEBUG_KEY_ALIAS" -v | head -n 12
+        env:
+          DEBUG_KEYSTORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
+          DEBUG_KEY_ALIAS: ${{ secrets.DEBUG_KEY_ALIAS }}
+
+      # 10. APK derle
+      - name: 10 - APK Derle
+        run: |
+          ./gradlew :app:assembleRelease --no-daemon --stacktrace | tee build.log
+        env:
+          MY_STORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
+          MY_KEY_ALIAS: ${{ secrets.DEBUG_KEY_ALIAS }}
+
+      # 🔍 Debug bilgileri
+      - name: 11 - Debug Bilgileri
+        run: |
+          echo ">>> Son commit:"
+          git log -1 --stat
+          echo ""
+          echo ">>> AndroidManifest.xml dosyaları:"
+          find app/src -name "AndroidManifest.xml" -print
+          echo ""
+          echo ">>> index.html içeriği:"
+          cat app/src/main/assets/index.html || echo "index.html yok!"
+          echo ""
+          echo ">>> app/src/main/assets içeriği:"
+          ls -l app/src/main/assets || echo "Assets yok!"
+
+      # 12. Build outputs listesi
+      - name: 12 - Build Outputs Listesi
+        run: |
+          echo "Build outputs:"
+          ls -R app/build/outputs || echo "Çıktı bulunamadı."
+
+      # 13. APK ve build.log'u yükle
+      - name: 13 - APK Yükle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gezi-signed-apk
+          path: |
+            app/build/outputs/apk/release/*.apk
+            app/build/outputs/apk/release/*.aab
+          if-no-files-found: ignore
+
+      - name: 14 - build.log Yükle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: build.log
+
+
+
