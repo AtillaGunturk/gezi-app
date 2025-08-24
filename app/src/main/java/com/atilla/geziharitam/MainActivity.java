@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.OpenableColumns;
 import android.util.Log;
+import android.webkit.JavascriptInterface;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
@@ -45,9 +46,7 @@ public class MainActivity extends AppCompatActivity {
         settings.setAllowUniversalAccessFromFileURLs(true);
 
         // ---------------- WebView cache temizleme ve LOAD_NO_CACHE ----------------
-        webView.clearCache(true);   // tüm cache'i temizle
-        webView.clearHistory();     // geçmişi temizle
-        settings.setCacheMode(WebSettings.LOAD_NO_CACHE); // cache kullanma
+        loadFreshWebView();
         // --------------------------------------------------------------------------
 
         webView.setWebViewClient(new WebViewClient());
@@ -66,8 +65,6 @@ public class MainActivity extends AppCompatActivity {
 
         androidExport = new AndroidExport(this, webView);
         webView.addJavascriptInterface(androidExport, "AndroidExport");
-
-        webView.loadUrl("file:///android_asset/index.html");
 
         /* -------- File chooser (input type=file) -------- */
         fileChooserLauncher = registerForActivityResult(
@@ -138,6 +135,18 @@ public class MainActivity extends AppCompatActivity {
         );
     }
 
+    /* -------- WebView’i her açılışta güncel yükleyen metod -------- */
+    private void loadFreshWebView() {
+        if (webView != null) {
+            webView.clearCache(true);
+            webView.clearHistory();
+            WebSettings settings = webView.getSettings();
+            settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
+            settings.setAppCacheEnabled(false);
+            webView.loadUrl("file:///android_asset/index.html");
+        }
+    }
+
     /* -------- JSON dışa aktarma başlat -------- */
     public void startFileExport() {
         Log.d("MainActivity", "startFileExport() çağrıldı");
@@ -187,4 +196,10 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
-                                }
+
+    /* -------- JS üzerinden WebView yeniden yükleme -------- */
+    @JavascriptInterface
+    public void reloadWebView() {
+        runOnUiThread(this::loadFreshWebView);
+    }
+    }
