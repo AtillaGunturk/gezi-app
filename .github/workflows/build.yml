@@ -84,7 +84,7 @@ jobs:
       # 10. APK derle
       - name: 10 - APK Derle
         run: |
-          ./gradlew :app:assembleRelease --stacktrace --info | tee build.log
+          ./gradlew :app:assembleRelease --no-daemon --stacktrace --info | tee build.log
         env:
           MY_STORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
           MY_KEY_ALIAS: ${{ secrets.DEBUG_KEY_ALIAS }}
@@ -127,6 +127,7 @@ jobs:
         with:
           name: build-log
           path: build.log
+
 
 
 
