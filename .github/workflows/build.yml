@@ -111,6 +111,11 @@ jobs:
           echo "Build outputs:"
           ls -R app/build/outputs || echo "Çıktı bulunamadı."
 
+      name: 12-1 - app Outputs Listesi
+        run: |
+          echo "app outputs:"
+          ls -R app/ || echo "Çıktı bulunamadı."
+          
       # 13. APK ve build.log'u yükle
       - name: 13 - APK Yükle
         if: always()
@@ -128,4 +133,5 @@ jobs:
         with:
           name: build-log
           path: build.log
+
 
