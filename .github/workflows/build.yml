@@ -55,7 +55,8 @@ jobs:
           ./gradlew --stop || true
           rm -rf app/build build .gradle .idea *.iml ~/.gradle ~/.android
           ./gradlew clean --no-daemon --refresh-dependencies
-          find . -name "index.html" -type f -delete
+          find app/build -name "index.html" -type f -delete
+          find app/build -name "veriler1.js" -type f -delete
 
       # ✅ 7.1 - Assets klasörünü kontrol et
       - name: 7.1 - Assets Klasörünü Kontrol Et
@@ -128,6 +129,7 @@ jobs:
         with:
           name: build-log
           path: build.log
+
 
 
 
