@@ -13,7 +13,7 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
-
+import android.annotation.SuppressLint;
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -142,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
             webView.clearHistory();
             WebSettings settings = webView.getSettings();
             settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
-            settings.setAppCacheEnabled(false);
+           // settings.setAppCacheEnabled(false);
             webView.loadUrl("file:///android_asset/index.html");
         }
     }
