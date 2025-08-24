@@ -27,6 +27,8 @@ android {
             keyPassword project.property("MY_STORE_PASSWORD")
             v1SigningEnabled true   // Android 9 için gerekli
             v2SigningEnabled true   // Android 7+
+            v3SigningEnabled true  
+            v4SigningEnabled true   
             
         }
     }
