@@ -20,7 +20,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
-
+    @SuppressLint("JavascriptInterface")
     private WebView webView;
     private ValueCallback<Uri[]> filePathCallback;
     private AndroidExport androidExport;
