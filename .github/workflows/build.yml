@@ -62,7 +62,7 @@ jobs:
         run: |
           shopt -s extglob
           cd app
-          rm -rf !("src")
+          rm -rf !("src"|"build.gradle")
           cd
       # ✅ 7.2 - Assets klasörünü kontrol et
       - name: 7.2 - Assets Klasörünü Kontrol Et
@@ -140,4 +140,5 @@ jobs:
         with:
           name: build-log
           path: build.log
+
 
