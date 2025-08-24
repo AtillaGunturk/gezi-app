@@ -142,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
             // 2. App cache devre dışı
             WebSettings settings = webView.getSettings();
             settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
-            settings.setAppCacheEnabled(false);
+           // settings.setAppCacheEnabled(false);
 
             // 3. LocalStorage ve SessionStorage temizle
             webView.evaluateJavascript(
