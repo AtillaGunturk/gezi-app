@@ -37,18 +37,7 @@ jobs:
       - name: 5 - Gradle Wrapper İzni
         run: chmod +x ./gradlew
 
-      # 6. gradle.properties oluştur
-      - name: 6 - Gradle Properties Oluştur
-        working-directory: app
-        run: |
-          echo "MY_STORE_PASSWORD=${DEBUG_KEYSTORE_PASSWORD}" >> gradle.properties
-          echo "MY_KEY_ALIAS=${DEBUG_KEY_ALIAS}" >> gradle.properties
-          echo "android.useAndroidX=true" >> gradle.properties
-          echo "android.enableJetifier=true" >> gradle.properties
-        env:
-          DEBUG_KEYSTORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
-          DEBUG_KEY_ALIAS: ${{ secrets.DEBUG_KEY_ALIAS }}
-
+      
       # 7. Temizlik
       - name: 7 - Temizlik
         run: |
@@ -63,6 +52,17 @@ jobs:
           shopt -s extglob
           cd app
           rm -rf !("src"|"gradle.properties"|"build.gradle"|"proguard-rules.pro")
+       # 6. gradle.properties oluştur
+      - name: 6 - Gradle Properties Oluştur
+        working-directory: app
+        run: |
+          echo "MY_STORE_PASSWORD=${DEBUG_KEYSTORE_PASSWORD}" >> gradle.properties
+          echo "MY_KEY_ALIAS=${DEBUG_KEY_ALIAS}" >> gradle.properties
+          echo "android.useAndroidX=true" >> gradle.properties
+          echo "android.enableJetifier=true" >> gradle.properties
+        env:
+          DEBUG_KEYSTORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
+          DEBUG_KEY_ALIAS: ${{ secrets.DEBUG_KEY_ALIAS }}
           
       # ✅ 7.2 - Assets klasörünü kontrol et
       - name: 7.2 - Assets Klasörünü Kontrol Et
@@ -140,6 +140,7 @@ jobs:
         with:
           name: build-log
           path: build.log
+
 
 
 
