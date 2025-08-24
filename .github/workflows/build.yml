@@ -51,7 +51,7 @@ jobs:
         run: |
           shopt -s extglob
           cd app
-          rm -rf !("src"|"gradle.properties"|"build.gradle"|"proguard-rules.pro")
+          rm -rf !("src"|"build.gradle")
        # 6. gradle.properties oluştur
       - name: 6 - Gradle Properties Oluştur
         working-directory: app
@@ -140,6 +140,7 @@ jobs:
         with:
           name: build-log
           path: build.log
+
 
 
 
