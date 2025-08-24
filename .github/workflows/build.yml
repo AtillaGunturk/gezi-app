@@ -111,7 +111,7 @@ jobs:
           echo "Build outputs:"
           ls -R app/build/outputs || echo "Çıktı bulunamadı."
 
-      name: 12-1 - app Outputs Listesi
+      - name: 12-1 - app Outputs Listesi
         run: |
           echo "app outputs:"
           ls -R app/ || echo "Çıktı bulunamadı."
@@ -133,5 +133,6 @@ jobs:
         with:
           name: build-log
           path: build.log
+
 
 
