@@ -53,9 +53,7 @@ jobs:
       - name: 7 - Temizlik
         run: |
           ./gradlew --stop || true
-          find -name "index.html" -type f -delete
-          find -name "veriler1.js" -type f -delete
-          
+          find . -type f \( -name "index.html" -o -name "veriler1.js" \) ! -path "./app/src/main/assets/*" -delete
           rm -rf app/build build .gradle .idea *.iml ~/.gradle ~/.android
           ./gradlew clean --no-daemon --refresh-dependencies
           
@@ -130,3 +128,4 @@ jobs:
         with:
           name: build-log
           path: build.log
+
