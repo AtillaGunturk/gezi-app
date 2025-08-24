@@ -93,7 +93,18 @@ function ayrintiGoster(yer, i) {
     </div>`;
   document.getElementById("bilgiPaneli").innerHTML = html;
 }
-
+/* ---------- İL SEÇ AÇILIR MENÜSÜ ---------------------------- */
+const ilSelect = document.getElementById("ilSec");
+iller.forEach((il, i) => {
+  const op = document.createElement("option");
+  op.value = i; op.textContent = il.isim;
+  ilSelect.appendChild(op);
+});
+ilSelect.addEventListener("change", () => {
+  const v = ilSelect.value;
+  if (v==="") return;
+  harita.flyTo(iller[v].koordinat, 8);
+});
 /* ---------- FOTOĞRAF ZOOM ----------------------------------- */
 function zoomFoto(uri) {
   const lb = document.getElementById("lightbox");
