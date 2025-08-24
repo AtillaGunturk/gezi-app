@@ -44,6 +44,12 @@ public class MainActivity extends AppCompatActivity {
         settings.setAllowFileAccessFromFileURLs(true);
         settings.setAllowUniversalAccessFromFileURLs(true);
 
+        // ---------------- WebView cache temizleme ve LOAD_NO_CACHE ----------------
+        webView.clearCache(true);   // tüm cache'i temizle
+        webView.clearHistory();     // geçmişi temizle
+        settings.setCacheMode(WebSettings.LOAD_NO_CACHE); // cache kullanma
+        // --------------------------------------------------------------------------
+
         webView.setWebViewClient(new WebViewClient());
 
         webView.setWebChromeClient(new WebChromeClient() {
@@ -181,4 +187,4 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
-            }
+                                }
