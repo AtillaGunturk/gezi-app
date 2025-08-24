@@ -29,7 +29,7 @@ public class MainActivity extends AppCompatActivity {
     private ActivityResultLauncher<Intent> fileChooserLauncher;
     private ActivityResultLauncher<Intent> photoPickerLauncher;
 
-    private String currentPhotoUid = null; // UID tutma alanı
+    private String currentPhotoUid = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,7 +104,6 @@ public class MainActivity extends AppCompatActivity {
                     if (result.getResultCode() == RESULT_OK && result.getData() != null) {
                         Uri uri = result.getData().getData();
                         if (uri != null) {
-                            // Görünen dosya adını al
                             String displayName = "";
                             Cursor cursor = getContentResolver().query(uri, null, null, null, null);
                             if (cursor != null) {
@@ -115,7 +114,6 @@ public class MainActivity extends AppCompatActivity {
                                 cursor.close();
                             }
 
-                            // Kalıcı okuma izni al
                             try {
                                 getContentResolver().takePersistableUriPermission(
                                         uri, Intent.FLAG_GRANT_READ_URI_PERMISSION
@@ -124,10 +122,9 @@ public class MainActivity extends AppCompatActivity {
                                 Log.w("MainActivity", "Persistable URI izin alınamadı: " + e.getMessage());
                             }
 
-                            // JS'e bildir (UID + URI + dosya adı)
                             if (currentPhotoUid != null) {
                                 androidExport.onPhotoPicked(currentPhotoUid, uri, displayName);
-                                currentPhotoUid = null; // Temizle
+                                currentPhotoUid = null;
                             }
                         }
                     }
@@ -138,11 +135,27 @@ public class MainActivity extends AppCompatActivity {
     /* -------- WebView’i her açılışta güncel yükleyen metod -------- */
     private void loadFreshWebView() {
         if (webView != null) {
+            // 1. Cache ve history temizle
             webView.clearCache(true);
             webView.clearHistory();
+
+            // 2. App cache devre dışı
             WebSettings settings = webView.getSettings();
             settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
-           // settings.setAppCacheEnabled(false);
+            settings.setAppCacheEnabled(false);
+
+            // 3. LocalStorage ve SessionStorage temizle
+            webView.evaluateJavascript(
+                    "window.localStorage.clear(); window.sessionStorage.clear();",
+                    null
+            );
+
+            // 4. Çerezleri temizle
+            android.webkit.CookieManager cookieManager = android.webkit.CookieManager.getInstance();
+            cookieManager.removeAllCookies(null);
+            cookieManager.flush();
+
+            // 5. Güncel index.html’i yükle
             webView.loadUrl("file:///android_asset/index.html");
         }
     }
@@ -202,4 +215,4 @@ public class MainActivity extends AppCompatActivity {
     public void reloadWebView() {
         runOnUiThread(this::loadFreshWebView);
     }
-    }
+                                    }
