@@ -1,5 +1,6 @@
 /* -----------------------------------------------------------
    veriler1.js  –  Gezdiğim Yerler  (IndexedDB + Android köprüsü)
+   Android 10+ uyumlu, Base64 kullanılmaz
    ----------------------------------------------------------- */
 
 /* ---------- LEAFLET HARİTASI -------------------------------- */
@@ -13,8 +14,8 @@ let db;                // IndexedDB bağlantısı
 
 /* ---------- IndexedDB AÇ / YÜKLE ---------------------------- */
 (async () => {
-  await dbAc(); // sadece db açılıyor, veri alınmıyor
-  veriler = []; // tamamen boş başlat
+  await dbAc();
+  veriler = [];
 })();
 function dbAc() {
   return new Promise((ok, err) => {
@@ -93,6 +94,7 @@ function ayrintiGoster(yer, i) {
     </div>`;
   document.getElementById("bilgiPaneli").innerHTML = html;
 }
+
 /* ---------- İL SEÇ AÇILIR MENÜSÜ ---------------------------- */
 const ilSelect = document.getElementById("ilSec");
 iller.forEach((il, i) => {
@@ -105,6 +107,7 @@ ilSelect.addEventListener("change", () => {
   if (v==="") return;
   harita.flyTo(iller[v].koordinat, 8);
 });
+
 /* ---------- FOTOĞRAF ZOOM ----------------------------------- */
 function zoomFoto(uri) {
   const lb = document.getElementById("lightbox");
@@ -152,7 +155,7 @@ function düzenlemeModu(i) {
   f("isim").value     = y.isim  ?? "";
   f("aciklama").value = y.aciklama ?? "";
   f("enlem").value    = y.konum?.[0] ?? "";
-  f("boylam").value   = y.konum?.1] ?? "";
+  f("boylam").value   = y.konum?.[1] ?? "";
 
   const fotoAlani = f("fotoAlani");
   fotoAlani.innerHTML = "";
@@ -163,7 +166,7 @@ function düzenlemeModu(i) {
 }
 window.düzenlemeModu = düzenlemeModu;
 
-// ---------- FOTO SATIRI BAŞLANGIÇ ---------------------------
+/* ---------- FOTO SATIRI BAŞLANGIÇ --------------------------- */
 let __pendingRow = null;
 function yeniFotoSatiriEkle() {
   const alan = document.getElementById("fotoAlani");
@@ -186,22 +189,19 @@ function yeniFotoSatiriEkle() {
 
     btnSec.addEventListener("click", () => {
       __pendingRow = div;
-      try { AndroidExport.pickPhoto(""); } catch(e) { console.warn(e); }
+      try { AndroidExport.pickPhoto("uid_" + Date.now()); } catch(e) { console.warn(e); }
     });
     btnSil.addEventListener("click", () => div.remove());
 
-    // Android tarafından seçilen fotoğraf Base64 ve URI ile birlikte saklanacak
-    window.onAndroidFilePicked = (uid, uri, displayName, base64Thumb, base64Original) => {
+    window.onAndroidFilePicked = (uid, uri, displayName) => {
       if (!__pendingRow) return;
-      __pendingRow.dataset.androidUri       = uri;
-      __pendingRow.dataset.displayName      = displayName || uri;
-      __pendingRow.dataset.base64Original   = base64Original || "";
-      __pendingRow.dataset.base64Thumb      = base64Thumb || "";
+      __pendingRow.dataset.androidUri  = uri;
+      __pendingRow.dataset.displayName = displayName || uri;
       dosyaAdi.textContent = displayName || uri;
       __pendingRow = null;
     };
+
   } else {
-    // Web tarafı aynı kalabilir
     div.innerHTML = `
       <label style="display:flex;align-items:center;gap:8px;width:100%">
         <input type="file" accept="image/*" style="flex:1">
@@ -221,7 +221,8 @@ function yeniFotoSatiriEkle() {
   }
 
   alan.appendChild(div);
-       }
+}
+yeniFotoSatiriEkle();
 
 /* ---------- YENİ / DÜZENLE KAYDET --------------------------- */
 async function yeniYerKaydet() {
@@ -242,11 +243,10 @@ async function yeniYerKaydet() {
       const uri  = div.dataset.androidUri || "";
       const name = div.dataset.displayName || "";
       if (uri) fotolar.push({ alt, uri, name });
-       
     } else {
       const file = div.querySelector('input[type=file]')?.files?.[0];
       if (file) {
-        const url = URL.createObjectURL(file); // web’de direkt yol
+        const url = URL.createObjectURL(file);
         fotolar.push({ alt, uri: url, name: file.name });
       }
     }
@@ -256,12 +256,10 @@ async function yeniYerKaydet() {
   const idx = (idxStr !== undefined) ? Number(idxStr) : undefined;
 
   if (idx !== undefined && !Number.isNaN(idx)) {
-    // Düzenleme
     Object.assign(veriler[idx], { isim, aciklama, konum:[enlem,boylam] });
     veriler[idx].fotolar = (veriler[idx].fotolar || []).concat(fotolar);
     markerlar[idx].setLatLng([enlem, boylam]);
   } else {
-    // Yeni kayıt
     veriler.push({ isim, aciklama, konum:[enlem,boylam], fotolar });
   }
 
@@ -276,10 +274,7 @@ async function yeniYerKaydet() {
 
 /* ---------- VERİLERİ DIŞA AKTAR ----------------------------- */
 function verileriDisariAktar() {
-  if (veriler.length === 0) {
-    alert("Henüz kaydedilmiş yer yok!");
-    return;
-  }
+  if (veriler.length === 0) { alert("Henüz kaydedilmiş yer yok!"); return; }
   const json = JSON.stringify(veriler, null, 2);
 
   if (window.AndroidExport && AndroidExport.exportVeri) {
@@ -312,10 +307,5 @@ async function verileriIceAktar(file) {
 }
 
 /* ---------- Yardımcılar ------------------------------------ */
-function escapeHtml(s="") {
-  return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-}
-function escapeAttr(s="") {
-  return s.replace(/"/g, '&quot;');
-
-}
+function escapeHtml(s="") { return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function escapeAttr(s="") { return s.replace(/"/g, '&quot;'); }
