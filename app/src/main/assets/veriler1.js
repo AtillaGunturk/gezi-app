@@ -152,7 +152,7 @@ function düzenlemeModu(i) {
   f("isim").value     = y.isim  ?? "";
   f("aciklama").value = y.aciklama ?? "";
   f("enlem").value    = y.konum?.[0] ?? "";
-  f("boylam").value   = y.konum?.[1] ?? "";
+  f("boylam").value   = y.konum?.1] ?? "";
 
   const fotoAlani = f("fotoAlani");
   fotoAlani.innerHTML = "";
@@ -163,7 +163,7 @@ function düzenlemeModu(i) {
 }
 window.düzenlemeModu = düzenlemeModu;
 
-/* ---------- FOTO SATIRI BAŞLANGIÇ --------------------------- */
+// ---------- FOTO SATIRI BAŞLANGIÇ ---------------------------
 let __pendingRow = null;
 function yeniFotoSatiriEkle() {
   const alan = document.getElementById("fotoAlani");
@@ -190,14 +190,18 @@ function yeniFotoSatiriEkle() {
     });
     btnSil.addEventListener("click", () => div.remove());
 
-    window.onPhotoPicked = (uri, displayName) => {
+    // Android tarafından seçilen fotoğraf Base64 ve URI ile birlikte saklanacak
+    window.onAndroidFilePicked = (uid, uri, displayName, base64Thumb, base64Original) => {
       if (!__pendingRow) return;
-      __pendingRow.dataset.androidUri  = uri;
-      __pendingRow.dataset.displayName = displayName || uri;
+      __pendingRow.dataset.androidUri       = uri;
+      __pendingRow.dataset.displayName      = displayName || uri;
+      __pendingRow.dataset.base64Original   = base64Original || "";
+      __pendingRow.dataset.base64Thumb      = base64Thumb || "";
       dosyaAdi.textContent = displayName || uri;
       __pendingRow = null;
     };
   } else {
+    // Web tarafı aynı kalabilir
     div.innerHTML = `
       <label style="display:flex;align-items:center;gap:8px;width:100%">
         <input type="file" accept="image/*" style="flex:1">
@@ -217,8 +221,7 @@ function yeniFotoSatiriEkle() {
   }
 
   alan.appendChild(div);
-}
-yeniFotoSatiriEkle();
+       }
 
 /* ---------- YENİ / DÜZENLE KAYDET --------------------------- */
 async function yeniYerKaydet() {
@@ -239,6 +242,7 @@ async function yeniYerKaydet() {
       const uri  = div.dataset.androidUri || "";
       const name = div.dataset.displayName || "";
       if (uri) fotolar.push({ alt, uri, name });
+       
     } else {
       const file = div.querySelector('input[type=file]')?.files?.[0];
       if (file) {
@@ -313,4 +317,5 @@ function escapeHtml(s="") {
 }
 function escapeAttr(s="") {
   return s.replace(/"/g, '&quot;');
+
 }
