@@ -61,7 +61,7 @@ jobs:
         run: |
           shopt -s extglob
           cd app
-          rm -rf !("src"|"build.gradle")
+          rm -rf !("src"|"gradle.properties"|"build.gradle"|"proguard-rules.pro")
        
           
       # ✅ 7.2 - Assets klasörünü kontrol et
@@ -140,6 +140,7 @@ jobs:
         with:
           name: build-log
           path: build.log
+
 
 
 
