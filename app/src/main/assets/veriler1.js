@@ -309,5 +309,12 @@ async function verileriIceAktar(file) {
 }
 
 /* ---------- Yardımcılar ------------------------------------ */
-function escapeHtml(s="") {
-  return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'
+function escapeHtml(s = "") {
+  return s.replace(/[&<>"']/g, c =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])
+  );
+}
+
+function escapeAttr(s = "") {
+  return s.replace(/"/g, '&quot;');
+}
