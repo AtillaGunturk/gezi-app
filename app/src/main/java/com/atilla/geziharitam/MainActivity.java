@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(webView);
 
         // (Debug’da açık, release’de kapalı) – optional
-        WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG);
+       // WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG);
 
         // WebView ayarları
         WebSettings settings = webView.getSettings();
