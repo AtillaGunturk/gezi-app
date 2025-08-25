@@ -109,15 +109,24 @@ ilSelect.addEventListener("change", () => {
 
 /* ---------- FOTOĞRAF ZOOM ----------------------------------- */
 function zoomFoto(uri) {
-  const lb = document.getElementById("lightbox");
-  if (window.AndroidExport && AndroidExport.openPhoto && uri) {
-    AndroidExport.openPhoto(uri);
+  if (!uri) return;
+  if (window.AndroidExport && AndroidExport.openPhoto) {
+    AndroidExport.openPhoto(uri); // Android WebView’de büyük resmi aç
     return;
   }
+  const lb = document.getElementById("lightbox");
+  const img = lb.querySelector("img");
+  img.src = uri;
   lb.style.display = "flex";
-  lb.querySelector("img").src = uri || "";
 }
-window.zoomFoto = zoomFoto;
+
+// Lightbox tıklayınca kapansın
+document.getElementById("lightbox").addEventListener("click", e => {
+  if (e.target.id === "lightbox") {
+    e.target.style.display = "none";
+    e.target.querySelector("img").src = "";
+  }
+});
 
 /* ---------- FOTOĞRAF SİL ------------------------------------ */
 async function fotoSil(yerIdx, fotoIdx) {
@@ -318,3 +327,4 @@ function escapeHtml(s = "") {
 function escapeAttr(s = "") {
   return s.replace(/"/g, '&quot;');
 }
+
