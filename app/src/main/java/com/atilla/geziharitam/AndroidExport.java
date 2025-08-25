@@ -6,11 +6,9 @@ import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import android.util.Log;
 import java.io.OutputStream;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.util.Base64;
 import java.io.InputStream;
-import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.nio.charset.StandardCharsets;
 
 public class AndroidExport {
@@ -34,7 +32,7 @@ public class AndroidExport {
         }
     }
 
-    // JSON dosyasını kayde
+    // JSON dosyasını kaydet
     public void onFileSelectedToSave(Uri uri) {
         if (jsonToSave == null || uri == null) return;
         try (OutputStream outputStream = context.getContentResolver().openOutputStream(uri)) {
@@ -57,37 +55,51 @@ public class AndroidExport {
         }
     }
 
-    // Fotoğraf seçildikten sonra JS'e bildir (thumbnail + orijinal)
-    // Fotoğraf seçildikten sonra JS'e bildir (URI kalıcı yol)
+    // Fotoğraf seçildikten sonra JS'e bildir (kalıcı yol)
     public void onPhotoPicked(String uid, Uri uri, String displayName) {
-    try {
-        // 1. Seçilen fotoğrafı uygulama dizinine kopyala
-        InputStream in = context.getContentResolver().openInputStream(uri);
-        if (in == null) return;
+        try {
+            if (uri == null) return;
 
-        String name = displayName != null ? displayName : "IMG_" + System.currentTimeMillis() + ".jpg";
-        File destFile = new File(context.getFilesDir(), name);
-        OutputStream out = new FileOutputStream(destFile);
+            // Benzersiz dosya adı oluştur
+            String name = displayName != null ? System.currentTimeMillis() + "_" + displayName : "IMG_" + System.currentTimeMillis() + ".jpg";
+            File destFile = new File(context.getFilesDir(), name);
 
-        byte[] buffer = new byte[8192];
-        int len;
-        while ((len = in.read(buffer)) > 0) {
-            out.write(buffer, 0, len);
-        }
-        in.close();
-        out.close();
-
-        // 2. JS'e bildir (kalıcı yol)
-        String js = String.format(
-                "window.onAndroidFilePicked && window.onAndroidFilePicked('%s','%s','%s');",
-                escapeJs(uid),
-                escapeJs(destFile.getAbsolutePath()), // kalıcı yol
-                escapeJs(name)
-        );
-
-        webView.post(() -> webView.evaluateJavascript(js, null));
-
-    } catch (Exception e) {
-        Log.e("AndroidExport", "Fotoğraf işlenirken hata oluştu", e);
-    }
+            // Fotoğrafı uygulama dizinine kopyala
+            try (InputStream in = context.getContentResolver().openInputStream(uri);
+                 OutputStream out = new FileOutputStream(destFile)) {
+                if (in == null) return;
+                byte[] buffer = new byte[8192];
+                int len;
+                while ((len = in.read(buffer)) > 0) {
+                    out.write(buffer, 0, len);
+                }
             }
+
+            // JS'e bildir (UID + kalıcı yol + dosya adı)
+            String js = String.format(
+                    "window.onAndroidFilePicked && window.onAndroidFilePicked('%s','%s','%s');",
+                    escapeJs(uid),
+                    escapeJs(destFile.getAbsolutePath()),
+                    escapeJs(name)
+            );
+
+            webView.post(() -> webView.evaluateJavascript(js, null));
+
+        } catch (Exception e) {
+            Log.e("AndroidExport", "Fotoğraf işlenirken hata oluştu", e);
+        }
+    }
+
+    // Fotoğraf aç (JS -> Android)
+    @JavascriptInterface
+    public void openPhoto(String uriOrPath) {
+        if (context instanceof MainActivity) {
+            ((MainActivity) context).openPhoto(uriOrPath);
+        }
+    }
+
+    // JS içinde güvenli string
+    private String escapeJs(String s) {
+        return s == null ? "" : s.replace("'", "\\'");
+    }
+                                                      }
