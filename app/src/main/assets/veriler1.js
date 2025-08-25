@@ -1,6 +1,5 @@
 /* -----------------------------------------------------------
    veriler1.js  –  Gezdiğim Yerler  (IndexedDB + Android köprüsü)
-   Android 10+ uyumlu, Base64 kullanılmaz
    ----------------------------------------------------------- */
 
 /* ---------- LEAFLET HARİTASI -------------------------------- */
@@ -14,8 +13,8 @@ let db;                // IndexedDB bağlantısı
 
 /* ---------- IndexedDB AÇ / YÜKLE ---------------------------- */
 (async () => {
-  await dbAc();
-  veriler = [];
+  await dbAc(); // sadece db açılıyor, veri alınmıyor
+  veriler = []; // tamamen boş başlat
 })();
 function dbAc() {
   return new Promise((ok, err) => {
@@ -189,10 +188,11 @@ function yeniFotoSatiriEkle() {
 
     btnSec.addEventListener("click", () => {
       __pendingRow = div;
-      try { AndroidExport.pickPhoto("uid_" + Date.now()); } catch(e) { console.warn(e); }
+      try { AndroidExport.pickPhoto(""); } catch(e) { console.warn(e); }
     });
     btnSil.addEventListener("click", () => div.remove());
 
+    // Android tarafından seçilen fotoğrafın kalıcı URI'si
     window.onAndroidFilePicked = (uid, uri, displayName) => {
       if (!__pendingRow) return;
       __pendingRow.dataset.androidUri  = uri;
@@ -200,8 +200,8 @@ function yeniFotoSatiriEkle() {
       dosyaAdi.textContent = displayName || uri;
       __pendingRow = null;
     };
-
   } else {
+    // Web tarafı
     div.innerHTML = `
       <label style="display:flex;align-items:center;gap:8px;width:100%">
         <input type="file" accept="image/*" style="flex:1">
@@ -233,7 +233,6 @@ async function yeniYerKaydet() {
 
   const fotolar = [];
   const satirlar = document.querySelectorAll("#fotoAlani > div");
-
   const isAndroid = !!(window.AndroidExport && AndroidExport.pickPhoto);
 
   satirlar.forEach(div => {
@@ -274,7 +273,10 @@ async function yeniYerKaydet() {
 
 /* ---------- VERİLERİ DIŞA AKTAR ----------------------------- */
 function verileriDisariAktar() {
-  if (veriler.length === 0) { alert("Henüz kaydedilmiş yer yok!"); return; }
+  if (veriler.length === 0) {
+    alert("Henüz kaydedilmiş yer yok!");
+    return;
+  }
   const json = JSON.stringify(veriler, null, 2);
 
   if (window.AndroidExport && AndroidExport.exportVeri) {
@@ -307,5 +309,5 @@ async function verileriIceAktar(file) {
 }
 
 /* ---------- Yardımcılar ------------------------------------ */
-function escapeHtml(s="") { return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-function escapeAttr(s="") { return s.replace(/"/g, '&quot;'); }
+function escapeHtml(s="") {
+  return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'
