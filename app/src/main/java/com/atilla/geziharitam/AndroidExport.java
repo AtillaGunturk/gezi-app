@@ -58,56 +58,36 @@ public class AndroidExport {
     }
 
     // Fotoğraf seçildikten sonra JS'e bildir (thumbnail + orijinal)
+    // Fotoğraf seçildikten sonra JS'e bildir (URI kalıcı yol)
     public void onPhotoPicked(String uid, Uri uri, String displayName) {
-        try (InputStream inputStream = context.getContentResolver().openInputStream(uri)) {
-            if (inputStream == null) return;
+    try {
+        // 1. Seçilen fotoğrafı uygulama dizinine kopyala
+        InputStream in = context.getContentResolver().openInputStream(uri);
+        if (in == null) return;
 
-            Bitmap originalBitmap = BitmapFactory.decodeStream(inputStream);
-            if (originalBitmap == null) return;
+        String name = displayName != null ? displayName : "IMG_" + System.currentTimeMillis() + ".jpg";
+        File destFile = new File(context.getFilesDir(), name);
+        OutputStream out = new FileOutputStream(destFile);
 
-            // ✅ Orijinal fotoğrafı Base64'e çevir
-            ByteArrayOutputStream baosOriginal = new ByteArrayOutputStream();
-            originalBitmap.compress(Bitmap.CompressFormat.JPEG, 90, baosOriginal);
-            String base64Original = Base64.encodeToString(baosOriginal.toByteArray(), Base64.NO_WRAP);
-
-            // ✅ Thumbnail oluştur (200px genişlik)
-            int newWidth = 200;
-            int newHeight = (int) ((double) originalBitmap.getHeight() / originalBitmap.getWidth() * newWidth);
-            Bitmap thumbnail = Bitmap.createScaledBitmap(originalBitmap, newWidth, newHeight, true);
-
-            // ✅ Thumbnail Base64
-            ByteArrayOutputStream baosThumb = new ByteArrayOutputStream();
-            thumbnail.compress(Bitmap.CompressFormat.JPEG, 80, baosThumb);
-            String base64Thumb = Base64.encodeToString(baosThumb.toByteArray(), Base64.NO_WRAP);
-
-            // ✅ JS'e gönder (orijinal + thumbnail)
-            String js = String.format(
-                    "window.onAndroidFilePicked && window.onAndroidFilePicked('%s','%s','%s','data:image/jpeg;base64,%s','data:image/jpeg;base64,%s');",
-                    escapeJs(uid),
-                    escapeJs(uri.toString()),
-                    escapeJs(displayName),
-                    base64Thumb,
-                    base64Original
-            );
-
-            webView.post(() -> webView.evaluateJavascript(js, null));
-
-        } catch (Exception e) {
-            Log.e("AndroidExport", "Fotoğraf işlenirken hata oluştu", e);
+        byte[] buffer = new byte[8192];
+        int len;
+        while ((len = in.read(buffer)) > 0) {
+            out.write(buffer, 0, len);
         }
-    }
+        in.close();
+        out.close();
 
-    // Fotoğraf aç (JS -> Android)
-    @JavascriptInterface
-    public void openPhoto(String uriOrPath) {
-        if (context instanceof MainActivity) {
-            ((MainActivity) context).openPhoto(uriOrPath);
-        }
-    }
+        // 2. JS'e bildir (kalıcı yol)
+        String js = String.format(
+                "window.onAndroidFilePicked && window.onAndroidFilePicked('%s','%s','%s');",
+                escapeJs(uid),
+                escapeJs(destFile.getAbsolutePath()), // kalıcı yol
+                escapeJs(name)
+        );
 
-    // JS içinde güvenli string
-    private String escapeJs(String s) {
-        return s == null ? "" : s.replace("'", "\\'");
+        webView.post(() -> webView.evaluateJavascript(js, null));
+
+    } catch (Exception e) {
+        Log.e("AndroidExport", "Fotoğraf işlenirken hata oluştu", e);
     }
-}
-            
+            }
