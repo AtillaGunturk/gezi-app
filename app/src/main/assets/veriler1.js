@@ -96,7 +96,7 @@ function ayrintiGoster(yer, i) {
   document.getElementById("bilgiPaneli").innerHTML = html;
 }
 
-  
+
 /* ---------- İL SEÇ AÇILIR MENÜSÜ ---------------------------- */
 const ilSelect = document.getElementById("ilSec");
 iller.forEach((il, i) => {
@@ -330,7 +330,5 @@ function escapeHtml(s = "") {
 function escapeAttr(s = "") {
   return s.replace(/"/g, '&quot;');
 }
-
-
 
 
