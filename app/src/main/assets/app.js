@@ -6,7 +6,7 @@ function showFullImage(path, aciklama) {
   const caption = document.getElementById('modalCaption');
 
   img.src = path;
-  caption.textContent = aciklama;
+  caption.textContent = aciklama || '';
   currentScale = 1;
   img.style.transform = `scale(${currentScale})`;
   modal.style.display = 'block';
@@ -40,4 +40,4 @@ function getDistance(touch1, touch2) {
   const dx = touch2.pageX - touch1.pageX;
   const dy = touch2.pageY - touch1.pageY;
   return Math.sqrt(dx * dx + dy * dy);
-      }
+}
