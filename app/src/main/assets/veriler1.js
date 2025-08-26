@@ -96,16 +96,7 @@ function ayrintiGoster(yer, i) {
   document.getElementById("bilgiPaneli").innerHTML = html;
 }
 
-  // ---------------------------------
-
-  html += `</div>
-    <div style="margin-top:10px">
-      <button onclick="düzenlemeModu(${i})">🖊️ Düzenle</button>
-      <button onclick="markerSil(${i})" style="margin-left:8px;color:red">🗑️ Yer Sil</button>
-      <button onclick="fotoEkleBaslat(${i})" style="margin-left:8px">➕ Fotoğraf Ekle</button>
-    </div>`;
-  document.getElementById("bilgiPaneli").innerHTML = html;
-    }
+  
 /* ---------- İL SEÇ AÇILIR MENÜSÜ ---------------------------- */
 const ilSelect = document.getElementById("ilSec");
 iller.forEach((il, i) => {
@@ -339,6 +330,7 @@ function escapeHtml(s = "") {
 function escapeAttr(s = "") {
   return s.replace(/"/g, '&quot;');
 }
+
 
 
 
