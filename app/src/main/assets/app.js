@@ -1,32 +1,45 @@
 let currentScale = 1;
 
-function showFullImage(path, aciklama) {
-  const modal = document.getElementById('imageModal');
-  const img = document.getElementById('modalImage');
-  const caption = document.getElementById('modalCaption');
+const modal   = document.getElementById('imageModal');
+const imgEl   = document.getElementById('modalImage');
+const caption = document.getElementById('modalCaption');
 
-  img.src = path;
+function normalizePath(p) {
+  if (!p) return '';
+  if (p.startsWith('http') || p.startsWith('content://') || p.startsWith('file://')) return p;
+  if (p.startsWith('/')) return 'file://' + p; // Android yerel dosya yolu desteği
+  return p;
+}
+
+window.showFullImage = function (path, aciklama) {
+  const src = normalizePath(path);
+  imgEl.src = src;
   caption.textContent = aciklama || '';
   currentScale = 1;
-  img.style.transform = `scale(${currentScale})`;
+  imgEl.style.transform = `scale(${currentScale})`;
   modal.style.display = 'block';
-}
+};
 
-function closeModal() {
-  document.getElementById('imageModal').style.display = 'none';
-}
+window.closeModal = function () {
+  modal.style.display = 'none';
+  imgEl.src = '';
+};
 
-// Zoom (pinch)
-const imgEl = document.getElementById('modalImage');
+// Arka plana tıklayınca kapat
+modal.addEventListener('click', (e) => {
+  if (e.target === modal) closeModal();
+});
+
+// Pinch-to-zoom
 let startDistance = 0;
 
-imgEl.addEventListener('touchstart', e => {
+imgEl.addEventListener('touchstart', (e) => {
   if (e.touches.length === 2) {
     startDistance = getDistance(e.touches[0], e.touches[1]);
   }
 }, false);
 
-imgEl.addEventListener('touchmove', e => {
+imgEl.addEventListener('touchmove', (e) => {
   if (e.touches.length === 2) {
     const newDistance = getDistance(e.touches[0], e.touches[1]);
     const scaleChange = newDistance / startDistance;
@@ -36,8 +49,8 @@ imgEl.addEventListener('touchmove', e => {
   }
 }, false);
 
-function getDistance(touch1, touch2) {
-  const dx = touch2.pageX - touch1.pageX;
-  const dy = touch2.pageY - touch1.pageY;
+function getDistance(t1, t2) {
+  const dx = t2.pageX - t1.pageX;
+  const dy = t2.pageY - t1.pageY;
   return Math.sqrt(dx * dx + dy * dy);
-}
+  }
