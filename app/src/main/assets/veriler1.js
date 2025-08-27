@@ -128,7 +128,7 @@ markerlar.push(mk);
 
 function ayrintiGoster(yer, i) {
 
-let html = <h3>${yer.isim}</h3><p>${yer.aciklama}</p><div>;
+let html =" <h3>${yer.isim}</h3><p>${yer.aciklama}"</p><div>;
 
 (yer.fotolar || []).forEach((f, j) => {
 
@@ -573,4 +573,5 @@ function escapeAttr(s = "") {
 return s.replace(/"/g, '"');
 
 }
+
 
