@@ -178,7 +178,7 @@ public class MainActivity extends AppCompatActivity {
         cm.flush();
 
         // 3) Güncel index.html (cache busting için versiyon parametresi)
-        webView.loadUrl("file:///android_asset/index.html?v=4" + System.currentTimeMillis());
+        webView.loadUrl("file:///android_asset/index.html?v=" + System.currentTimeMillis());
     }
 
     /* --------------- JSON dışa aktarma başlat ------------------ */
