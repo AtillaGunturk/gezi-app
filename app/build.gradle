@@ -14,7 +14,7 @@ android {
         versionName "1.0"
         // Asset path temizleme
         aaptOptions {
-            ignoreAssetsPattern "!index.html:!veriler1.js:!veriler.js
+            ignoreAssetsPattern "!index.html:!veriler1.js:!veriler.js"
     }
 
     compileOptions {
