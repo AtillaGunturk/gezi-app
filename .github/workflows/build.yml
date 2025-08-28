@@ -47,37 +47,30 @@ jobs:
         env:
           DEBUG_KEYSTORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
           DEBUG_KEY_ALIAS: ${{ secrets.DEBUG_KEY_ALIAS }}
-      - name:7- Derin Temizlik (Tüm Cache ve Assets)
-        run: |
-          rm -rf ~/.gradle/caches/
-          rm -rf ~/.gradle/daemon/
-          rm -rf ~/.gradle/native/
-          rm -rf ~/.gradle/wrapper/
-          rm -rf ~/.android/build-cache/
-          find . -type f \( -name "index.html" -o -name "veriler1.js" -o -name "veriler.js" \) -delete
-          rm -rf build/
-          rm -rf app/build/
-          rm -rf .gradle/
-          rm -rf .idea/
-          rm -rf *.iml
-          rm -rf app/.cxx/
-          rm -rf app/.gradle/
-          rm -f app/src/main/assets/index.html
-          rm -f app/src/main/assets/veriler1.js
-          rm -f app/src/main/assets/veriler.js
       
       - name: 7 - Temizlik
         run: |
           git status
           ./gradlew --stop || true
           find . -type f \( -name "index.html" -o -name "veriler1.js" -o -name "veriler.js" \) ! -path "./app/src/main/assets/*" -delete
-          rm -rf app/build build .gradle .idea *.iml ~/.gradle ~/.android
+          rm -rf ~/.gradle/caches/
+          rm -rf ~/.gradle/daemon/
+          rm -rf ~/.gradle/native/
+          rm -rf ~/.gradle/wrapper/
+          rm -rf ~/.android/build-cache/
+          rm -rf app/.cxx/
+          rm -rf app/.gradle/
+          rm -f app/src/main/assets/index.html
+          rm -f app/src/main/assets/veriler1.js
+          rm -f app/src/main/assets/veriler.js
+      
+          rm -rf app/build build .gradle .idea/ *.iml ~/.gradle ~/.android
           ./gradlew clean --no-daemon --refresh-dependencies
 
       # ✅ 7.1 - app altında src hariç her şeyi sil
       - name: 7.1 - app altında src hariç her şeyi sil
         run: |
-          shopt -s extglob
+          bash -c 'shopt -s extglob; ...'
           cd app
           rm -rf !("src"|"gradle.properties"|"build.gradle"|"proguard-rules.pro")
        
@@ -158,6 +151,7 @@ jobs:
         with:
           name: build-log
           path: build.log
+
 
 
 
