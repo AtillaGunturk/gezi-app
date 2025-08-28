@@ -76,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
                     Intent intent = fileChooserParams.createIntent();
                     fileChooserLauncher.launch(intent);
                 } catch (Exception e) {
-               de     MainActivity.this.filePathCallback = null;
+                    MainActivity.this.filePathCallback = null;
                     Toast.makeText(MainActivity.this, "Dosya seçici açılamadı.", Toast.LENGTH_SHORT).show();
                     return false;
                 }
