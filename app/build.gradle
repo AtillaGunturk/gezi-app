@@ -12,9 +12,6 @@ android {
         targetSdk 34
         versionCode 1
         versionName "1.0"
-        // Asset path temizleme
-        aaptOptions {
-            ignoreAssetsPattern "!index.html:!veriler1.js:!veriler.js"
     }
 
     compileOptions {
