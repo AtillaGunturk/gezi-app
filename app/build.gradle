@@ -50,6 +50,9 @@ android {
             java.srcDirs = ['src/main/java']
             res.srcDirs = ['src/main/res']
             assets.srcDirs= ['src/main/assets']
+            // Bu iki satır, buildType kaynaklarında assets olmasını devre dışı bırakır
+            debug   { assets.srcDirs = [] }
+            release { assets.srcDirs = [] }
         }
         
     }
