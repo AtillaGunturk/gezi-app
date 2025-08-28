@@ -256,13 +256,10 @@ const f = id => document.getElementById(id);
 
 if (!f("isim")) return;
 
-f("isim").value     = y.isim  ?? "";
-
-f("aciklama").value = y.aciklama ?? "";
-
-f("enlem").value    = y.konum?.[0] ?? "";
-
-f("boylam").value   = y.konum?.[1] ?? "";
+f("isim").value      = y.isim != null ? y.isim : "";
+f("aciklama").value  = y.aciklama != null ? y.aciklama : "";
+f("enlem").value     = y.konum && y.konum[0] ? y.konum[0] : "";
+f("boylam").value    = y.konum && y.konum[1] ? y.konum[1] : "";
 
 const fotoAlani = f("fotoAlani");
 
@@ -557,5 +554,6 @@ function escapeAttr(s = "") {
 return s.replace(/"/g, '"');
 
 }
+
 
 
