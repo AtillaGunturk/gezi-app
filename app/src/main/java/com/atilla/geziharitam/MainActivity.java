@@ -76,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
                     Intent intent = fileChooserParams.createIntent();
                     fileChooserLauncher.launch(intent);
                 } catch (Exception e) {
-                    MainActivity.this.filePathCallback = null;
+               de     MainActivity.this.filePathCallback = null;
                     Toast.makeText(MainActivity.this, "Dosya seçici açılamadı.", Toast.LENGTH_SHORT).show();
                     return false;
                 }
@@ -86,7 +86,8 @@ public class MainActivity extends AppCompatActivity {
 
         // Sayfa yüklenince storage temizliği (garantili an)
         webView.setWebViewClient(new WebViewClient() {
-            @Override public void onPageFinished(WebView view, String url) {
+            @Override 
+            public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
                 // Local & Session Storage temizliği – ilk yüklemede tetiklenir
                 webView.evaluateJavascript(
@@ -178,7 +179,7 @@ public class MainActivity extends AppCompatActivity {
         cm.flush();
 
         // 3) Güncel index.html (cache busting için versiyon parametresi)
-        webView.loadUrl("file:///android_asset/index.html?v=4");
+        webView.loadUrl("file:///android_asset/index.html?v=" + System.currentTimeMillis());
     }
 
     /* --------------- JSON dışa aktarma başlat ------------------ */
