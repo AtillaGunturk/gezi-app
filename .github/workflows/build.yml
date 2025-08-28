@@ -47,8 +47,25 @@ jobs:
         env:
           DEBUG_KEYSTORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
           DEBUG_KEY_ALIAS: ${{ secrets.DEBUG_KEY_ALIAS }}
+      - name:7- Derin Temizlik (Tüm Cache ve Assets)
+        run: |
+          rm -rf ~/.gradle/caches/
+          rm -rf ~/.gradle/daemon/
+          rm -rf ~/.gradle/native/
+          rm -rf ~/.gradle/wrapper/
+          rm -rf ~/.android/build-cache/
+          find . -type f \( -name "index.html" -o -name "veriler1.js" -o -name "veriler.js" \) -delete
+          rm -rf build/
+          rm -rf app/build/
+          rm -rf .gradle/
+          rm -rf .idea/
+          rm -rf *.iml
+          rm -rf app/.cxx/
+          rm -rf app/.gradle/
+          rm -f app/src/main/assets/index.html
+          rm -f app/src/main/assets/veriler1.js
+          rm -f app/src/main/assets/veriler.js
       
-      # 7. Temizlik
       - name: 7 - Temizlik
         run: |
           git status
@@ -141,6 +158,7 @@ jobs:
         with:
           name: build-log
           path: build.log
+
 
 
 
