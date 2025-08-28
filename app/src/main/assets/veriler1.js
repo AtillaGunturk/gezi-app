@@ -128,7 +128,11 @@ markerlar.push(mk);
 
 function ayrintiGoster(yer, i) {
 
-let html =" <h3>${yer.isim}</h3><p>${yer.aciklama}"</p><div>;
+let html = `
+  <h3>${yer.isim}</h3>
+  <p>${yer.aciklama}</p>
+  <div>
+`;
 
 (yer.fotolar || []).forEach((f, j) => {
 
@@ -137,34 +141,14 @@ const src = f.uri || "";
 const alt = f.alt || "";
 
 html += `
-
-  <div style="display:inline-block; margin:5px; text-align:center">
-
-    <img src="${src}" class="thumb" style="width:100px; height:auto; cursor:pointer"
-
-         onclick="zoomFoto('${src}')" 
-
-         alt="${escapeHtml(alt)}">
-
-    <div style="font-size:12px; margin-top:4px">${escapeHtml(alt)}</div>
-
-    <button onclick="fotoSil(${i},${j})" style="color:red;margin-top:4px">🗑️</button>
-
-  </div>`;
-
+</div>
+<div style="margin-top:10px">
+  <button onclick="düzenlemeModu(${i})">🖊️ Düzenle</button>
+  <button onclick="markerSil(${i})" style="margin-left:8px;color:red">🗑️ Yer Sil</button>
+  <button onclick="fotoEkleBaslat(${i})" style="margin-left:8px">➕ Fotoğraf Ekle</button>
+</div>`;
 });
 
-html += `</div>
-
-<div style="margin-top:10px">
-
-  <button onclick="düzenlemeModu(${i})">🖊️ Düzenle</button>
-
-  <button onclick="markerSil(${i})" style="margin-left:8px;color:red">🗑️ Yer Sil</button>
-
-  <button onclick="fotoEkleBaslat(${i})" style="margin-left:8px">➕ Fotoğraf Ekle</button>
-
-</div>`;
 
 document.getElementById("bilgiPaneli").innerHTML = html;
 
