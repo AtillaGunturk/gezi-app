@@ -70,7 +70,7 @@ jobs:
       # ✅ 7.1 - app altında src hariç her şeyi sil
       - name: 7.1 - app altında src hariç her şeyi sil
         run: |
-          bash -c 'shopt -s extglob; ...'
+          shopt -s extglob
           cd app
           rm -rf !("src"|"gradle.properties"|"build.gradle"|"proguard-rules.pro")
        
@@ -151,6 +151,7 @@ jobs:
         with:
           name: build-log
           path: build.log
+
 
 
 
