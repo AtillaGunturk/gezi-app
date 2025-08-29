@@ -66,28 +66,28 @@ function goster() {
   });
 }
 
+// (İstersen globalde tut) Gerçek yolu görüntülemeye uygun URL'e çevir
+function toFileURL(yol) {
+  if (!yol) return "";
+  if (yol.startsWith("file://") || yol.startsWith("content://")) return yol;
+  return "file://" + yol;
+}
+
 function ayrintiGoster(yer, i) {
   let html = `<h3>${yer.isim}</h3><p>${yer.aciklama}</p><div>`;
 
   (yer.fotolar ?? []).forEach((f, j) => {
+    const src = toFileURL(f.yol);                // 🔹 JSON’daki gerçek yol
+    const safeSrc = src.replace(/"/g, '&quot;').replace(/'/g, "\\'");
     html += `
       <div style="margin-bottom:6px">
-        <img src="" class="thumb" id="thumb-${i}-${j}" alt="${f.alt}">
+        <img src="${src}"
+             alt="${f.alt || ""}"
+             style="max-width:80px;max-height:80px;cursor:pointer;margin:4px"
+             onclick="zoomFoto('${safeSrc}')">
         <div style="font-size:14px;color:#555">${f.alt || ""}</div>
         <button onclick="fotoSil(${i},${j})" style="color:red;margin-left:4px">🗑️</button>
       </div>`;
-
-    // Thumbnail oluştur
-    const img = new Image();
-    img.onload = () => {
-      const canvas = document.createElement("canvas");
-      const scale = 150 / img.width;
-      canvas.width = 150;
-      canvas.height = img.height * scale;
-      canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
-      document.getElementById(`thumb-${i}-${j}`).src = canvas.toDataURL("image/jpeg", 0.7);
-    };
-    img.src = f.yol; // gerçek yol
   });
 
   html += `</div>
@@ -98,8 +98,7 @@ function ayrintiGoster(yer, i) {
     </div>`;
 
   document.getElementById("bilgiPaneli").innerHTML = html;
-}
-
+                        }
 const lb = document.getElementById("lightbox");
 const lbImg = lb.querySelector("img");
 let zoomed = false;
@@ -107,7 +106,7 @@ let zoomed = false;
 window.zoomFoto = src => {
   if (window.AndroidExport && AndroidExport.openPhoto) {
     AndroidExport.openPhoto(src); // Android'de gerçek yolu aç
-  } else {
+} else {
     lb.style.display = "flex";
     lbImg.src = src;
     lbImg.style.transform = "scale(1)";
