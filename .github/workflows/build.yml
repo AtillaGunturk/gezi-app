@@ -26,6 +26,28 @@ jobs:
       # 3. Android SDK kurulumu
       - name: 3 - Android SDK Kurulumu
         uses: android-actions/setup-android@v3
+
+      # 4. Gradle ayarları (cache kapalı)
+      - name: 4 - Gradle Ayarları
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          cache-disabled: true
+
+      # 5. Gradle Wrapper’a izin ver
+      - name: 5 - Gradle Wrapper İzni
+        run: chmod +x ./gradlew
+     
+     # 6. gradle.properties oluştur
+      - name: 6 - Gradle Properties Oluştur
+        working-directory: app
+        run: |
+          echo "MY_STORE_PASSWORD=${DEBUG_KEYSTORE_PASSWORD}" >> gradle.properties
+          echo "MY_KEY_ALIAS=${DEBUG_KEY_ALIAS}" >> gradle.properties
+          echo "android.useAndroidX=true" >> gradle.properties
+          echo "android.enableJetifier=true" >> gradle.properties
+        env:
+          DEBUG_KEYSTORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
+          DEBUG_KEY_ALIAS: ${{ secrets.DEBUG_KEY_ALIAS }}
       
       - name: 7 - Temizlik
         run: |
@@ -52,27 +74,6 @@ jobs:
           cd app
           rm -rf !("src"|"gradle.properties"|"build.gradle"|"proguard-rules.pro")
 
-       # 4. Gradle ayarları (cache kapalı)
-      - name: 4 - Gradle Ayarları
-        uses: gradle/actions/setup-gradle@v3
-        with:
-          cache-disabled: true
-
-      # 5. Gradle Wrapper’a izin ver
-      - name: 5 - Gradle Wrapper İzni
-        run: chmod +x ./gradlew
-     # 6. gradle.properties oluştur
-      - name: 6 - Gradle Properties Oluştur
-        working-directory: app
-        run: |
-          echo "MY_STORE_PASSWORD=${DEBUG_KEYSTORE_PASSWORD}" >> gradle.properties
-          echo "MY_KEY_ALIAS=${DEBUG_KEY_ALIAS}" >> gradle.properties
-          echo "android.useAndroidX=true" >> gradle.properties
-          echo "android.enableJetifier=true" >> gradle.properties
-        env:
-          DEBUG_KEYSTORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
-          DEBUG_KEY_ALIAS: ${{ secrets.DEBUG_KEY_ALIAS }}
-      
           
       # ✅ 7.2 - Assets klasörünü kontrol et
       - name: 7.2 - Assets Klasörünü Kontrol Et
@@ -87,7 +88,7 @@ jobs:
           mkdir -p android
           printf '%s' "$DEBUG_KEYSTORE_B64" | base64 -d > android/debug.keystore
         env:
-          DEBUG_KEYSTORE_B64: ${{ secrets.DEBUG_KEYSTORE_B64 }}
+         DEBUG_KEYSTORE_B64: ${{ secrets.DEBUG_KEYSTORE_B64 }}
 
       # 9. Keystore test
       - name: 9 - Keystore Test
@@ -152,6 +153,7 @@ jobs:
         with:
           name: build-log
           path: build.log
+
 
 
 
