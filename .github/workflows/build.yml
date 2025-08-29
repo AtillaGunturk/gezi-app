@@ -103,7 +103,7 @@ jobs:
       - name: 10 - APK Derle
         run: |
           git status
-          ./gradlew clean --no-daemon --refresh-dependencies
+          ./gradlew clean
           ./gradlew :app:assembleRelease --no-daemon --parallel --stacktrace | tee build.log
         env:
           MY_STORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
@@ -152,6 +152,7 @@ jobs:
         with:
           name: build-log
           path: build.log
+
 
 
 
