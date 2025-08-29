@@ -171,6 +171,7 @@ public class MainActivity extends AppCompatActivity {
         if (webView == null) return;
 
         // 1) WebView cache & history temizle
+        webView.getSettings().setCacheMode(WebSettings.LOAD_NO_CACHE);
         webView.clearCache(true);
         webView.clearHistory();
 
