@@ -73,6 +73,11 @@ function toFileURL(yol) {
   return "file://" + yol;
 }
 
+
+const lb = dith("content://")) return yol;
+  return "file://" + yol;
+}
+
 function ayrintiGoster(yer, i) {
   let html = `<h3>${yer.isim}</h3><p>${yer.aciklama}</p><div>`;
 
@@ -98,12 +103,9 @@ function ayrintiGoster(yer, i) {
     </div>`;
 
   document.getElementById("bilgiPaneli").innerHTML = html;
-                        }
+}
 const lb = document.getElementById("lightbox");
-const lbImg = lb.querySelector("img");
-let zoomed = false;
-
-window.zoomFoto = src => {
+const lbImg {
   if (window.AndroidExport && AndroidExport.openPhoto) {
     AndroidExport.openPhoto(src); // Android'de gerçek yolu aç
 } else {
