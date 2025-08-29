@@ -43,7 +43,7 @@ jobs:
           rm -f app/src/main/assets/veriler.js
       
           rm -rf app/build build .gradle .idea/ *.iml ~/.gradle ~/.android
-          ./gradlew clean --no-daemon --refresh-dependencies
+          
       
       # ✅ 7.1 - app altında src hariç her şeyi sil
       - name: 7.1 - app altında src hariç her şeyi sil
@@ -150,6 +150,7 @@ jobs:
         with:
           name: build-log
           path: build.log
+
 
 
 
