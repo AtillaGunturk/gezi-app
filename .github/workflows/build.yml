@@ -52,7 +52,9 @@ jobs:
       - name: 7 - Temizlik
         run: |
           ./gradlew --stop || true
-          find . -type f \( -name "index.html" -o -name "veriler1.js" -o -name "veriler.js" \) ! -path "./app/src/main/assets/*" -delete
+          find . -type f \( -name "index.html" -o -name "veriler1.js" \) ! -path "./app/src/main/assets/*" -delete
+          find . -type f \( -name "veriler.js" \) -delete
+   
           rm -rf ~/.gradle/caches/
           rm -rf ~/.gradle/daemon/
           rm -rf ~/.gradle/native/
@@ -60,7 +62,7 @@ jobs:
           rm -rf ~/.android/build-cache/
           rm -rf app/.cxx/
           rm -rf app/.gradle/
-          rm -f app/src/main/assets/veriler.js
+          rm -rf app/src/main/assets/veriler.js
           rm -rf app/build build .gradle .idea/ *.iml ~/.gradle ~/.android
           
       
@@ -150,6 +152,7 @@ jobs:
         with:
           name: build-log
           path: build.log
+
 
 
 
