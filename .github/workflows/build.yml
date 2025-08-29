@@ -29,7 +29,6 @@ jobs:
       
       - name: 7 - Temizlik
         run: |
-          git status
           ./gradlew --stop || true
           find . -type f \( -name "index.html" -o -name "veriler1.js" -o -name "veriler.js" \) ! -path "./app/src/main/assets/*" -delete
           rm -rf ~/.gradle/caches/
@@ -151,6 +150,7 @@ jobs:
         with:
           name: build-log
           path: build.log
+
 
 
 
