@@ -49,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
 
         // WebView ayarları
         WebSettings settings = webView.getSettings();
+        webView.getSettings().setDomStorageEnabled(true);
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
         settings.setAllowFileAccess(true);
