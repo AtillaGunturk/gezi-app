@@ -26,8 +26,34 @@ jobs:
       # 3. Android SDK kurulumu
       - name: 3 - Android SDK Kurulumu
         uses: android-actions/setup-android@v3
+      
+      - name: 7 - Temizlik
+        run: |
+          git status
+          ./gradlew --stop || true
+          find . -type f \( -name "index.html" -o -name "veriler1.js" -o -name "veriler.js" \) ! -path "./app/src/main/assets/*" -delete
+          rm -rf ~/.gradle/caches/
+          rm -rf ~/.gradle/daemon/
+          rm -rf ~/.gradle/native/
+          rm -rf ~/.gradle/wrapper/
+          rm -rf ~/.android/build-cache/
+          rm -rf app/.cxx/
+          rm -rf app/.gradle/
+          rm -f app/src/main/assets/index.html
+          rm -f app/src/main/assets/veriler1.js
+          rm -f app/src/main/assets/veriler.js
+      
+          rm -rf app/build build .gradle .idea/ *.iml ~/.gradle ~/.android
+          ./gradlew clean --no-daemon --refresh-dependencies
+      
+      # ✅ 7.1 - app altında src hariç her şeyi sil
+      - name: 7.1 - app altında src hariç her şeyi sil
+        run: |
+          shopt -s extglob
+          cd app
+          rm -rf !("src"|"gradle.properties"|"build.gradle"|"proguard-rules.pro")
 
-      # 4. Gradle ayarları (cache kapalı)
+       # 4. Gradle ayarları (cache kapalı)
       - name: 4 - Gradle Ayarları
         uses: gradle/actions/setup-gradle@v3
         with:
@@ -48,32 +74,6 @@ jobs:
           DEBUG_KEYSTORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
           DEBUG_KEY_ALIAS: ${{ secrets.DEBUG_KEY_ALIAS }}
       
-      - name: 7 - Temizlik
-        run: |
-          git status
-          ./gradlew --stop || true
-          find . -type f \( -name "index.html" -o -name "veriler1.js" -o -name "veriler.js" \) ! -path "./app/src/main/assets/*" -delete
-          rm -rf ~/.gradle/caches/
-          rm -rf ~/.gradle/daemon/
-          rm -rf ~/.gradle/native/
-          rm -rf ~/.gradle/wrapper/
-          rm -rf ~/.android/build-cache/
-          rm -rf app/.cxx/
-          rm -rf app/.gradle/
-          rm -f app/src/main/assets/index.html
-          rm -f app/src/main/assets/veriler1.js
-          rm -f app/src/main/assets/veriler.js
-      
-          rm -rf app/build build .gradle .idea/ *.iml ~/.gradle ~/.android
-          ./gradlew clean --no-daemon --refresh-dependencies
-
-      # ✅ 7.1 - app altında src hariç her şeyi sil
-      - name: 7.1 - app altında src hariç her şeyi sil
-        run: |
-          shopt -s extglob
-          cd app
-          rm -rf !("src"|"gradle.properties"|"build.gradle"|"proguard-rules.pro")
-       
           
       # ✅ 7.2 - Assets klasörünü kontrol et
       - name: 7.2 - Assets Klasörünü Kontrol Et
@@ -151,6 +151,7 @@ jobs:
         with:
           name: build-log
           path: build.log
+
 
 
 
