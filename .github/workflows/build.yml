@@ -16,29 +16,23 @@ jobs:
         with:
           ref: main
 
-      # 2. JDK kurulumu
+      # 2. JDK 17
       - name: 2 - JDK 17 Kurulumu
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
 
-      # 3. Android SDK kurulumu
+      # 3. Android SDK
       - name: 3 - Android SDK Kurulumu
         uses: android-actions/setup-android@v3
 
-      # 4. Gradle ayarları (cache kapalı)
-      - name: 4 - Gradle Ayarları
-        uses: gradle/actions/setup-gradle@v3
-        with:
-          cache-disabled: true
-
-      # 5. Gradle Wrapper’a izin ver
-      - name: 5 - Gradle Wrapper İzni
+      # 4. Gradle Wrapper İzni
+      - name: 4 - Gradle Wrapper İzni
         run: chmod +x ./gradlew
-     
-     # 6. gradle.properties oluştur
-      - name: 6 - Gradle Properties Oluştur
+
+      # 5. Gradle Properties
+      - name: 5 - Gradle Properties Oluştur
         working-directory: app
         run: |
           echo "MY_STORE_PASSWORD=${DEBUG_KEYSTORE_PASSWORD}" >> gradle.properties
@@ -48,157 +42,56 @@ jobs:
         env:
           DEBUG_KEYSTORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
           DEBUG_KEY_ALIAS: ${{ secrets.DEBUG_KEY_ALIAS }}
-      
-      - name: 7 - Temizlik
+
+      # 6. Temizlik (önceki cache/dosyalar)
+      - name: 6 - Temizlik
         run: |
           ./gradlew --stop || true
-          find . -type f \( -name "index.html" -o -name "veriler1.js" \) ! -path "./app/src/main/assets/*" -delete
-          find . -type f \( -name "veriler.js" \) -delete
-   
-          rm -rf ~/.gradle/caches/
-          rm -rf ~/.gradle/daemon/
-          rm -rf ~/.gradle/native/
-          rm -rf ~/.gradle/wrapper/
-          rm -rf ~/.android/build-cache/
-          rm -rf app/.cxx/
-          rm -rf app/.gradle/
-          rm -rf app/src/main/assets/veriler.js
-          rm -rf app/build build .gradle .idea/ *.iml ~/.gradle ~/.android
-          
-      
-      # ✅ 7.1 - app altında src hariç her şeyi sil
-      - name: 7.1 - app altında src hariç her şeyi sil
-        run: |
-          shopt -s extglob
-          cd app
-          rm -rf !("src"|"gradle.properties"|"build.gradle"|"proguard-rules.pro")
+          rm -rf ~/.gradle/caches/ ~/.gradle/daemon/ ~/.gradle/native/ ~/.gradle/wrapper/ ~/.android/build-cache/
+          rm -rf app/.gradle app/.cxx app/build build .gradle .idea *.iml
 
-      # 🔑 7.2.1 - En güncel index.html ve veriler1.js'yi assets'e kopyala
-      - name: 7.2.1 - En Güncel Dosyaları Assets'e Kopyala
+      # 7. Assets güncelle
+      - name: 7 - En Güncel Dosyaları Assets'e Kopyala
         run: |
           mkdir -p app/src/main/assets
-          cp -f index S2.html app/src/main/assets/index.html || echo "index.html kökte yok!"
+          cp -f index.html app/src/main/assets/index.html || echo "index.html kökte yok!"
           cp -f veriler1.js app/src/main/assets/veriler1.js || echo "veriler1.js kökte yok!"
-          echo ">>> Kopyalama sonrası assets içeriği:"
+          echo ">>> Assets içeriği:"
           ls -l app/src/main/assets
-          
-      # ✅ 7.2 - Assets klasörünü kontrol et
-      - name: 7.2 - Assets Klasörünü Kontrol Et
-        run: |
-          echo ">>> app/src/main/assets içeriği:"
-          ls -l app/src/main/assets || echo "Assets klasörü yok!"
-          
-      - name: 🔍 Build öncesi assets dosya içeriğini göster
-        run: |
-          echo ">>> index.html (build öncesi):"
-          cat app/src/main/assets/index.html | head -n 20
-          echo ">>> veriler1.js (build öncesi):"
-          head -n 20 app/src/main/assets/veriler1.js
 
-      # 8. Keystore yaz
-      - name: 8 - Keystore Dosyası Oluştur
+      # 8. Keystore
+      - name: 8 - Keystore Oluştur
         working-directory: app
         run: |
           mkdir -p android
           printf '%s' "$DEBUG_KEYSTORE_B64" | base64 -d > android/debug.keystore
         env:
-         DEBUG_KEYSTORE_B64: ${{ secrets.DEBUG_KEYSTORE_B64 }}
+          DEBUG_KEYSTORE_B64: ${{ secrets.DEBUG_KEYSTORE_B64 }}
 
-      # 9. Keystore test
-      - name: 9 - Keystore Test
+      # 9. APK Derle
+      - name: 9 - APK Derle
         run: |
-          keytool -list -keystore app/android/debug.keystore \
-            -storepass "$DEBUG_KEYSTORE_PASSWORD" \
-            -alias "$DEBUG_KEY_ALIAS" -v | head -n 12
-        env:
-          DEBUG_KEYSTORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
-          DEBUG_KEY_ALIAS: ${{ secrets.DEBUG_KEY_ALIAS }}
-
-      # 10. APK derle
-      - name: 10 - APK Derle
-        run: |
-          git status
-          ./gradlew clean
           ./gradlew clean :app:assembleRelease --no-daemon --parallel --stacktrace | tee build.log
         env:
           MY_STORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
           MY_KEY_ALIAS: ${{ secrets.DEBUG_KEY_ALIAS }}
-      
-      - name: 🔍 APK içeriğini kontrol et
-        run: |
-          unzip -l app/build/outputs/apk/release/*.apk | grep assets/
-      # 🔍 Debug bilgileri
-      - name: 11 - Debug Bilgileri
-        run: |
-          echo ">>> Son commit:"
-          git log -1 --stat
-          echo ""
-          echo ">>> AndroidManifest.xml dosyaları:"
-          find app/src -name "AndroidManifest.xml" -print
-          echo ""
-          echo ">>> index.html içeriği:"
-          cat app/src/main/assets/index.html || echo "index.html yok!"
-          echo ""
-          echo ">>> app/src/main/assets içeriği:"
-          ls -l app/src/main/assets || echo "Assets yok!"
 
-      # 12. Build outputs listesi
-      - name: 12 - Build Outputs Listesi
-        run: |
-          echo "Build outputs:"
-          ls -R app/build/outputs || echo "Çıktı bulunamadı."
+      # 10. APK içeriğini kontrol et
+      - name: 10 - APK İçeriği
+        run: unzip -l app/build/outputs/apk/release/*.apk | grep assets/
 
-      - name: 12-1 - app Outputs Listesi
-        run: |
-          echo "app outputs:"
-          ls -R app/ || echo "Çıktı bulunamadı."
-          
-      # 13. APK ve build.log'u yükle
-      - name: 13 - APK Yükle
+      # 11. APK ve log yükle
+      - name: 11 - APK Yükle
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: gezi-signed-apk
-          path: |
-            app/build/outputs/apk/release/*.apk
-            app/build/outputs/apk/release/*.aab
+          path: app/build/outputs/apk/release/*.apk
           if-no-files-found: ignore
 
-      - name: 14 - build.log Yükle
+      - name: 12 - Build Log Yükle
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: build-log
           path: build.log
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
