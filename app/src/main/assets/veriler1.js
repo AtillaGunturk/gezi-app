@@ -129,19 +129,8 @@ function ayrintiGoster(yer, i) {
 
   document.getElementById("bilgiPaneli").innerHTML = html;
 }
-const lb = document.getElementById("lightbox");
-const lbImg {
-  if (window.AndroidExport && AndroidExport.openPhoto) {
-    AndroidExport.openPhoto(src); // Android'de gerçek yolu aç
-} else {
-    lb.style.display = "flex";
-    lbImg.src = src;
-    lbImg.style.transform = "scale(1)";
-    lbImg.style.cursor = "zoom-in";
-    zoomed = false;
-  }
-};
 
+};
 lb.onclick = () => {
   if (!zoomed) {
     lbImg.style.transform = "scale(2)";
