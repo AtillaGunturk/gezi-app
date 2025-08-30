@@ -1,88 +1,87 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-  <meta charset="UTF-8" />
-  <title>Gezi Haritam</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-  <style>
-body { font-family: sans-serif; margin: 0; padding: 0; height: 100%; }
-#harita { height: 50vh; }
-form { padding: 1em; background: #f0f0f0; margin-bottom: 1em; }
-#fotoAlani div { margin-bottom: 8px; }
-.thumb { max-width: 120px; cursor: zoom-in; border: 1px solid #ccc; border-radius: 4px; margin: 4px; transition: transform .2s; }
-.thumb:hover { transform: scale(1.05); }
-#bilgiPaneli { padding: 1em; background: #fafafa; border-top: 1px solid #ccc; min-height: 150px; }
-#lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.8); justify-content: center; align-items: center; z-index: 9999; }
-#lightbox img { max-width: 90vw; max-height: 90vh; border-radius: 6px; cursor: zoom-out; box-shadow: 0 0 12px #000; }
-input, textarea { padding: 4px; margin-bottom: 4px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px; }
-.form-row { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 5px; align-items: center; }
-.form-row label { width: 80px; }
-.form-row input { flex: 1; min-width: 120px; }
-@media (max-width: 600px) {
-  .form-row { flex-direction: column; align-items: stretch; }
-  .form-row label { width: 100%; }
-  .form-row input { width: 100%; }
+/* -----------------------------------------------------------
+   yeniKayit.js – Yeni Yer Ekleme ve Fotoğraf Yönetimi
+   ✅ AndroidExport entegrasyonu
+   ✅ Lightbox ve küçük önizleme
+----------------------------------------------------------- */
+
+const fotoAlani = document.getElementById("fotoAlani");
+
+// Global callback Android'ten fotoğraf alındığında
+window.onAndroidFilePicked = (uid, path, name) => {
+  const div = document.createElement("div");
+  
+  const img = document.createElement("img");
+  img.src = path;
+  img.className = "thumb";
+  img.title = name;
+  img.onclick = () => zoomFoto(path);
+
+  const input = document.createElement("input");
+  input.type = "text";
+  input.placeholder = "Açıklama";
+  input.style = "width:45%;margin-left:8px";
+
+  const silBtn = document.createElement("button");
+  silBtn.textContent = "🗑️";
+  silBtn.type = "button";
+  silBtn.onclick = () => div.remove();
+
+  div.appendChild(img);
+  div.appendChild(input);
+  div.appendChild(silBtn);
+
+  fotoAlani.appendChild(div);
+};
+
+// Fotoğraf ekleme butonuna bağlanan fonksiyon
+function yeniFotoSatiriEkle() {
+  if (window.AndroidExport && AndroidExport.pickPhoto) {
+    const uid = 'uid_' + Date.now();
+    AndroidExport.pickPhoto(uid);
+  } else {
+    // Tarayıcı için fallback
+    const div = document.createElement("div");
+    div.innerHTML = `
+      <input type="file" accept="image/*" style="width:45%" onchange="this.nextElementSibling.src=window.URL.createObjectURL(this.files[0])">
+      <input type="text" placeholder="Açıklama" style="width:45%;margin-left:8px">
+      <button type="button" onclick="this.parentNode.remove()">🗑️</button>`;
+    fotoAlani.appendChild(div);
+  }
 }
-  </style>
-</head>
-<body>
-  <h2>Gezdiğim Yerler</h2>
 
-  <!-- Dışa Aktar -->
-  <button type="button" onclick="verileriDisariAktar()">📤 Verileri Dışa Aktar</button>
+// Yeni yer kaydetme
+async function yeniYerKaydet() {
+  const g = id => document.getElementById(id).value.trim();
+  const isim = g("isim"), aciklama = g("aciklama");
+  const enlem = parseFloat(g("enlem")), boylam = parseFloat(g("boylam"));
 
-  <!-- İçe Aktar -->
-  <input type="file" id="jsonInput" accept="application/json" style="display:none"
-         onchange="verileriIceAktar(this.files[0])">
-  <button type="button" onclick="document.getElementById('jsonInput').click()">📥 Verileri İçe Aktar</button>
+  if (!isim || !aciklama || isNaN(enlem) || isNaN(boylam)) {
+    return alert("Alanlar boş veya geçersiz!");
+  }
 
-  <!-- İl Seçimi -->
-  <label for="ilSec">İl Seç: </label>
-  <select id="ilSec">
-    <option value="">Seçiniz...</option>
-  </select>
+  const fotolar = [];
+  const satırlar = fotoAlani.querySelectorAll("div");
 
-  <!-- Harita -->
-  <div id="harita"></div>
+  satırlar.forEach(div => {
+    const img = div.querySelector("img");
+    const alt = div.querySelector("input[type=text]").value || "Fotoğraf";
+    if (img?.src) fotolar.push({ yol: img.src, alt });
+  });
 
-  <!-- Form -->
-  <form id="yerForm" onsubmit="return false;">
-    <h3 id="formBaslik">Yeni Yer Ekle</h3>
-    <fieldset class="form-grid">
-      <div class="form-row">
-        <label for="isim">İsmi:</label>
-        <input type="text" id="isim" required>
-        <label for="aciklama">Açıklama:</label>
-        <input type="text" id="aciklama" required>
-      </div>
-      <div class="form-row">
-        <label for="enlem">Enlem:</label>
-        <input type="number" id="enlem" step="0.0001" required>
-        <label for="boylam">Boylam:</label>
-        <input type="number" id="boylam" step="0.0001" required>
-      </div>
-    </fieldset>
+  // Yeni veri objesi
+  const yeniYer = { isim, aciklama, konum: [enlem, boylam], fotolar };
 
-    <div id="fotoAlani"></div>
-    <button type="button" onclick="yeniFotoSatiriEkle()">+ Fotoğraf Ekle</button>
-    <button type="button" onclick="yeniYerKaydet()">Kaydet</button>
-  </form>
+  // Global veriler dizisine ekleme
+  if (!window.veriler) window.veriler = [];
+  window.veriler.push(yeniYer);
 
-  <!-- Bilgi Paneli -->
-  <div id="bilgiPaneli">🗺️ Haritadan bir yeri seçtiğinizde detayları burada görünecek.</div>
+  // Form temizleme
+  document.getElementById("yerForm").reset();
+  fotoAlani.innerHTML = "";
 
-  <!-- Lightbox -->
-  <div id="lightbox">
-    <img>
-  </div>
-
-  <!-- JS Dosyaları -->
-  <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script defer src="il.js"></script>
-  <script defer src="genel.js"></script>
-  <script defer src="ilSec.js"></script>
-  <script defer src="yeniKayit.js"></script>
-  <script defer src="iceAktar.js"></script>
-  <script defer src="disarAktar.js"></script>
-</body>
-  </html>
+  // Harita güncelleme (varsa goster fonksiyonu)
+  if (window.goster) window.goster();
+  if (window.harita) window.harita.flyTo([enlem, boylam], 9);
+}
+window.yeniYerKaydet = yeniYerKaydet;
+window.yeniFotoSatiriEkle = yeniFotoSatiriEkle;
