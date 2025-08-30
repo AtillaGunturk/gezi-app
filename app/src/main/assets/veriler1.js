@@ -73,10 +73,35 @@ function toFileURL(yol) {
   return "file://" + yol;
 }
 
+// Lightbox elemanları
+const lb = document.getElementById("lightbox");
+const lbImg = document.getElementById("lightbox-img"); // sen HTML’de <img id="lightbox-img"> koymalısın
+let zoomed = false;
 
-const lb = dith("content://")) return yol;
-  return "file://" + yol;
+// Fotoğraf büyütme işlevi
+function zoomFoto(src) {
+  if (window.AndroidExport && AndroidExport.openPhoto) {
+    AndroidExport.openPhoto(src); // Android’de gerçek yolu aç
+  } else {
+    lb.style.display = "flex";
+    lbImg.src = src;
+    lbImg.style.transform = "scale(1)";
+    lbImg.style.cursor = "zoom-in";
+    zoomed = false;
+  }
 }
+
+lb.onclick = () => {
+  if (!zoomed) {
+    lbImg.style.transform = "scale(2)";
+    lbImg.style.cursor = "zoom-out";
+    zoomed = true;
+  } else {
+    lb.style.display = "none";
+    zoomed = false;
+  }
+};
+
 
 function ayrintiGoster(yer, i) {
   let html = `<h3>${yer.isim}</h3><p>${yer.aciklama}</p><div>`;
