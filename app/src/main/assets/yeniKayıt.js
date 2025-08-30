@@ -1,90 +1,87 @@
-/* ---------- yeniKayit.js ---------- */
-// Yeni yer ekleme / düzenleme ve fotoğraf ekleme
+/* -----------------------------------------------------------
+   yeniKayit.js – Yeni Yer Ekleme ve Fotoğraf Yönetimi
+   ✅ AndroidExport entegrasyonu
+   ✅ Lightbox ve küçük önizleme
+----------------------------------------------------------- */
 
-function düzenlemeModu(i) {
-  const y = veriler[i];
-  if (!y) return;
-  const f = id => document.getElementById(id);
-  f("isim").value = y.isim ?? "";
-  f("aciklama").value = y.aciklama ?? "";
-  f("enlem").value = y.konum?.[0] ?? "";
-  f("boylam").value = y.konum?.[1] ?? "";
-  const fotoAlani = f("fotoAlani");
-  fotoAlani.innerHTML = "";
+const fotoAlani = document.getElementById("fotoAlani");
 
-  (y.fotolar ?? []).forEach((ft, j) => {
-    const div = document.createElement("div");
-    const img = document.createElement("img");
-    img.src = ft.yol;
-    img.className = "thumb";
-    const input = document.createElement("input");
-    input.type = "text";
-    input.value = ft.alt || "";
-    input.placeholder = "Açıklama";
-    input.style = "width: 45%; margin-left: 8px;";
-    input.oninput = () => ft.alt = input.value;
-    const silBtn = document.createElement("button");
-    silBtn.textContent = "🗑️";
-    silBtn.onclick = () => { y.fotolar.splice(j, 1); div.remove(); };
-    div.appendChild(img); div.appendChild(input); div.appendChild(silBtn);
-    fotoAlani.appendChild(div);
-  });
-
-  f("yerForm").dataset.editIndex = i;
-  f("formBaslik").textContent = "Düzenle";
-  harita.flyTo([y.konum?.[0], y.konum?.[1]], 9);
-}
-window.düzenlemeModu = düzenlemeModu;
-
-// Yeni foto satırı ekleme
-function yeniFotoSatiriEkle() {
-  const alan = document.getElementById("fotoAlani");
+// Global callback Android'ten fotoğraf alındığında
+window.onAndroidFilePicked = (uid, path, name) => {
   const div = document.createElement("div");
-  div.innerHTML = `
-    <input type="file" accept="image/*" style="width:45%">
-    <input type="text" placeholder="Açıklama" style="width:45%;margin-left:8px">
-    <button type="button" onclick="this.parentNode.remove()">🗑️</button>`;
-  alan.appendChild(div);
-}
+  
+  const img = document.createElement("img");
+  img.src = path;
+  img.className = "thumb";
+  img.title = name;
+  img.onclick = () => zoomFoto(path);
 
-// Yeni yer kaydet
-function yeniYerKaydet() {
-  const g = id => document.getElementById(id).value.trim();
-  const isim = g("isim"), aciklama = g("aciklama");
-  const enlem = parseFloat(g("enlem")), boylam = parseFloat(g("boylam"));
-  if (!isim || !aciklama || isNaN(enlem) || isNaN(boylam)) return alert("Alanlar boş!");
+  const input = document.createElement("input");
+  input.type = "text";
+  input.placeholder = "Açıklama";
+  input.style = "width:45%;margin-left:8px";
 
-  const fotolar = [];
-  const satırlar = document.querySelectorAll("#fotoAlani > div");
-  let bekleyen = satırlar.length;
-  if (bekleyen === 0) finish();
+  const silBtn = document.createElement("button");
+  silBtn.textContent = "🗑️";
+  silBtn.type = "button";
+  silBtn.onclick = () => div.remove();
 
-  satırlar.forEach(div => {
-    const file = div.querySelector('input[type=file]').files[0];
-    const alt = div.querySelector('input[type=text]').value || "Fotoğraf";
-    if (!file) { if (--bekleyen === 0) finish(); return; }
-    fotolar.push({ yol: file.path, alt }); // JSON’a gerçek yol kaydediliyor
-    if (--bekleyen === 0) finish();
-  });
+  div.appendChild(img);
+  div.appendChild(input);
+  div.appendChild(silBtn);
 
-  function finish() {
-    const idx = document.getElementById("yerForm").dataset.editIndex;
-    if (idx !== undefined) {
-      Object.assign(veriler[idx], { isim, aciklama, konum:[enlem,boylam] });
-      veriler[idx].fotolar.push(...fotolar);
-    } else {
-      veriler.push({ isim, aciklama, konum:[enlem,boylam], fotolar });
-    }
+  fotoAlani.appendChild(div);
+};
 
-    document.getElementById("yerForm").reset();
-    document.getElementById("fotoAlani").innerHTML = "";
-    delete document.getElementById("yerForm").dataset.editIndex;
-    document.getElementById("formBaslik").textContent = "Yeni Yer Ekle";
-
-    goster();
-    harita.flyTo([enlem, boylam], 9);
+// Fotoğraf ekleme butonuna bağlanan fonksiyon
+function yeniFotoSatiriEkle() {
+  if (window.AndroidExport && AndroidExport.pickPhoto) {
+    const uid = 'uid_' + Date.now();
+    AndroidExport.pickPhoto(uid);
+  } else {
+    // Tarayıcı için fallback
+    const div = document.createElement("div");
+    div.innerHTML = `
+      <input type="file" accept="image/*" style="width:45%" onchange="this.nextElementSibling.src=window.URL.createObjectURL(this.files[0])">
+      <input type="text" placeholder="Açıklama" style="width:45%;margin-left:8px">
+      <button type="button" onclick="this.parentNode.remove()">🗑️</button>`;
+    fotoAlani.appendChild(div);
   }
 }
 
+// Yeni yer kaydetme
+async function yeniYerKaydet() {
+  const g = id => document.getElementById(id).value.trim();
+  const isim = g("isim"), aciklama = g("aciklama");
+  const enlem = parseFloat(g("enlem")), boylam = parseFloat(g("boylam"));
+
+  if (!isim || !aciklama || isNaN(enlem) || isNaN(boylam)) {
+    return alert("Alanlar boş veya geçersiz!");
+  }
+
+  const fotolar = [];
+  const satırlar = fotoAlani.querySelectorAll("div");
+
+  satırlar.forEach(div => {
+    const img = div.querySelector("img");
+    const alt = div.querySelector("input[type=text]").value || "Fotoğraf";
+    if (img?.src) fotolar.push({ yol: img.src, alt });
+  });
+
+  // Yeni veri objesi
+  const yeniYer = { isim, aciklama, konum: [enlem, boylam], fotolar };
+
+  // Global veriler dizisine ekleme
+  if (!window.veriler) window.veriler = [];
+  window.veriler.push(yeniYer);
+
+  // Form temizleme
+  document.getElementById("yerForm").reset();
+  fotoAlani.innerHTML = "";
+
+  // Harita güncelleme (varsa goster fonksiyonu)
+  if (window.goster) window.goster();
+  if (window.harita) window.harita.flyTo([enlem, boylam], 9);
+}
 window.yeniYerKaydet = yeniYerKaydet;
 window.yeniFotoSatiriEkle = yeniFotoSatiriEkle;
