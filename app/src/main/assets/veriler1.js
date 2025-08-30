@@ -128,7 +128,7 @@ function ayrintiGoster(yer, i) {
     </div>`;
 
   document.getElementById("bilgiPaneli").innerHTML = html;
-}
+
 
 };
 lb.onclick = () => {
@@ -291,4 +291,3 @@ async function verileriIceAktar(file) {
     alert("Dosya okunamadı: " + e);
   }
 }
-
