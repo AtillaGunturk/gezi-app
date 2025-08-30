@@ -2,8 +2,10 @@
    yeniKayit.js – Yeni Yer Ekleme ve Fotoğraf Yönetimi
    ✅ AndroidExport entegrasyonu
    ✅ Lightbox ve küçük önizleme
+   ✅ Marker ekleme
 ----------------------------------------------------------- */
 
+// Fotoğraf alanı
 const fotoAlani = document.getElementById("fotoAlani");
 
 // Global callback Android'ten fotoğraf alındığında
@@ -39,7 +41,7 @@ function yeniFotoSatiriEkle() {
     const uid = 'uid_' + Date.now();
     AndroidExport.pickPhoto(uid);
   } else {
-    // Tarayıcı için fallback
+    // Tarayıcı fallback
     const div = document.createElement("div");
     div.innerHTML = `
       <input type="file" accept="image/*" style="width:45%" onchange="this.nextElementSibling.src=window.URL.createObjectURL(this.files[0])">
@@ -61,7 +63,6 @@ async function yeniYerKaydet() {
 
   const fotolar = [];
   const satırlar = fotoAlani.querySelectorAll("div");
-
   satırlar.forEach(div => {
     const img = div.querySelector("img");
     const alt = div.querySelector("input[type=text]").value || "Fotoğraf";
@@ -75,13 +76,36 @@ async function yeniYerKaydet() {
   if (!window.veriler) window.veriler = [];
   window.veriler.push(yeniYer);
 
+  // Marker ekleme
+  if (window.harita) {
+    const ozelIkon = L.icon({
+      iconUrl: 'tr2.png',
+      iconSize: [24, 32],
+      iconAnchor: [12, 32],
+      className: 'gezi-marker'
+    });
+
+    const mk = L.marker([enlem, boylam], { icon: ozelIkon }).addTo(window.harita);
+    
+    // Marker tıklayınca detay göster
+    mk.on("click", () => {
+      if (window.ayrintiGoster) window.ayrintiGoster(yeniYer, window.veriler.length - 1);
+    });
+
+    // Marker'ları global tut
+    if (!window.markerlar) window.markerlar = [];
+    window.markerlar.push(mk);
+  }
+
   // Form temizleme
   document.getElementById("yerForm").reset();
   fotoAlani.innerHTML = "";
 
-  // Harita güncelleme (varsa goster fonksiyonu)
+  // Harita güncelleme
   if (window.goster) window.goster();
   if (window.harita) window.harita.flyTo([enlem, boylam], 9);
 }
+
+// Globale aç
 window.yeniYerKaydet = yeniYerKaydet;
 window.yeniFotoSatiriEkle = yeniFotoSatiriEkle;

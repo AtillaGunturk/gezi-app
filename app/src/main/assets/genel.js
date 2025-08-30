@@ -2,7 +2,7 @@
 // Global veriler ve harita
 let veriler = [];
 let markerlar = [];
-const harita = L.map("harita").setView([39.0, 35.0], 6);
+window.harita = L.map("harita").setView([39.0, 35.0], 6);
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(harita);
 
 const ozelIkon = L.icon({
