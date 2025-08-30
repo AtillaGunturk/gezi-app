@@ -73,12 +73,27 @@ jobs:
           cd app
           rm -rf !("src"|"gradle.properties"|"build.gradle"|"proguard-rules.pro")
 
+      # 🔑 7.2.1 - En güncel index.html ve veriler1.js'yi assets'e kopyala
+      - name: 7.2.1 - En Güncel Dosyaları Assets'e Kopyala
+        run: |
+          mkdir -p app/src/main/assets
+          cp -f index S2.html app/src/main/assets/index.html || echo "index.html kökte yok!"
+          cp -f veriler1.js app/src/main/assets/veriler1.js || echo "veriler1.js kökte yok!"
+          echo ">>> Kopyalama sonrası assets içeriği:"
+          ls -l app/src/main/assets
           
       # ✅ 7.2 - Assets klasörünü kontrol et
       - name: 7.2 - Assets Klasörünü Kontrol Et
         run: |
           echo ">>> app/src/main/assets içeriği:"
           ls -l app/src/main/assets || echo "Assets klasörü yok!"
+          
+      - name: 🔍 Build öncesi assets dosya içeriğini göster
+        run: |
+          echo ">>> index.html (build öncesi):"
+          cat app/src/main/assets/index.html | head -n 20
+          echo ">>> veriler1.js (build öncesi):"
+          head -n 20 app/src/main/assets/veriler1.js
 
       # 8. Keystore yaz
       - name: 8 - Keystore Dosyası Oluştur
@@ -104,11 +119,14 @@ jobs:
         run: |
           git status
           ./gradlew clean
-          ./gradlew :app:assembleRelease --no-daemon --parallel --stacktrace | tee build.log
+          ./gradlew clean :app:assembleRelease --no-daemon --parallel --stacktrace | tee build.log
         env:
           MY_STORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
           MY_KEY_ALIAS: ${{ secrets.DEBUG_KEY_ALIAS }}
-
+      
+      - name: 🔍 APK içeriğini kontrol et
+        run: |
+          unzip -l app/build/outputs/apk/release/*.apk | grep assets/
       # 🔍 Debug bilgileri
       - name: 11 - Debug Bilgileri
         run: |
@@ -152,6 +170,7 @@ jobs:
         with:
           name: build-log
           path: build.log
+
 
 
 
