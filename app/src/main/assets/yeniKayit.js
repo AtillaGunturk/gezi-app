@@ -95,25 +95,61 @@ function yeniFotoSatiriEkle() {
 }
 
 // Yeni yer kaydet
-function yeniYerKaydet() {
+// Yeni yer kaydetme
+async function yeniYerKaydet() {
   const g = id => document.getElementById(id).value.trim();
   const isim = g("isim"), aciklama = g("aciklama");
   const enlem = parseFloat(g("enlem")), boylam = parseFloat(g("boylam"));
-  if (!isim || !aciklama || isNaN(enlem) || isNaN(boylam)) return alert("Alanlar boş!");
+
+  if (!isim || !aciklama || isNaN(enlem) || isNaN(boylam)) {
+    return alert("Alanlar boş veya geçersiz!");
+  }
 
   const fotolar = [];
-  const satırlar = document.querySelectorAll("#fotoAlani > div");
-  let bekleyen = satırlar.length;
-  if (bekleyen === 0) finish();
-
+  const satırlar = fotoAlani.querySelectorAll("div");
   satırlar.forEach(div => {
-    const file = div.querySelector('input[type=file]').files[0];
-    const alt = div.querySelector('input[type=text]').value || "Fotoğraf";
-    if (!file) { if (--bekleyen === 0) finish(); return; }
-    fotolar.push({ yol: file.path, alt }); // JSON’a gerçek yol kaydediliyor
-    if (--bekleyen === 0) finish();
+    const img = div.querySelector("img");
+    const alt = div.querySelector("input[type=text]").value || "Fotoğraf";
+    if (img?.src) fotolar.push({ yol: img.src, alt });
   });
 
+  // Yeni veri objesi
+  const yeniYer = { isim, aciklama, konum: [enlem, boylam], fotolar };
+
+  // Global veriler dizisine ekleme
+  if (!window.veriler) window.veriler = [];
+  window.veriler.push(yeniYer);
+
+  // Marker ekleme
+  if (window.harita) {
+    const ozelIkon = L.icon({
+      iconUrl: 'tr2.png',
+      iconSize: [24, 32],
+      iconAnchor: [12, 32],
+      className: 'gezi-marker'
+    });
+
+    const mk = L.marker([enlem, boylam], { icon: ozelIkon }).addTo(window.harita);
+    
+    // Marker'a tıklayınca detay göster
+    mk.on("click", () => {
+      if (window.ayrintiGoster) window.ayrintiGoster(yeniYer, window.veriler.length - 1);
+    });
+
+    // Marker'ları global tutmak istersen
+    if (!window.markerlar) window.markerlar = [];
+    window.markerlar.push(mk);
+  }
+
+  // Form temizleme
+  document.getElementById("yerForm").reset();
+  fotoAlani.innerHTML = "";
+
+  // Harita güncelleme
+  if (window.goster) window.goster();
+  if (window.harita) window.harita.flyTo([enlem, boylam], 9);
+}
+window.yeniYerKaydet = yeniYerKaydet;
   function finish() {
     const idx = document.getElementById("yerForm").dataset.editIndex;
     if (idx !== undefined) {
