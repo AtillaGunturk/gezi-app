@@ -98,3 +98,9 @@ function markerSil(i) {
 
 // Fotoğraf ekleme başlat
 function fotoEkleBaslat(i) { düzenlemeModu(i); }
+// Örnek
+window.goster = goster;
+window.ayrintiGoster = ayrintiGoster;
+window.markerSil = markerSil;
+window.fotoEkleBaslat = fotoEkleBaslat;
+window.zoomFoto = zoomFoto;
