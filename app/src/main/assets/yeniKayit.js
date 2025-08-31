@@ -70,7 +70,7 @@ async function yeniYerKaydet() {
 
   // Yeni veri objesi
   const yeniYer = { isim, aciklama, konum: [enlem, boylam], fotolar };
-
+console.log('yeniYerKaydet çalıştı', window.veriler);
   // Global veriler dizisine ekleme
   if (!window.veriler) window.veriler = [];
   window.veriler.push(yeniYer);
