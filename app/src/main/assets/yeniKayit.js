@@ -74,8 +74,7 @@ console.log('yeniYerKaydet çalıştı', window.veriler);
   // Global veriler dizisine ekleme
   if (!window.veriler) window.veriler = [];
   window.veriler.push(yeniYer);
-  alert('yeniYerKaydet çalıştı', window.veriler);
-   alert("Marker eklenecek:", enlem, boylam, ozelIkon.iconUrl);
+  alert(`Marker eklenecek:\nEnlem: ${enlem}\nBoylam: ${boylam}\nIcon: ${ozelIkon.iconUrl}`);
   // Marker ekleme
   if (window.harita) {
     const ozelIkon = L.icon({
