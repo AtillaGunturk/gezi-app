@@ -77,7 +77,7 @@ console.log('yeniYerKaydet çalıştı', window.veriler);
     // Marker ekleme
   if (window.harita) {
     const ozelIkon = L.icon({
-      iconUrl: 'tr2.png',
+      iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/e/ec/RedDot.svg';
       iconSize: [24, 32],
       iconAnchor: [12, 32],
       className: 'gezi-marker'
