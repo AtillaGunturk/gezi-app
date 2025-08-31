@@ -1,4 +1,3 @@
-// iceAktar.js
 function verileriIceAktar(file) {
   if (!file) return;
   const reader = new FileReader();
@@ -6,13 +5,18 @@ function verileriIceAktar(file) {
     try {
       const json = JSON.parse(e.target.result);
       if (!Array.isArray(json)) throw new Error("Geçersiz JSON");
-      window.veriler = json;
+
+      // Mevcut verileri koru ve yeni verileri ekle
+      if (!window.veriler) window.veriler = [];
+      const startIndex = window.veriler.length;
+
+      window.veriler = window.veriler.concat(json);
+
       if (!window.markerlar) window.markerlar = [];
       // Önce mevcut markerları temizle
       window.markerlar.forEach(m => window.harita.removeLayer(m));
-      window.markerlar = [];
 
-      // Yeni markerları ekle
+      window.markerlar = [];
       window.veriler.forEach((yer, i) => {
         const ozelIkon = L.icon({
           iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/e/ec/RedDot.svg',
@@ -24,7 +28,8 @@ function verileriIceAktar(file) {
         mk.on("click", () => { if (window.ayrintiGoster) window.ayrintiGoster(yer, i); });
         window.markerlar.push(mk);
       });
-      alert("Veriler başarıyla içe aktarıldı!");
+
+      alert(json.length + " kayıt içe aktarıldı, toplam kayıt: " + window.veriler.length);
     } catch (err) {
       alert("JSON okunamadı: " + err.message);
     }
