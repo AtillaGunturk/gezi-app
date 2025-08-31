@@ -1,4 +1,51 @@
 /* ---------- yeniKayit.js ---------- */
+// Global callback Android'ten fotoğraf alındığında
+window.onAndroidFilePicked = (uid, path, name) => {
+  const fotoAlani = document.getElementById("fotoAlani");
+  
+  // UID ile eşleşen div varsa ekle, yoksa yeni div oluştur
+  const div = document.createElement("div");
+  
+  const img = document.createElement("img");
+  img.src = path;
+  img.className = "thumb";
+  img.title = name;
+  img.onclick = () => zoomFoto(path);
+
+  const input = document.createElement("input");
+  input.type = "text";
+  input.placeholder = "Açıklama";
+  input.style = "width:45%;margin-left:8px";
+
+  const silBtn = document.createElement("button");
+  silBtn.textContent = "🗑️";
+  silBtn.type = "button";
+  silBtn.onclick = () => div.remove();
+
+  div.appendChild(img);
+  div.appendChild(input);
+  div.appendChild(silBtn);
+
+  fotoAlani.appendChild(div);
+};
+
+// Fotoğraf ekleme butonuna bağlanan fonksiyon
+function yeniFotoSatiriEkle() {
+  if (window.AndroidExport && AndroidExport.pickPhoto) {
+    // Benzersiz UID oluştur
+    const uid = 'uid_' + Date.now();
+    AndroidExport.pickPhoto(uid);
+  } else {
+    // Tarayıcı için fallback (input file)
+    const alan = document.getElementById("fotoAlani");
+    const div = document.createElement("div");
+    div.innerHTML = `
+      <input type="file" accept="image/*" style="width:45%" onchange="this.nextElementSibling.src=window.URL.createObjectURL(this.files[0])">
+      <input type="text" placeholder="Açıklama" style="width:45%;margin-left:8px">
+      <button type="button" onclick="this.parentNode.remove()">🗑️</button>`;
+    alan.appendChild(div);
+  }
+      }
 // Yeni yer ekleme / düzenleme ve fotoğraf ekleme
 
 function düzenlemeModu(i) {
