@@ -39,27 +39,35 @@ function toFileURL(yol) {
 }
 
 function zoomFoto(src) {
+  if (!src) return alert("Fotoğraf açılamadı!");
+
   if (window.AndroidExport && AndroidExport.openPhoto) {
+    // Android: fotoğrafı native olarak aç
     AndroidExport.openPhoto(src);
   } else {
+    // Web: lightbox ile aç
+    const lb = document.getElementById("lightbox");
+    const lbImg = lb.querySelector("img");
     lb.style.display = "flex";
     lbImg.src = src;
     lbImg.style.transform = "scale(1)";
     lbImg.style.cursor = "zoom-in";
-    zoomed = false;
+    let zoomed = false;
+
+    lb.onclick = () => {
+      if (!zoomed) {
+        lbImg.style.transform = "scale(2)";
+        lbImg.style.cursor = "zoom-out";
+        zoomed = true;
+      } else {
+        lb.style.display = "none";
+        zoomed = false;
+      }
+    };
   }
 }
 
-lb.onclick = () => {
-  if (!zoomed) {
-    lbImg.style.transform = "scale(2)";
-    lbImg.style.cursor = "zoom-out";
-    zoomed = true;
-  } else {
-    lb.style.display = "none";
-    zoomed = false;
-  }
-};
+window.zoomFoto = zoomFoto;
 
 // Ayrıntı gösterim
 function ayrintiGoster(yer, i) {
