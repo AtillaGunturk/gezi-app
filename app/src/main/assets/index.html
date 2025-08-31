@@ -30,7 +30,39 @@ input, textarea { padding: 4px; margin-bottom: 4px; font-size: 16px; border: 1px
 
   <!-- Dışa Aktar -->
   <button type="button" onclick="verileriDisariAktar()">📤 Verileri Dışa Aktar</button>
+<button type="button" id="disarAktarBtn">📤 Verileri Dışa Aktar</button>
+  
+<script>
+  // Örnek veriler (test için)
+  window.veriler = [
+    { isim: "Ankara", aciklama: "Başkent", konum: [39.9334, 32.8597], fotolar: [] }
+  ];
 
+  document.getElementById("disarAktarBtn").onclick = function() {
+    if (!window.veriler || window.veriler.length === 0) {
+      alert("Kaydedilmiş veri yok!");
+      return;
+    }
+
+    console.log("Dışa aktarılıyor:", window.veriler);
+
+    const dataStr = JSON.stringify(window.veriler, null, 2);
+
+    if (window.AndroidExport && AndroidExport.saveFile) {
+      AndroidExport.saveFile("gezi_veriler.json", dataStr);
+      alert("Veriler Android cihazınıza kaydedildi!");
+    } else {
+      const blob = new Blob([dataStr], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "gezi_veriler.json";
+      a.click();
+      URL.revokeObjectURL(url);
+      alert("Veriler dışa aktarıldı (Web).");
+    }
+  };
+</script>
   <!-- İçe Aktar -->
   <input type="file" id="jsonInput" accept="application/json" style="display:none"
          onchange="verileriIceAktar(this.files[0])">
@@ -86,3 +118,4 @@ input, textarea { padding: 4px; margin-bottom: 4px; font-size: 16px; border: 1px
   <script defer src="disarAktar.js"></script>
 </body>
   </html>
+
