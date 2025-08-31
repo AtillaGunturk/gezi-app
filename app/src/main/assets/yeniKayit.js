@@ -4,7 +4,7 @@
    ✅ Lightbox ve küçük önizleme
    ✅ Marker ekleme
 ----------------------------------------------------------- */
-
+alert('yeniKayit.js yüklendi');
 // Fotoğraf alanı
 const fotoAlani = document.getElementById("fotoAlani");
 
@@ -55,7 +55,7 @@ async function yeniYerKaydet() {
   const g = id => document.getElementById(id).value.trim();
   const isim = g("isim"), aciklama = g("aciklama");
   const enlem = parseFloat(g("enlem")), boylam = parseFloat(g("boylam"));
-
+  alert('Kaydet fonksiyonu tetiklendi');
   if (!isim || !aciklama || isNaN(enlem) || isNaN(boylam)) {
     return alert("Alanlar boş veya geçersiz!");
   }
@@ -74,7 +74,8 @@ console.log('yeniYerKaydet çalıştı', window.veriler);
   // Global veriler dizisine ekleme
   if (!window.veriler) window.veriler = [];
   window.veriler.push(yeniYer);
-
+  alert('yeniYerKaydet çalıştı', window.veriler);
+   alert("Marker eklenecek:", enlem, boylam, ozelIkon.iconUrl);
   // Marker ekleme
   if (window.harita) {
     const ozelIkon = L.icon({
