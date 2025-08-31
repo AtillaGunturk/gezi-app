@@ -74,8 +74,7 @@ console.log('yeniYerKaydet çalıştı', window.veriler);
   // Global veriler dizisine ekleme
   if (!window.veriler) window.veriler = [];
   window.veriler.push(yeniYer);
-  alert(`Marker eklenecek:\nEnlem: ${enlem}\nBoylam: ${boylam}\nIcon: ${ozelIkon.iconUrl}`);
-  // Marker ekleme
+    // Marker ekleme
   if (window.harita) {
     const ozelIkon = L.icon({
       iconUrl: 'tr2.png',
@@ -85,7 +84,8 @@ console.log('yeniYerKaydet çalıştı', window.veriler);
     });
 
     const mk = L.marker([enlem, boylam], { icon: ozelIkon }).addTo(window.harita);
-    
+    alert(`Marker eklenecek:\nEnlem: ${enlem}\nBoylam: ${boylam}\nIcon: ${ozelIkon.iconUrl}`);
+     
     // Marker tıklayınca detay göster
     mk.on("click", () => {
       if (window.ayrintiGoster) window.ayrintiGoster(yeniYer, window.veriler.length - 1);
