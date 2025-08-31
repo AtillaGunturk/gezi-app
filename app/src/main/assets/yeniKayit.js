@@ -74,27 +74,43 @@ console.log('yeniYerKaydet çalıştı', window.veriler);
   // Global veriler dizisine ekleme
   if (!window.veriler) window.veriler = [];
   window.veriler.push(yeniYer);
-    // Marker ekleme
-  if (window.harita) {
-    const ozelIkon = L.icon({
-      iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/e/ec/RedDot.svg',
-      iconSize: [24, 32],
-      iconAnchor: [12, 32],
-      className: 'gezi-marker'
-    });
-
-    const mk = L.marker([enlem, boylam], { icon: ozelIkon }).addTo(window.harita);
-    alert(`Marker eklenecek:\nEnlem: ${enlem}\nBoylam: ${boylam}\nIcon: ${ozelIkon.iconUrl}`);
-     
-    // Marker tıklayınca detay göster
-    mk.on("click", () => {
-      if (window.ayrintiGoster) window.ayrintiGoster(yeniYer, window.veriler.length - 1);
-    });
-
+    
     // Marker'ları global tut
     if (!window.markerlar) window.markerlar = [];
     window.markerlar.push(mk);
   }
+
+if (window.harita) {
+  // Özel ikon tanımı
+  const ozelIkon = L.icon({
+    iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/e/ec/RedDot.svg',
+    iconSize: [24, 32],
+    iconAnchor: [12, 32],
+    className: 'gezi-marker'
+  });
+
+  // Marker oluşturma
+  const mk = L.marker([enlem, boylam], { icon: ozelIkon }).addTo(window.harita);
+
+  // Test çıktısı
+  alert(
+    `Marker eklenecek:\n` +
+    `Enlem: ${enlem}\n` +
+    `Boylam: ${boylam}\n` +
+    `Icon: ${ozelIkon.options.iconUrl}`
+  );
+
+  // Marker tıklanınca detay aç
+  mk.on("click", () => {
+    if (window.ayrintiGoster) {
+      window.ayrintiGoster(yeniYer, window.veriler.length - 1);
+    }
+  });
+
+  // Marker'ı global diziye ekle
+  if (!window.markerlar) window.markerlar = [];
+  window.markerlar.push(mk);
+     }
 
   // Form temizleme
   document.getElementById("yerForm").reset();
