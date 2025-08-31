@@ -50,7 +50,6 @@ function yeniFotoSatiriEkle() {
     fotoAlani.appendChild(div);
   }
 }
-
 // Yeni yer kaydetme
 async function yeniYerKaydet() {
   const g = id => document.getElementById(id).value.trim();
@@ -108,9 +107,7 @@ async function yeniYerKaydet() {
 
 // Globale aç
 window.yeniYerKaydet = yeniYerKaydet;
-window.yeniFotoSatiriEkle = yeniFotoSatiriEkle;/* ---------- yeniKayit.js ---------- */
-// Global callback Android'ten fotoğraf alındığında
-window.onAndroidFilePicked = (uid, path, name) => {
+window.yeniFotoSatiriEkle = yeniFotoSatiriEkle;
   
 function düzenlemeModu(i) {
   const y = veriler[i];
