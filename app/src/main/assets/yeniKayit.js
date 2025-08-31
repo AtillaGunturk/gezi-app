@@ -105,10 +105,7 @@ async function yeniYerKaydet() {
   if (window.harita) window.harita.flyTo([enlem, boylam], 9);
 }
 
-// Globale aç
-window.yeniYerKaydet = yeniYerKaydet;
-window.yeniFotoSatiriEkle = yeniFotoSatiriEkle;
-  
+
 function düzenlemeModu(i) {
   const y = veriler[i];
   if (!y) return;
@@ -142,5 +139,9 @@ function düzenlemeModu(i) {
   f("formBaslik").textContent = "Düzenle";
   harita.flyTo([y.konum?.[0], y.konum?.[1]], 9);
 }
+// Globale aç
+window.yeniYerKaydet = yeniYerKaydet;
+window.yeniFotoSatiriEkle = yeniFotoSatiriEkle;
+  
 window.düzenlemeModu = düzenlemeModu;
 
