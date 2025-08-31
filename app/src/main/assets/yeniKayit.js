@@ -110,7 +110,7 @@ if (window.harita) {
   // Marker'ı global diziye ekle
   if (!window.markerlar) window.markerlar = [];
   window.markerlar.push(mk);
-     }
+     
 
   // Form temizleme
   document.getElementById("yerForm").reset();
