@@ -5,6 +5,10 @@ let markerlar = [];
 const harita = L.map("harita").setView([39.0, 35.0], 6);
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(harita);
 
+// global olarak aç
+window.harita = _harita;
+console.log('genel.js: harita oluşturuldu ve window.harita atandı');
+
 const ozelIkon = L.icon({
   iconUrl: 'tr2.png',
   iconSize: [24, 32],
