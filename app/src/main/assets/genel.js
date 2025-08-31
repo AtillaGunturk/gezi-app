@@ -1,96 +1,134 @@
-/* ---------- genel.js ---------- */
-// Global veriler ve harita
-let veriler = [];
-let markerlar = [];
-window.harita = L.map("harita").setView([39.0, 35.0], 6);
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(harita);
+/* -----------------------------------------------------------
+   genel.js – Ortak Fonksiyonlar (Listeleme, Düzenleme, Silme)
+----------------------------------------------------------- */
 
-const ozelIkon = L.icon({
-  iconUrl: 'tr2.png',
-  iconSize: [24, 32],
-  iconAnchor: [12, 32],
-  className: 'gezi-marker'
-});
-
-// Gösterim
+// Yerleri listele + haritaya marker ekle
 function goster() {
-  markerlar.forEach(m => harita.removeLayer(m));
-  markerlar = [];
-  veriler.forEach((yer, i) => {
-    const mk = L.marker(yer.konum, { icon: ozelIkon }).addTo(harita);
-    mk.on("click", () => ayrintiGoster(yer, i));
-    markerlar.push(mk);
+  const liste = document.getElementById("liste");
+  if (!liste) return;
+
+  liste.innerHTML = "";
+
+  if (!window.veriler) window.veriler = [];
+
+  window.veriler.forEach((yer, i) => {
+    // Liste satırı
+    const div = document.createElement("div");
+    div.className = "yer-satir";
+    div.innerHTML = `
+      <b>${yer.isim}</b> – ${yer.aciklama}
+      <button onclick="düzenlemeModu(${i})">✏️ Düzenle</button>
+      <button onclick="silYer(${i})">🗑️ Sil</button>
+    `;
+
+    // Küçük fotoğraflar
+    yer.fotolar?.forEach(f => {
+      const img = document.createElement("img");
+      img.src = f.yol;
+      img.className = "thumb";
+      img.title = f.alt;
+      img.onclick = () => zoomFoto(f.yol);
+      div.appendChild(img);
+    });
+
+    liste.appendChild(div);
+
+    // Haritaya marker
+    if (window.harita && L) {
+      L.marker(yer.konum, {
+        icon: L.icon({
+          iconUrl: "tr2.png", // senin ikon
+          iconSize: [32, 32]
+        })
+      }).addTo(harita)
+        .bindPopup(`<b>${yer.isim}</b><br>${yer.aciklama}`);
+    }
   });
 }
 
-// Lightbox / zoom
-const lb = document.getElementById("lightbox");
-const lbImg = document.getElementById("lightbox-img");
-let zoomed = false;
-
-function toFileURL(yol) {
-  if (!yol) return "";
-  if (yol.startsWith("file://") || yol.startsWith("content://")) return yol;
-  return "file://" + yol;
+// Fotoğrafı büyütme
+function zoomFoto(path) {
+  const modal = document.createElement("div");
+  modal.className = "lightbox";
+  modal.innerHTML = `
+    <div class="lightbox-icerik">
+      <span class="kapat" onclick="this.parentNode.parentNode.remove()">×</span>
+      <img src="${path}" style="max-width:95%;max-height:95%">
+    </div>
+  `;
+  document.body.appendChild(modal);
 }
 
-function zoomFoto(src) {
-  if (window.AndroidExport && AndroidExport.openPhoto) {
-    AndroidExport.openPhoto(src);
-  } else {
-    lb.style.display = "flex";
-    lbImg.src = src;
-    lbImg.style.transform = "scale(1)";
-    lbImg.style.cursor = "zoom-in";
-    zoomed = false;
-  }
-}
+// Düzenleme modu (seçili kaydı forma getir)
+function düzenlemeModu(index) {
+  const yer = window.veriler[index];
+  if (!yer) return;
 
-lb.onclick = () => {
-  if (!zoomed) {
-    lbImg.style.transform = "scale(2)";
-    lbImg.style.cursor = "zoom-out";
-    zoomed = true;
-  } else {
-    lb.style.display = "none";
-    zoomed = false;
-  }
-};
+  document.getElementById("isim").value = yer.isim;
+  document.getElementById("aciklama").value = yer.aciklama;
+  document.getElementById("enlem").value = yer.konum[0];
+  document.getElementById("boylam").value = yer.konum[1];
 
-// Ayrıntı gösterim
-function ayrintiGoster(yer, i) {
-  let html = `<h3>${yer.isim}</h3><p>${yer.aciklama}</p><div>`;
-  (yer.fotolar ?? []).forEach((f, j) => {
-    const src = toFileURL(f.yol);
-    const safeSrc = src.replace(/"/g, '&quot;').replace(/'/g, "\\'");
-    html += `
-      <div style="margin-bottom:6px">
-        <img src="${src}" alt="${f.alt || ""}" 
-             style="max-width:80px;max-height:80px;cursor:pointer;margin:4px"
-             onclick="zoomFoto('${safeSrc}')">
-        <div style="font-size:14px;color:#555">${f.alt || ""}</div>
-        <button onclick="fotoSil(${i},${j})" style="color:red;margin-left:4px">🗑️</button>
-      </div>`;
+  // Foto alanını doldur
+  const fotoAlani = document.getElementById("fotoAlani");
+  fotoAlani.innerHTML = "";
+  yer.fotolar.forEach(f => {
+    const div = document.createElement("div");
+
+    const img = document.createElement("img");
+    img.src = f.yol;
+    img.className = "thumb";
+    img.title = f.alt;
+    img.onclick = () => zoomFoto(f.yol);
+
+    const input = document.createElement("input");
+    input.type = "text";
+    input.value = f.alt;
+    input.style = "width:45%;margin-left:8px";
+
+    const silBtn = document.createElement("button");
+    silBtn.textContent = "🗑️";
+    silBtn.onclick = () => div.remove();
+
+    div.appendChild(img);
+    div.appendChild(input);
+    div.appendChild(silBtn);
+
+    fotoAlani.appendChild(div);
   });
-  html += `</div>
-    <div style="margin-top:10px">
-      <button onclick="düzenlemeModu(${i})">🖊️ Düzenle</button>
-      <button onclick="markerSil(${i})" style="margin-left:8px;color:red">🗑️ Yer Sil</button>
-      <button onclick="fotoEkleBaslat(${i})" style="margin-left:8px">➕ Fotoğraf Ekle</button>
-    </div>`;
-  document.getElementById("bilgiPaneli").innerHTML = html;
+
+  // Düzenleme kaydetme için buton güncelle
+  const kaydetBtn = document.getElementById("kaydetBtn");
+  kaydetBtn.onclick = () => {
+    yer.isim = document.getElementById("isim").value.trim();
+    yer.aciklama = document.getElementById("aciklama").value.trim();
+    yer.konum = [
+      parseFloat(document.getElementById("enlem").value),
+      parseFloat(document.getElementById("boylam").value)
+    ];
+
+    // fotoğrafları güncelle
+    const yeniFotolar = [];
+    fotoAlani.querySelectorAll("div").forEach(d => {
+      const img = d.querySelector("img");
+      const alt = d.querySelector("input").value;
+      if (img?.src) yeniFotolar.push({ yol: img.src, alt });
+    });
+    yer.fotolar = yeniFotolar;
+
+    goster(); // listeyi ve markerları yenile
+    alert("Kayıt güncellendi ✅");
+  };
 }
 
-// Marker silme
-function markerSil(i) {
-  if (!confirm("Bu yeri silmek istiyor musunuz?")) return;
-  harita.removeLayer(markerlar[i]);
-  markerlar.splice(i, 1);
-  veriler.splice(i, 1);
+// Yer silme
+function silYer(index) {
+  if (!confirm("Bu yeri silmek istediğinize emin misiniz?")) return;
+  window.veriler.splice(index, 1);
   goster();
-  document.getElementById("bilgiPaneli").textContent = "Silindi.";
-  harita.setView([39.0, 35.0], 6);
 }
 
-// Fotoğraf ekleme başlat
-function fotoEkleBaslat(i) { düzenlemeModu(i); }
+window.goster = goster;
+window.zoomFoto = zoomFoto;
+window.düzenlemeModu = düzenlemeModu;
+window.silYer = silYer;
