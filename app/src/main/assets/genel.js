@@ -6,7 +6,7 @@ const harita = L.map("harita").setView([39.0, 35.0], 6);
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(harita);
 
 // global olarak aç
-window.harita = _harita;
+window.harita = harita;
 console.log('genel.js: harita oluşturuldu ve window.harita atandı');
 
 const ozelIkon = L.icon({
