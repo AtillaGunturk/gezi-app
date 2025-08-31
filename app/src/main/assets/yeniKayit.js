@@ -83,7 +83,7 @@ console.log('yeniYerKaydet çalıştı', window.veriler);
 if (window.harita) {
   // Özel ikon tanımı
   const ozelIkon = L.icon({
-    iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/e/ec/RedDot.svg',
+    iconUrl: 'tr2.png',
     iconSize: [24, 32],
     iconAnchor: [12, 32],
     className: 'gezi-marker'
