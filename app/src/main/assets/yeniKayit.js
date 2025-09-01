@@ -117,10 +117,8 @@ function düzenlemeModu(i) {
   f("enlem").value = y.konum?.[0] ?? "";
   f("boylam").value = y.konum?.[1] ?? "";
 
-  // Fotoğraf alanını temizle ve mevcut fotoğrafları ekle
   const fotoAlani = f("fotoAlani");
   fotoAlani.innerHTML = "";
-
   (y.fotolar ?? []).forEach((ft, j) => {
     const div = document.createElement("div");
     const img = document.createElement("img");
@@ -144,15 +142,14 @@ function düzenlemeModu(i) {
   f("yerForm").dataset.editIndex = i;
   f("formBaslik").textContent = "Düzenle";
 
-  // Eski marker varsa haritadan kaldır
-  if (aktifMarker) {
-    window.harita.removeLayer(aktifMarker);
-    const idx = window.markerlar.indexOf(aktifMarker);
+  // Eski marker varsa kaldır
+  if (y._marker) {
+    window.harita.removeLayer(y._marker);
+    const idx = window.markerlar.indexOf(y._marker);
     if (idx !== -1) window.markerlar.splice(idx, 1);
-    aktifMarker = null;
   }
 
-  // Yeni marker ekle ve aktif marker olarak ata
+  // Yeni marker ekle
   const enlem = parseFloat(y.konum[0]);
   const boylam = parseFloat(y.konum[1]);
   const ozelIkon = L.icon({
@@ -163,20 +160,18 @@ function düzenlemeModu(i) {
   });
 
   const mk = L.marker([enlem, boylam], { icon: ozelIkon }).addTo(window.harita);
-  aktifMarker = mk;
+  y._marker = mk;           // Marker referansını veri objesine ekle
   window.markerlar.push(mk);
 
   mk.on("click", () => {
-    aktifMarker = mk;        // Tıklanan marker aktif marker olur
+    aktifMarker = mk;
     ayrintiGoster(y, i);
   });
 
-  // Haritayı yeni konuma taşı
   window.harita.flyTo([enlem, boylam], 9);
 }
 
 window.düzenlemeModu = düzenlemeModu;
-
 // Globale aç
 window.yeniYerKaydet = yeniYerKaydet;
 window.yeniFotoSatiriEkle = yeniFotoSatiriEkle;
