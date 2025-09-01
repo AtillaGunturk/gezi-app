@@ -101,7 +101,7 @@ function markerSil(i) {
   if (!confirm("Bu yeri silmek istiyor musunuz?")) return;
 
   // Marker'ı haritadan kaldır
-  if (win A1dow.markerlar && window.markerlar[i]) {
+  if (window.markerlar && window.markerlar[i]) {
     window.harita.removeLayer(window.markerlar[i]);
     window.markerlar.splice(i, 1);
   }
