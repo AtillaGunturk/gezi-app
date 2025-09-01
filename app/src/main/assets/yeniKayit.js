@@ -105,17 +105,19 @@ async function yeniYerKaydet() {
 }
 
 // Düzenleme modu
+let aktifMarker = null;
 
 function düzenlemeModu(i) {
   const y = window.veriler[i];
   if (!y) return;
-  
+
   const f = id => document.getElementById(id);
   f("isim").value = y.isim ?? "";
   f("aciklama").value = y.aciklama ?? "";
   f("enlem").value = y.konum?.[0] ?? "";
   f("boylam").value = y.konum?.[1] ?? "";
 
+  // Fotoğraf alanını temizle ve mevcut fotoğrafları ekle
   const fotoAlani = f("fotoAlani");
   fotoAlani.innerHTML = "";
 
@@ -124,38 +126,35 @@ function düzenlemeModu(i) {
     const img = document.createElement("img");
     img.src = ft.yol;
     img.className = "thumb";
-
     const input = document.createElement("input");
     input.type = "text";
     input.value = ft.alt || "";
     input.placeholder = "Açıklama";
     input.style = "width: 45%; margin-left: 8px;";
     input.oninput = () => ft.alt = input.value;
-
     const silBtn = document.createElement("button");
     silBtn.textContent = "🗑️";
-    silBtn.onclick = () => { 
-      y.fotolar.splice(j, 1); 
-      div.remove(); 
-    };
-
+    silBtn.onclick = () => { y.fotolar.splice(j, 1); div.remove(); };
     div.appendChild(img);
     div.appendChild(input);
     div.appendChild(silBtn);
     fotoAlani.appendChild(div);
   });
 
-  // Form üzerinde hangi index düzenleniyor kaydı
   f("yerForm").dataset.editIndex = i;
   f("formBaslik").textContent = "Düzenle";
 
-  // Mevcut marker varsa sil
-  if (window.markerlar && window.markerlar[i]) {
-    window.harita.removeLayer(window.markerlar[i]);
-    window.markerlar[i] = null;
+  // Eski marker varsa haritadan kaldır
+  if (aktifMarker) {
+    window.harita.removeLayer(aktifMarker);
+    const idx = window.markerlar.indexOf(aktifMarker);
+    if (idx !== -1) window.markerlar.splice(idx, 1);
+    aktifMarker = null;
   }
 
-  // Yeni marker ekle
+  // Yeni marker ekle ve aktif marker olarak ata
+  const enlem = parseFloat(y.konum[0]);
+  const boylam = parseFloat(y.konum[1]);
   const ozelIkon = L.icon({
     iconUrl: 'tr2.png',
     iconSize: [24, 32],
@@ -163,17 +162,20 @@ function düzenlemeModu(i) {
     className: 'gezi-marker'
   });
 
-  const mk = L.marker(y.konum, { icon: ozelIkon }).addTo(window.harita);
+  const mk = L.marker([enlem, boylam], { icon: ozelIkon }).addTo(window.harita);
+  aktifMarker = mk;
+  window.markerlar.push(mk);
+
   mk.on("click", () => {
-    if (window.ayrintiGoster) window.ayrintiGoster(y, i);
+    aktifMarker = mk;        // Tıklanan marker aktif marker olur
+    ayrintiGoster(y, i);
   });
 
-  // Marker array’ini güncelle
-  if (!window.markerlar) window.markerlar = [];
-  window.markerlar[i] = mk;
-
-  window.harita.flyTo([y.konum[0], y.konum[1]], 9);
+  // Haritayı yeni konuma taşı
+  window.harita.flyTo([enlem, boylam], 9);
 }
+
+window.düzenlemeModu = düzenlemeModu;
 
 // Globale aç
 window.yeniYerKaydet = yeniYerKaydet;
