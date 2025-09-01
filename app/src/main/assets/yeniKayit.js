@@ -1,4 +1,4 @@
-/* -----------------------------------------------------------
+	/* -----------------------------------------------------------
    yeniKayit.js – Yeni Yer Ekleme ve Fotoğraf Yönetimi
    ✅ AndroidExport entegrasyonu
    ✅ Lightbox ve küçük önizleme
@@ -105,14 +105,18 @@ async function yeniYerKaydet() {
 }
 
 // Düzenleme modu
+
 function düzenlemeModu(i) {
   const y = window.veriler[i];
   if (!y) return;
+  
   const f = id => document.getElementById(id);
   f("isim").value = y.isim ?? "";
   f("aciklama").value = y.aciklama ?? "";
   f("enlem").value = y.konum?.[0] ?? "";
   f("boylam").value = y.konum?.[1] ?? "";
+
+  const fotoAlani = f("fotoAlani");
   fotoAlani.innerHTML = "";
 
   (y.fotolar ?? []).forEach((ft, j) => {
@@ -120,22 +124,55 @@ function düzenlemeModu(i) {
     const img = document.createElement("img");
     img.src = ft.yol;
     img.className = "thumb";
+
     const input = document.createElement("input");
     input.type = "text";
     input.value = ft.alt || "";
     input.placeholder = "Açıklama";
     input.style = "width: 45%; margin-left: 8px;";
     input.oninput = () => ft.alt = input.value;
+
     const silBtn = document.createElement("button");
     silBtn.textContent = "🗑️";
-    silBtn.onclick = () => { y.fotolar.splice(j, 1); div.remove(); };
-    div.appendChild(img); div.appendChild(input); div.appendChild(silBtn);
+    silBtn.onclick = () => { 
+      y.fotolar.splice(j, 1); 
+      div.remove(); 
+    };
+
+    div.appendChild(img);
+    div.appendChild(input);
+    div.appendChild(silBtn);
     fotoAlani.appendChild(div);
   });
 
+  // Form üzerinde hangi index düzenleniyor kaydı
   f("yerForm").dataset.editIndex = i;
   f("formBaslik").textContent = "Düzenle";
-  if (window.harita) window.harita.flyTo([y.konum?.[0], y.konum?.[1]], 9);
+
+  // Mevcut marker varsa sil
+  if (window.markerlar && window.markerlar[i]) {
+    window.harita.removeLayer(window.markerlar[i]);
+    window.markerlar[i] = null;
+  }
+
+  // Yeni marker ekle
+  const ozelIkon = L.icon({
+    iconUrl: 'tr2.png',
+    iconSize: [24, 32],
+    iconAnchor: [12, 32],
+    className: 'gezi-marker'
+  });
+
+  const mk = L.marker(y.konum, { icon: ozelIkon }).addTo(window.harita);
+  mk.on("click", () => {
+    if (window.ayrintiGoster) window.ayrintiGoster(y, i);
+  });
+
+  // Marker array’ini güncelle
+  if (!window.markerlar) window.markerlar = [];
+  window.markerlar[i] = mk;
+
+  window.harita.flyTo([y.konum[0], y.konum[1]], 9);
 }
 
 // Globale aç
