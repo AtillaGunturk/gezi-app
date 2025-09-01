@@ -1,26 +1,19 @@
 function verileriDisariAktar() {
-  if (!window.veriler || window.veriler.length === 0) {
-    alert("Kaydedilmiş veri yok!");
-    return;
-  }
-
-  const dataStr = JSON.stringify(window.veriler, null, 2);
-
-  if (window.AndroidExport && AndroidExport.saveFile) {
-    // Android: SAF üzerinden kaydet
-    AndroidExport.saveFile("gezi_veriler.json", dataStr);
-    alert("Veriler Android cihazınıza kaydedildi!");
-  } else {
-    // Tarayıcı fallback
-    const blob = new Blob([dataStr], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "gezi_veriler.json";
-    a.click();
-    URL.revokeObjectURL(url);
-    alert("Veriler dışa aktarıldı!");
-  }
+if (veriler.length === 0) { alert("Henüz kaydedilmiş yer yok!"); return; }
+const json = JSON.stringify(veriler, null, 2);
+if (window.AndroidExport && AndroidExport.exportVeri) {
+AndroidExport.exportVeri(json);
+} else {
+const blob = new Blob([json], { type: "application/json" });
+const url  = URL.createObjectURL(blob);
+const a    = document.createElement("a");
+a.href     = url;
+a.download = "gezi-verileri.json";
+document.body.appendChild(a);
+a.click();
+document.body.removeChild(a)
+URL.revokeObjectURL(url);
+alert("✅ Veriler başarıyla dışa aktarıldı!");
 }
-
+  }
 window.verileriDisariAktar = verileriDisariAktar;
