@@ -95,16 +95,34 @@ function ayrintiGoster(yer, i) {
 }
 
 // Marker silme
+
 function markerSil(i) {
+  if (!window.veriler || !window.veriler[i]) return;
+  if (!window.markerlar || !window.markerlar[i]) return;
+
   if (!confirm("Bu yeri silmek istiyor musunuz?")) return;
-  harita.removeLayer(markerlar[i]);
-  markerlar.splice(i, 1);
-  veriler.splice(i, 1);
-  goster();
-  document.getElementById("bilgiPaneli").textContent = "Silindi.";
-  harita.setView([39.0, 35.0], 6);
+
+  // 1. Marker’ı haritadan kaldır
+  window.harita.removeLayer(window.markerlar[i]);
+
+  // 2. Marker array’inden kaldır
+  window.markerlar.splice(i, 1);
+
+  // 3. Veriler array’inden kaldır
+  window.veriler.splice(i, 1);
+
+  // 4. Haritada kalan marker’ları yeniden göster
+  if (window.goster) window.goster();
+
+  // 5. Bilgi panelini temizle
+  const panel = document.getElementById("bilgiPaneli");
+  if (panel) panel.textContent = "Silindi.";
+
+  // 6. Haritayı varsayılan konuma getir
+  window.harita.setView([39.0, 35.0], 6);
 }
 
+window.markerSil = markerSil;
 // Fotoğraf ekleme başlat
 function fotoEkleBaslat(i) { düzenlemeModu(i); }
 // Örnek
