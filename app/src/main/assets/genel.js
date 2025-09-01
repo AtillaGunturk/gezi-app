@@ -5,6 +5,7 @@ let markerlar = [];
 const harita = L.map("harita").setView([39.0, 35.0], 6);
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(harita);
 window.veriler = veriler;
+window.markerlar = markerlar;
 // global olarak aç
 window.harita = harita;
 console.log('genel.js: harita oluşturuldu ve window.harita atandı');
