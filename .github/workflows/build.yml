@@ -47,12 +47,20 @@ jobs:
       - name: 6 - Temizlik
         run: |
           ./gradlew --stop || true
-          ./gradlew clean
           rm -rf ~/.gradle/caches/ ~/.gradle/daemon/ ~/.gradle/native/ ~/.gradle/wrapper/ ~/.android/build-cache/
           rm -rf app/.gradle app/.cxx app/build build .gradle .idea *.iml
 
-      # 7. Keystore
-      - name: 7 - Keystore Oluştur
+      # 7. Assets güncelle
+      - name: 7 - En Güncel Dosyaları Assets'e Kopyala
+        run: |
+          mkdir -p app/src/main/assets
+          cp -f index.html app/src/main/assets/index.html || echo "index.html kökte yok!"
+        
+          echo ">>> Assets içeriği:"
+          ls -l app/src/main/assets
+
+      # 8. Keystore
+      - name: 8 - Keystore Oluştur
         working-directory: app
         run: |
           mkdir -p android
@@ -60,20 +68,20 @@ jobs:
         env:
           DEBUG_KEYSTORE_B64: ${{ secrets.DEBUG_KEYSTORE_B64 }}
 
-      # 8. APK Derle
-      - name: 8 - APK Derle
+      # 9. APK Derle
+      - name: 9 - APK Derle
         run: |
           ./gradlew clean :app:assembleRelease --no-daemon --parallel --stacktrace | tee build.log
         env:
           MY_STORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
           MY_KEY_ALIAS: ${{ secrets.DEBUG_KEY_ALIAS }}
 
-      # 9. APK içeriğini kontrol et
-      - name: 9 - APK İçeriği
+      # 10. APK içeriğini kontrol et
+      - name: 10 - APK İçeriği
         run: unzip -l app/build/outputs/apk/release/*.apk | grep assets/
 
-      # 10. APK ve log yükle
-      - name: 10 - APK Yükle
+      # 11. APK ve log yükle
+      - name: 11 - APK Yükle
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -81,9 +89,13 @@ jobs:
           path: app/build/outputs/apk/release/*.apk
           if-no-files-found: ignore
 
-      - name: 11 - Build Log Yükle
+      - name: 12 - Build Log Yükle
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: build-log
           path: build.log
+
+
+
+
