@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.application'
 }
+
 android {
     namespace "com.atilla.geziharitam"
     compileSdk 34
@@ -68,16 +69,6 @@ android {
     }
 }
 
-
-    // 🔧 META-INF çakışmalarını engeller
-    packagingOptions {
-        exclude 'META-INF/*.kotlin_module'
-        exclude 'META-INF/LICENSE*'
-        exclude 'META-INF/NOTICE*'
-        exclude 'META-INF/DEPENDENCIES'
-    }
-}
-
 repositories {
     google()
     mavenCentral()
@@ -88,6 +79,7 @@ dependencies {
     implementation 'androidx.webkit:webkit:1.7.0'
     implementation 'com.google.android.material:material:1.11.0'
 }
+
 tasks.register("cleanManifestLogs", Delete) {
     delete fileTree("${buildDir}/intermediates/merged_manifests") {
         include "**/manifest-merger-report.txt"
