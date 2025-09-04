@@ -50,8 +50,14 @@ jobs:
         run: |
           ./gradlew --stop || true
           ./gradlew clean
-          rm -rf ~/.gradle/caches/ ~/.gradle/daemon/ ~/.gradle/native/ ~/.gradle/wrapper/ ~/.android/build-cache/
-          rm -rf app/.gradle app/.cxx app/build build .gradle .idea *.iml
+          rm -rf app/build app/.gradle app/.cxx
+          rm -rf build .gradle .idea *.iml
+          rm -rf ~/.gradle/caches/ ~/.gradle/daemon/ ~/.gradle/native/ ~/.gradle/wrapper/
+          rm -rf ~/.android/build-cache/
+          # Assets, res, libs gibi kaynak dosyalarını da istersen temizleyebilirsin (dikkatli ol!)
+          rm -rf app/src/main/assets/*
+          rm -rf app/src/main/res/*
+          rm -rf app/src/main/libs/*
           ./gradlew :app:assembleRelease --no-daemon --parallel --stacktrace | tee build.log
         env:
           MY_STORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
@@ -74,3 +80,4 @@ jobs:
         with:
           name: build-log
           path: build.log
+
