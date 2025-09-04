@@ -10,29 +10,24 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Kodu çek
-      - name: 1 - Kodu Çek
+      - name: Kodu Çek
         uses: actions/checkout@v4
         with:
           ref: main
 
-      # 2. JDK 17
-      - name: 2 - JDK 17 Kurulumu
+      - name: JDK 17 Kurulumu
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
 
-      # 3. Android SDK
-      - name: 3 - Android SDK Kurulumu
+      - name: Android SDK Kurulumu
         uses: android-actions/setup-android@v3
 
-      # 4. Gradle Wrapper İzni
-      - name: 4 - Gradle Wrapper İzni
+      - name: Gradle Wrapper İzni
         run: chmod +x ./gradlew
 
-      # 5. Gradle Properties
-      - name: 5 - Gradle Properties Oluştur
+      - name: Gradle Properties Oluştur
         working-directory: app
         run: |
           echo "MY_STORE_PASSWORD=${DEBUG_KEYSTORE_PASSWORD}" >> gradle.properties
@@ -43,26 +38,7 @@ jobs:
           DEBUG_KEYSTORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
           DEBUG_KEY_ALIAS: ${{ secrets.DEBUG_KEY_ALIAS }}
 
-      # 6. Temizlik (önceki cache/dosyalar)
-      - name: 6 - Temizlik
-        run: |
-          ./gradlew --stop || true
-          ./gradlew clean
-          ./app/build clean
-          rm -rf ~/.gradle/caches/ ~/.gradle/daemon/ ~/.gradle/native/ ~/.gradle/wrapper/ ~/.android/build-cache/
-          rm -rf app/.gradle app/.cxx app/build build .gradle .idea *.iml
-
-      # 7. Assets güncelle
-      - name: 7 - En Güncel Dosyaları Assets'e Kopyala
-        run: |
-          mkdir -p app/src/main/assets
-          cp -f index.html app/src/main/assets/index.html || echo "index.html kökte yok!"
-        
-          echo ">>> Assets içeriği:"
-          ls -l app/src/main/assets
-
-      # 8. Keystore
-      - name: 8 - Keystore Oluştur
+      - name: Keystore Oluştur
         working-directory: app
         run: |
           mkdir -p android
@@ -70,20 +46,21 @@ jobs:
         env:
           DEBUG_KEYSTORE_B64: ${{ secrets.DEBUG_KEYSTORE_B64 }}
 
-      # 9. APK Derle
-      - name: 9 - APK Derle
+      - name: APK Derle (Temizlik Dahil)
         run: |
-          ./gradlew clean :app:assembleRelease --no-daemon --parallel --stacktrace | tee build.log
+          ./gradlew --stop || true
+          ./gradlew clean
+          rm -rf ~/.gradle/caches/ ~/.gradle/daemon/ ~/.gradle/native/ ~/.gradle/wrapper/ ~/.android/build-cache/
+          rm -rf app/.gradle app/.cxx app/build build .gradle .idea *.iml
+          ./gradlew :app:assembleRelease --no-daemon --parallel --stacktrace | tee build.log
         env:
           MY_STORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
           MY_KEY_ALIAS: ${{ secrets.DEBUG_KEY_ALIAS }}
 
-      # 10. APK içeriğini kontrol et
-      - name: 10 - APK İçeriği
+      - name: APK İçeriği
         run: unzip -l app/build/outputs/apk/release/*.apk | grep assets/
 
-      # 11. APK ve log yükle
-      - name: 11 - APK Yükle
+      - name: APK Yükle
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -91,14 +68,9 @@ jobs:
           path: app/build/outputs/apk/release/*.apk
           if-no-files-found: ignore
 
-      - name: 12 - Build Log Yükle
+      - name: Build Log Yükle
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: build-log
           path: build.log
-
-
-
-
-
