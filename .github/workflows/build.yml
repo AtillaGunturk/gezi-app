@@ -47,6 +47,8 @@ jobs:
       - name: 6 - Temizlik
         run: |
           ./gradlew --stop || true
+          ./gradlew clean
+          ./app/build clean
           rm -rf ~/.gradle/caches/ ~/.gradle/daemon/ ~/.gradle/native/ ~/.gradle/wrapper/ ~/.android/build-cache/
           rm -rf app/.gradle app/.cxx app/build build .gradle .idea *.iml
 
@@ -95,6 +97,7 @@ jobs:
         with:
           name: build-log
           path: build.log
+
 
 
 
