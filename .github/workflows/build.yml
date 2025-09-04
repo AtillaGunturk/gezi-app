@@ -47,9 +47,10 @@ jobs:
       - name: 6 - Temizlik
         run: |
           ./gradlew --stop || true
+          ./gradlew cleanBuildCache
           rm -rf ~/.gradle/caches/ ~/.gradle/daemon/ ~/.gradle/native/ ~/.gradle/wrapper/ ~/.android/build-cache/
           rm -rf app/.gradle app/.cxx app/build build .gradle .idea *.iml
-
+          
       # 7. Assets güncelle
       - name: 7 - En Güncel Dosyaları Assets'e Kopyala
         run: |
@@ -95,6 +96,7 @@ jobs:
         with:
           name: build-log
           path: build.log
+
 
 
 
