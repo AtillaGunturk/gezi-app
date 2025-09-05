@@ -58,6 +58,9 @@ jobs:
           rm -rf app/src/main/assets/*
           rm -rf app/src/main/res/*
           rm -rf app/src/main/libs/*
+          cp -r app/src/main/assets/* app/src/main/assets/
+          cp -r app/src/main/res/* app/src/main/res/
+
           echo ">>> Assets içeriği:"
           ls -l app/src/main/assets
           echo ">>> res içeriği:"
@@ -84,5 +87,6 @@ jobs:
         with:
           name: build-log
           path: build.log
+
 
 
