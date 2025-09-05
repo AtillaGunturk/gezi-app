@@ -122,11 +122,9 @@ function markerSil(i) {
 
 // Globale aç
 window.markerSil = markerSil;
-alert(window.veriler);
-alert(window.markerlar);
+
 // Fotoğraf ekleme başlat
 function fotoEkleBaslat(i) { düzenlemeModu(i); }
-// Örnek
 window.goster = goster;
 window.ayrintiGoster = ayrintiGoster;
 window.markerSil = markerSil;
