@@ -58,6 +58,10 @@ jobs:
           rm -rf app/src/main/assets/*
           rm -rf app/src/main/res/*
           rm -rf app/src/main/libs/*
+          echo ">>> Assets içeriği:"
+          ls -l app/src/main/assets
+          echo ">>> res içeriği:"
+          ls -l app/src/main/res
           ./gradlew :app:assembleRelease --no-daemon --parallel --stacktrace | tee build.log
         env:
           MY_STORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
@@ -80,4 +84,5 @@ jobs:
         with:
           name: build-log
           path: build.log
+
 
