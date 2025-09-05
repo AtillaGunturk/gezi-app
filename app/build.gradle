@@ -1,7 +1,6 @@
 plugins {
     id 'com.android.application'
 }
-
 android {
     namespace "com.atilla.geziharitam"
     compileSdk 34
@@ -71,7 +70,6 @@ dependencies {
     implementation 'androidx.webkit:webkit:1.7.0'
     implementation 'com.google.android.material:material:1.11.0'
 }
-
 tasks.register("cleanManifestLogs", Delete) {
     delete fileTree("${buildDir}/intermediates/merged_manifests") {
         include "**/manifest-merger-report.txt"
