@@ -60,7 +60,7 @@ async function yeniYerKaydet() {
   aktifMarker = null;
 
   // Verileri sıfırla
-  veriler = [];
+  window.veriler = [];
 	
   const g = id => document.getElementById(id).value.trim();
   const isim = g("isim"), aciklama = g("aciklama");
