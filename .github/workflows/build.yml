@@ -54,13 +54,7 @@ jobs:
           rm -rf build .gradle .idea *.iml
           rm -rf ~/.gradle/caches/ ~/.gradle/daemon/ ~/.gradle/native/ ~/.gradle/wrapper/
           rm -rf ~/.android/build-cache/
-          # Assets, res, libs gibi kaynak dosyalarını da istersen temizleyebilirsin (dikkatli ol!)
-          rm -rf app/src/main/assets/*
-          rm -rf app/src/main/res/*
-          rm -rf app/src/main/libs/*
-          cp -r app/src/main/assets/* app/src/main/assets/
-          cp -r app/src/main/res/* app/src/main/res/
-
+          
           echo ">>> Assets içeriği:"
           ls -l app/src/main/assets
           echo ">>> res içeriği:"
@@ -87,6 +81,7 @@ jobs:
         with:
           name: build-log
           path: build.log
+
 
 
 
