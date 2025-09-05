@@ -54,6 +54,14 @@ function yeniFotoSatiriEkle() {
 
 // Yeni yer kaydetme
 async function yeniYerKaydet() {
+	  // Haritadaki tüm markerları temizle
+  window.markerlar?.forEach(m => window.harita.removeLayer(m));
+  window.markerlar = [];
+  aktifMarker = null;
+
+  // Verileri sıfırla
+  veriler = [];
+	
   const g = id => document.getElementById(id).value.trim();
   const isim = g("isim"), aciklama = g("aciklama");
   const enlem = parseFloat(g("enlem")), boylam = parseFloat(g("boylam"));
