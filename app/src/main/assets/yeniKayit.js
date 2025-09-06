@@ -14,7 +14,7 @@ window.onAndroidFilePicked = (uid, path, name) => {
   const div = document.createElement("div");
   
   const img = document.createElement("img");
-  img.src = path;
+  img.src = path;alert(img.src);
   img.className = "thumb";
   img.title = name;
   img.onclick = () => zoomFoto(path);
