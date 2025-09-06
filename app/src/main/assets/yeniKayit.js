@@ -14,7 +14,7 @@ window.onAndroidFilePicked = (uid, path, name) => {
   const div = document.createElement("div");
   
   const img = document.createElement("img");
-  img.src = path;alert(img.src);
+  img.src = path;
   img.className = "thumb";
   img.title = name;
   img.onclick = () => zoomFoto(path);
@@ -54,14 +54,13 @@ function yeniFotoSatiriEkle() {
 
 // Yeni yer kaydetme
 async function yeniYerKaydet() {
-	  // Haritadaki tüm markerları temizle
+  // Haritadaki tüm markerları temizleme kısmını istersen bırakabilirsin
   window.markerlar?.forEach(m => window.harita.removeLayer(m));
   window.markerlar = [];
   aktifMarker = null;
 
-  // Verileri sıfırla
-  window.veriler = [];
-	
+  // ❌ Bunu kaldır: window.veriler = [];
+
   const g = id => document.getElementById(id).value.trim();
   const isim = g("isim"), aciklama = g("aciklama");
   const enlem = parseFloat(g("enlem")), boylam = parseFloat(g("boylam"));
@@ -78,12 +77,11 @@ async function yeniYerKaydet() {
     if (img?.src) fotolar.push({ yol: img.src, alt });
   });
 
-  // Yeni veri objesi
   const yeniYer = { isim, aciklama, konum: [enlem, boylam], fotolar };
 
-  // Global veriler dizisine ekleme
   if (!window.veriler) window.veriler = [];
   window.veriler.push(yeniYer);
+
   
   // Marker ekleme
   if (window.harita) {

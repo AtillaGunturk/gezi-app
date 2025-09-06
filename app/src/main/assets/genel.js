@@ -6,9 +6,7 @@ const harita = L.map("harita").setView([39.0, 35.0], 6);
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(harita);
 window.veriler = veriler;
 window.markerlar = markerlar;
-// global olarak aç
 window.harita = harita;
-console.log('genel.js: harita oluşturuldu ve window.harita atandı');
 
 const ozelIkon = L.icon({
   iconUrl: 'tr2.png',
@@ -29,10 +27,6 @@ function goster() {
 }
 
 // Lightbox / zoom
-const lb = document.getElementById("lightbox");
-const lbImg = document.getElementById("lightbox-img");
-let zoomed = false;
-
 function toFileURL(yol) {
   if (!yol) return "";
   if (yol.startsWith("file://") || yol.startsWith("content://")) return yol;
@@ -40,21 +34,25 @@ function toFileURL(yol) {
 }
 
 function zoomFoto(src) {
-  if (!src) return alert("Fotoğraf açılamadı!");
 
+// <--- ekledik
+  if (!src) return alert("Foto açılamadı!");
+  const safeSrc = src.replace(/"/g, '&quot;').replace(/'/g, "\\'");
+  alert("safeSrc = " + src);
   if (window.AndroidExport && AndroidExport.openPhoto) {
-    // Android: fotoğrafı native olarak aç
-    AndroidExport.openPhoto(src);
+    AndroidExport.openPhoto(toFileURL(src));
   } else {
-    // Web: lightbox ile aç
     const lb = document.getElementById("lightbox");
     const lbImg = lb.querySelector("img");
     lb.style.display = "flex";
     lbImg.src = src;
-    lbImg.style.transform = "scale(1)";
+    lbImg.style.width = "auto";
+    lbImg.style.maxHeight = "80vh";
     lbImg.style.cursor = "zoom-in";
-    let zoomed = false;
+    lbImg.style.objectFit = "contain";
+    lbImg.style.transform = "scale(1)";
 
+    let zoomed = false;
     lb.onclick = () => {
       if (!zoomed) {
         lbImg.style.transform = "scale(2)";
@@ -62,12 +60,12 @@ function zoomFoto(src) {
         zoomed = true;
       } else {
         lb.style.display = "none";
+        lbImg.style.transform = "scale(1)";
         zoomed = false;
       }
     };
   }
 }
-
 window.zoomFoto = zoomFoto;
 
 // Ayrıntı gösterim
@@ -77,12 +75,11 @@ function ayrintiGoster(yer, i) {
     const src = toFileURL(f.yol);
     const safeSrc = src.replace(/"/g, '&quot;').replace(/'/g, "\\'");
     html += `
-      <div style="margin-bottom:6px">
-        <img src="${src}" alt="${f.alt || ""}" 
-             style="max-width:80px;max-height:80px;cursor:pointer;margin:4px"
-             onclick="zoomFoto('${safeSrc}')">
-        <div style="font-size:14px;color:#555">${f.alt || ""}</div>
-        <button onclick="fotoSil(${i},${j})" style="color:red;margin-left:4px">🗑️</button>
+      <div style="margin-bottom:6px; display:inline-block;">
+        <img src="${src}" alt="${f.alt || ''}" 
+             style="width:80px; height:auto; cursor:pointer; margin:4px; object-fit:cover;"
+             onclick="alert('Fotoğraf tıklanıyor, src: ${safeSrc}'); zoomFoto('${src}')">
+        <div style="font-size:14px;color:#555">${f.alt || ''}</div>
       </div>`;
   });
   html += `</div>
@@ -97,36 +94,27 @@ function ayrintiGoster(yer, i) {
 // Marker silme
 function markerSil(i) {
   if (!window.veriler || !window.veriler[i]) return;
-
   if (!confirm("Bu yeri silmek istiyor musunuz?")) return;
 
-  // Marker'ı haritadan kaldır
   if (window.markerlar && window.markerlar[i]) {
     window.harita.removeLayer(window.markerlar[i]);
     window.markerlar.splice(i, 1);
   }
 
-  // Veriyi diziden kaldır
   window.veriler.splice(i, 1);
 
-  // Harita üzerindeki markerları yeniden göster
   if (window.goster) window.goster();
 
-  // Bilgi panelini temizle
   const panel = document.getElementById("bilgiPaneli");
   if (panel) panel.textContent = "Yer silindi.";
 
-  // Haritayı varsayılan konuma al
   if (window.harita) window.harita.setView([39.0, 35.0], 6);
 }
 
 // Globale aç
 window.markerSil = markerSil;
-
-// Fotoğraf ekleme başlat
 function fotoEkleBaslat(i) { düzenlemeModu(i); }
 window.goster = goster;
 window.ayrintiGoster = ayrintiGoster;
-window.markerSil = markerSil;
 window.fotoEkleBaslat = fotoEkleBaslat;
-window.zoomFoto = zoomFoto;
+
