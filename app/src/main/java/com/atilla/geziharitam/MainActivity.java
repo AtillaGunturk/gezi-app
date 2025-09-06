@@ -14,6 +14,7 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.webkit.JavascriptInterface;  // <--- eksik
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResult;
@@ -26,6 +27,11 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import android.Manifest;
 import android.content.pm.PackageManager;
+import java.io.File;                        // File sınıfı için
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import androidx.core.content.FileProvider;  // FileProvider için
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -55,8 +61,8 @@ public class MainActivity extends AppCompatActivity {
         settings.setDomStorageEnabled(true);
         settings.setAllowFileAccess(true);
         settings.setAllowContentAccess(true);
-        settings.setAllowFileAccessFromFileURLs(false);
-        settings.setAllowUniversalAccessFromFileURLs(false);
+        settings.setAllowFileAccessFromFileURLs(true);
+        settings.setAllowUniversalAccessFromFileURLs(true);
         settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
 
         // JS köprüsü
@@ -229,40 +235,60 @@ public class MainActivity extends AppCompatActivity {
         photoPickerLauncher.launch(intent);
     }
 
+  
+    @JavascriptInterface
     public void openPhoto(String pathOrUri) {
-        try {
+    try {
+        Log.d("MainActivity", "openPhoto pathOrUri: " + pathOrUri); // <-- burada log
+        Toast.makeText(this, "DEBUG: " + pathOrUri, Toast.LENGTH_LONG).show(); // opsiyonel 
+        File srcFile;
+
+        if (pathOrUri.startsWith("content://")) {
+            // Content resolver'dan oku
             Uri uri = Uri.parse(pathOrUri);
-
-            if ("content".equalsIgnoreCase(uri.getScheme())) {
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setDataAndType(uri, "image/*");
-                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                startActivity(intent);
-                return;
+            InputStream is = getContentResolver().openInputStream(uri);
+            if (is == null) throw new Exception("Dosya açılamadı");
+            srcFile = new File(getCacheDir(), "temp_" + System.currentTimeMillis() + ".jpg");
+            FileOutputStream fos = new FileOutputStream(srcFile);
+            byte[] buffer = new byte[4096];
+            int read;
+            while ((read = is.read(buffer)) != -1) {
+                fos.write(buffer, 0, read);
             }
-
-            if ("http".equalsIgnoreCase(uri.getScheme()) || "https".equalsIgnoreCase(uri.getScheme())) {
-                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-                startActivity(intent);
-                return;
-            }
-
-            if ("file".equalsIgnoreCase(uri.getScheme())) {
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setDataAndType(uri, "image/*");
-                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                startActivity(intent);
-                return;
-            }
-
-            Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.setDataAndType(uri, "image/*");
-            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            startActivity(intent);
-
-        } catch (Exception e) {
-            Toast.makeText(this, "Fotoğraf açılamadı!", Toast.LENGTH_SHORT).show();
-            e.printStackTrace();
+            fos.close();
+            is.close();
+        } else if (pathOrUri.startsWith("file://")) {
+            // file:///data/... -> sadece path kısmını al
+            srcFile = new File(Uri.parse(pathOrUri).getPath());
+        } else {
+            // Doğrudan path verilmişse
+            srcFile = new File(pathOrUri);
         }
+
+        Uri fileUri;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            fileUri = FileProvider.getUriForFile(
+                    this,
+                    getPackageName() + ".provider",
+                    srcFile
+            );
+        } else {
+            fileUri = Uri.fromFile(srcFile);
+        }
+
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setDataAndType(fileUri, "image/*");
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivity(intent);
+        } else {
+            Toast.makeText(this, "Görüntüleyici uygulama bulunamadı!", Toast.LENGTH_SHORT).show();
+        }
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        Toast.makeText(this, "Fotoğraf açılamadı!", Toast.LENGTH_SHORT).show();
     }
-                    }
+}
+                 }
