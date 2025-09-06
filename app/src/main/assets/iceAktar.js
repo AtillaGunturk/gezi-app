@@ -32,7 +32,7 @@ function verileriIceAktar(file) {
 
     window.veriler.forEach((yer, i) => {
       const ozelIkon = L.icon({
-        iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/e/ec/RedDot.svg',
+        iconUrl: 'tr2.png',
         iconSize: [40, 40],
         iconAnchor: [20, 40],
         className: 'gezi-marker'
