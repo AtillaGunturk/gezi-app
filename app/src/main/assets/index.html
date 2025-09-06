@@ -32,7 +32,7 @@ input, textarea { padding: 4px; margin-bottom: 4px; font-size: 16px; border: 1px
   <button type="button" onclick="verileriDisariAktar()">📤 Verileri Dışa Aktar</button>
 
   <!-- İçe Aktar -->
-  <input type="file" id="jsonInput" accept="application/json" style="display:none"
+  <input type="file" id="jsonInput" accept=".json,application/json,text/plain" style="display:none"
          onchange="verileriIceAktar(this.files[0])">
   <button type="button" onclick="document.getElementById('jsonInput').click()">📥 Verileri İçe Aktar</button>
 
