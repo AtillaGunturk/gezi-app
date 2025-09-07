@@ -1,18 +1,25 @@
-	/* -----------------------------------------------------------
+/* -----------------------------------------------------------
    yeniKayit.js – Yeni Yer Ekleme ve Fotoğraf Yönetimi
    ✅ AndroidExport entegrasyonu
    ✅ Lightbox ve küçük önizleme
-   ✅ Marker ekleme
+   ✅ Marker yönetimi (yeniden çizme + silme sonrası reset)
 ----------------------------------------------------------- */
-
 
 // Fotoğraf alanı
 const fotoAlani = document.getElementById("fotoAlani");
 
-// Global callback Android'ten fotoğraf alındığında
+// Global aktif marker
+let aktifMarker = null;
+if (!window.markerlar) window.markerlar = [];
+if (!window.veriler) window.veriler = [];
+
+// -----------------------------------------------------------
+// Fotoğraf seçimi (Android veya tarayıcı)
+// -----------------------------------------------------------
+
 window.onAndroidFilePicked = (uid, path, name) => {
   const div = document.createElement("div");
-  
+
   const img = document.createElement("img");
   img.src = path;
   img.className = "thumb";
@@ -36,10 +43,9 @@ window.onAndroidFilePicked = (uid, path, name) => {
   fotoAlani.appendChild(div);
 };
 
-// Fotoğraf ekleme butonuna bağlanan fonksiyon
 function yeniFotoSatiriEkle() {
   if (window.AndroidExport && AndroidExport.pickPhoto) {
-    const uid = 'uid_' + Date.now();
+    const uid = "uid_" + Date.now();
     AndroidExport.pickPhoto(uid);
   } else {
     // Tarayıcı fallback
@@ -52,15 +58,53 @@ function yeniFotoSatiriEkle() {
   }
 }
 
-// Yeni yer kaydetme
-async function yeniYerKaydet() {
-  // Haritadaki tüm markerları temizleme kısmını istersen bırakabilirsin
-  window.markerlar?.forEach(m => window.harita.removeLayer(m));
+// -----------------------------------------------------------
+// Marker yönetimi
+// -----------------------------------------------------------
+
+function tumMarkerlariYenile() {
+  // Tüm markerları kaldır
+  window.markerlar.forEach(m => window.harita.removeLayer(m));
   window.markerlar = [];
-  aktifMarker = null;
 
-  // ❌ Bunu kaldır: window.veriler = [];
+  // Verilerden yeniden ekle
+  window.veriler.forEach((yer, i) => {
+    if (!yer.konum) return;
+    const [enlem, boylam] = yer.konum.map(Number);
 
+    const ozelIkon = L.icon({
+      iconUrl: "tr2.png",
+      iconSize: [24, 32],
+      iconAnchor: [12, 32],
+      className: "gezi-marker"
+    });
+
+    const mk = L.marker([enlem, boylam], { icon: ozelIkon }).addTo(window.harita);
+    mk.on("click", () => {
+      aktifMarker = mk;
+      if (window.ayrintiGoster) window.ayrintiGoster(yer, i);
+    });
+
+    window.markerlar.push(mk);
+  });
+}
+
+function markerSil(i) {
+  // Kaydı verilerden çıkar
+  window.veriler.splice(i, 1);
+
+  // Markerları baştan çiz
+  tumMarkerlariYenile();
+
+  // Yeni kayıt formuna dön
+  yeniKayitModu();
+}
+
+// -----------------------------------------------------------
+// Yeni kayıt / düzenleme kaydetme
+// -----------------------------------------------------------
+
+async function yeniYerKaydet() {
   const g = id => document.getElementById(id).value.trim();
   const isim = g("isim"), aciklama = g("aciklama");
   const enlem = parseFloat(g("enlem")), boylam = parseFloat(g("boylam"));
@@ -70,49 +114,41 @@ async function yeniYerKaydet() {
   }
 
   const fotolar = [];
-  const satırlar = fotoAlani.querySelectorAll("div");
-  satırlar.forEach(div => {
+  fotoAlani.querySelectorAll("div").forEach(div => {
     const img = div.querySelector("img");
     const alt = div.querySelector("input[type=text]").value || "Fotoğraf";
     if (img?.src) fotolar.push({ yol: img.src, alt });
   });
 
-  const yeniYer = { isim, aciklama, konum: [enlem, boylam], fotolar };
+  const yerForm = document.getElementById("yerForm");
+  const editIndex = yerForm.dataset.editIndex;
 
-  if (!window.veriler) window.veriler = [];
-  window.veriler.push(yeniYer);
-
-  
-  // Marker ekleme
-  if (window.harita) {
-    const ozelIkon = L.icon({
-      iconUrl: 'tr2.png',
-      iconSize: [40, 40],
-      iconAnchor: [20, 40],
-      className: 'gezi-marker'
-    });
-
-    const mk = L.marker([enlem, boylam], { icon: ozelIkon }).addTo(window.harita);
-    mk.on("click", () => {
-      if (window.ayrintiGoster) window.ayrintiGoster(yeniYer, window.veriler.length - 1);
-    });
-
-    if (!window.markerlar) window.markerlar = [];
-    window.markerlar.push(mk);
+  if (editIndex !== undefined) {
+    // 📌 Düzenleme modunda: mevcut kaydı güncelle
+    const y = window.veriler[editIndex];
+    y.isim = isim;
+    y.aciklama = aciklama;
+    y.konum = [enlem, boylam];
+    y.fotolar = fotolar;
+  } else {
+    // 📌 Yeni kayıt ekle
+    const yeniYer = { isim, aciklama, konum: [enlem, boylam], fotolar };
+    window.veriler.push(yeniYer);
   }
 
-  // Form temizleme
-  document.getElementById("yerForm").reset();
-  fotoAlani.innerHTML = "";
+  // Markerları güncelle
+  tumMarkerlariYenile();
 
-  // Harita güncelleme
-  if (window.goster) window.goster();
+  // Form reset + yeni kayıt moduna dön
+  yeniKayitModu();
+
+  // Haritayı konuma taşı
   if (window.harita) window.harita.flyTo([enlem, boylam], 9);
 }
 
+// -----------------------------------------------------------
 // Düzenleme modu
-// Global aktif marker
-let aktifMarker = null;
+// -----------------------------------------------------------
 
 function düzenlemeModu(i) {
   const y = window.veriler[i];
@@ -124,24 +160,28 @@ function düzenlemeModu(i) {
   f("enlem").value = y.konum?.[0] ?? "";
   f("boylam").value = y.konum?.[1] ?? "";
 
-  // Fotoğraf alanını temizle ve mevcut fotoğrafları ekle
-  const fotoAlani = f("fotoAlani");
+  // Fotoğrafları doldur
   fotoAlani.innerHTML = "";
-
   (y.fotolar ?? []).forEach((ft, j) => {
     const div = document.createElement("div");
     const img = document.createElement("img");
     img.src = ft.yol;
     img.className = "thumb";
+
     const input = document.createElement("input");
     input.type = "text";
     input.value = ft.alt || "";
     input.placeholder = "Açıklama";
     input.style = "width: 45%; margin-left: 8px;";
-    input.oninput = () => ft.alt = input.value;
+    input.oninput = () => (ft.alt = input.value);
+
     const silBtn = document.createElement("button");
     silBtn.textContent = "🗑️";
-    silBtn.onclick = () => { y.fotolar.splice(j, 1); div.remove(); };
+    silBtn.onclick = () => {
+      y.fotolar.splice(j, 1);
+      div.remove();
+    };
+
     div.appendChild(img);
     div.appendChild(input);
     div.appendChild(silBtn);
@@ -151,39 +191,31 @@ function düzenlemeModu(i) {
   f("yerForm").dataset.editIndex = i;
   f("formBaslik").textContent = "Düzenle";
 
-  // Eski marker varsa haritadan kaldır
-  if (aktifMarker) {
-    window.harita.removeLayer(aktifMarker);
-    const idx = window.markerlar.indexOf(aktifMarker);
-    if (idx !== -1) window.markerlar.splice(idx, 1);
-    aktifMarker = null;
+  // Markerları yeniden çiz
+  tumMarkerlariYenile();
+
+  // Haritayı yeni konuma götür
+  if (y.konum) {
+    window.harita.flyTo([parseFloat(y.konum[0]), parseFloat(y.konum[1])], 9);
   }
-
-  // Yeni marker ekle ve aktif marker olarak ata
-  const enlem = parseFloat(y.konum[0]);
-  const boylam = parseFloat(y.konum[1]);
-  const ozelIkon = L.icon({
-    iconUrl: 'tr2.png',
-    iconSize: [24, 32],
-    iconAnchor: [12, 32],
-    className: 'gezi-marker'
-  });
-
-  const mk = L.marker([enlem, boylam], { icon: ozelIkon }).addTo(window.harita);
-  aktifMarker = mk;
-  window.markerlar.push(mk);
-
-  mk.on("click", () => {
-    aktifMarker = mk;        // Tıklanan marker aktif marker olur
-    ayrintiGoster(y, i);
-  });
-
-  // Haritayı yeni konuma taşı
-  window.harita.flyTo([enlem, boylam], 9);
 }
 
-window.düzenlemeModu = düzenlemeModu;
+// -----------------------------------------------------------
+// Yeni kayıt modu (form sıfırlama)
+// -----------------------------------------------------------
+
+function yeniKayitModu() {
+  document.getElementById("yerForm").reset();
+  fotoAlani.innerHTML = "";
+  document.getElementById("formBaslik").textContent = "Yeni Kayıt";
+  delete document.getElementById("yerForm").dataset.editIndex;
+}
+
+// -----------------------------------------------------------
 // Globale aç
-window.yeniYerKaydet = yeniYerKaydet;
+// -----------------------------------------------------------
 window.yeniFotoSatiriEkle = yeniFotoSatiriEkle;
+window.yeniYerKaydet = yeniYerKaydet;
 window.düzenlemeModu = düzenlemeModu;
+window.markerSil = markerSil;
+window.yeniKayitModu = yeniKayitModu;
