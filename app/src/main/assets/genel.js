@@ -38,7 +38,7 @@ function zoomFoto(src) {
 // <--- ekledik
   if (!src) return alert("Foto açılamadı!");
   const safeSrc = src.replace(/"/g, '&quot;').replace(/'/g, "\\'");
-  alert("safeSrc = " + src);
+  
   if (window.AndroidExport && AndroidExport.openPhoto) {
     AndroidExport.openPhoto(toFileURL(src));
   } else {
