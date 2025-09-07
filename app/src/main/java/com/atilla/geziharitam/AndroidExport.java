@@ -94,7 +94,6 @@ public class AndroidExport {
     // Fotoğraf aç (JS -> Android)
     @JavascriptInterface
     public void openPhoto(String uriOrPath) {
-        Log.d("AndroidExport", "Android'e gonderilen src: " + uriOrPath); // BURAYA AL
         if (context instanceof MainActivity) {
             ((MainActivity) context).openPhoto(uriOrPath);
         }
