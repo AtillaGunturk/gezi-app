@@ -54,18 +54,10 @@ jobs:
           rm -rf build .gradle .idea *.iml
           rm -rf ~/.gradle/caches/ ~/.gradle/daemon/ ~/.gradle/native/ ~/.gradle/wrapper/
           rm -rf ~/.android/build-cache/
-          
-          echo ">>> Assets içeriği:"
-          ls -l app/src/main/assets
-          echo ">>> res içeriği:"
-          ls -l app/src/main/res
           ./gradlew :app:assembleRelease --no-daemon --parallel --stacktrace | tee build.log
         env:
           MY_STORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
           MY_KEY_ALIAS: ${{ secrets.DEBUG_KEY_ALIAS }}
-
-      - name: APK İçeriği
-        run: unzip -l app/build/outputs/apk/release/*.apk | grep assets/
 
       - name: APK Yükle
         if: always()
@@ -81,6 +73,7 @@ jobs:
         with:
           name: build-log
           path: build.log
+
 
 
 
