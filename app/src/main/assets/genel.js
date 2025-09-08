@@ -91,12 +91,22 @@ function ayrintiGoster(yer, i) {
   document.getElementById("bilgiPaneli").innerHTML = html;
 }
 
-function markerSil(i) {
-  if (!window.veriler || !window.veriler[i]) return;
+
+  function markerSil(i) {
+  alert("Silinecek index: " + i);
+
+  if (!window.veriler || !window.veriler[i]) {
+    alert("Veri bulunamadı! i=" + i);
+    return;
+  }
+
   if (!confirm("Bu yeri silmek istiyor musunuz?")) return;
 
   // 1) Veriyi sil
+  alert("Silmeden önce veriler uzunluk: " + window.veriler.length);
   window.veriler.splice(i, 1);
+  alert("Sildikten sonra veriler uzunluk: " + window.veriler.length);
+  alert("Kalan veriler: " + JSON.stringify(window.veriler));
 
   // 2) Paneli sıfırla
   const panel = document.getElementById("bilgiPaneli");
@@ -106,7 +116,10 @@ function markerSil(i) {
 
   // 3) Eski markerları kaldır
   if (window.markerlar) {
-    window.markerlar.forEach(m => window.harita.removeLayer(m));
+    window.markerlar.forEach((m, idx) => {
+      window.harita.removeLayer(m);
+      alert("Marker " + idx + " haritadan kaldırıldı");
+    });
   }
   window.markerlar = [];
 
@@ -117,8 +130,9 @@ function markerSil(i) {
     iconAnchor: [16, 32]
   });
 
-  // 5) Yeniden markerları oluştur (ayrintiGoster ile!)
+  // 5) Markerları yeniden oluştur
   window.veriler.forEach((v, idx) => {
+    alert("Yeniden marker ekleniyor: " + v.isim + " (index=" + idx + ")");
     const marker = L.marker(v.konum, { icon }).addTo(window.harita);
     window.markerlar.push(marker);
 
@@ -127,6 +141,8 @@ function markerSil(i) {
 
   // 6) Haritayı varsayılana döndür
   window.harita.setView([39.0, 35.0], 6);
+
+  alert("İşlem tamamlandı. Kalan marker sayısı: " + window.markerlar.length);
 }
 // Globale aç
 window.markerSil = markerSil;
