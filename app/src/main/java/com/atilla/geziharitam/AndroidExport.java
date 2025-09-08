@@ -34,18 +34,48 @@ public class AndroidExport {
 
     // JSON dosyasını kaydet
     public void onFileSelectedToSave(Uri uri) {
-        if (jsonToSave == null || uri == null) return;
-        try (OutputStream outputStream = context.getContentResolver().openOutputStream(uri)) {
-            if (outputStream != null) {
-                outputStream.write(jsonToSave.getBytes(StandardCharsets.UTF_8));
+    if (jsonToSave == null || uri == null) return;
+
+    try {
+        // Mevcut JSON'u oku
+        String existingJson = "";
+        try (InputStream is = context.getContentResolver().openInputStream(uri)) {
+            if (is != null) {
+                byte[] buffer = new byte[is.available()];
+                is.read(buffer);
+                existingJson = new String(buffer, StandardCharsets.UTF_8).trim();
             }
-            webView.post(() -> webView.evaluateJavascript(
-                    "alert('Veriler başarıyla kaydedildi!')", null
-            ));
         } catch (Exception e) {
-            Log.e("AndroidExport", "Dosya kaydedilemedi", e);
+            Log.w("AndroidExport", "Mevcut JSON okunamadı, yeni dosya oluşturulacak");
         }
+
+        // Mevcut JSON varsa array içine al, yoksa direkt yaz
+        String newJson;
+        if (!existingJson.isEmpty()) {
+            existingJson = existingJson.replaceAll("(?s)^\\s*\\[|\\]\\s*$", ""); // baştaki/sondaki [] kaldır
+            newJson = "[" + existingJson + "," + jsonToSave.substring(1, jsonToSave.length() - 1) + "]";
+        } else {
+            newJson = jsonToSave;
+        }
+
+        // Dosyaya yaz (truncate mode)
+        try (OutputStream outputStream = context.getContentResolver().openOutputStream(uri, "wt")) {
+            if (outputStream != null) {
+                outputStream.write(newJson.getBytes(StandardCharsets.UTF_8));
+            }
+        }
+
+        webView.post(() -> webView.evaluateJavascript(
+                "alert('✅ Veriler başarıyla kaydedildi!')", null
+        ));
+
+    } catch (Exception e) {
+        Log.e("AndroidExport", "Dosya kaydedilemedi", e);
+        webView.post(() -> webView.evaluateJavascript(
+                "alert('❌ Veriler kaydedilemedi!')", null
+        ));
     }
+        }
 
     // Fotoğraf seçme (JS -> Android)
     @JavascriptInterface
