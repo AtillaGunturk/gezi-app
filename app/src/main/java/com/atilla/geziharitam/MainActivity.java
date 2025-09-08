@@ -239,7 +239,6 @@ public class MainActivity extends AppCompatActivity {
     @JavascriptInterface
     public void openPhoto(String pathOrUri) {
     try {
-        Log.d("MainActivity", "openPhoto pathOrUri: " + pathOrUri); // <-- burada log
         Toast.makeText(this, "DEBUG: " + pathOrUri, Toast.LENGTH_LONG).show(); // opsiyonel 
         File srcFile;
 
