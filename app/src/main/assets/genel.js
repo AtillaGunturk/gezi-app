@@ -106,7 +106,7 @@ function markerSil(i) {
   window.veriler.splice(i, 1);
 
   // Paneli tamamen gizle
-  document.getElementById("bilgiPaneli").innerHTML = html;
+  document.getElementById("bilgiPaneli").innerHTML = "🗺️ Haritadan bir yeri seçtiğinizde detayları burada görünecek";
 
   // Harita görünümünü varsayılana döndür
   if (window.harita) window.harita.setView([39.0, 35.0], 6);
