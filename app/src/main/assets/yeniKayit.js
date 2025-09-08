@@ -89,16 +89,7 @@ function tumMarkerlariYenile() {
   });
 }
 
-function markerSil(i) {
-  // Kaydı verilerden çıkar
-  window.veriler.splice(i, 1);
 
-  // Markerları baştan çiz
-  tumMarkerlariYenile();
-
-  // Yeni kayıt formuna dön
-  yeniKayitModu();
-}
 
 // -----------------------------------------------------------
 // Yeni kayıt / düzenleme kaydetme
