@@ -90,36 +90,42 @@ function ayrintiGoster(yer, i) {
     </div>`;
   document.getElementById("bilgiPaneli").innerHTML = html;
 }
-function markerSil(marker) {
-  if (!marker) return;
 
-  // Silmeden önce panel ve diziler
-  alert("Silmeden önce veriler:\n" + JSON.stringify(window.veriler, null, 2));
-  alert("Silmeden önce markerlar sayısı: " + window.markerlar.length);
 
+function markerSil(i) {
+  if (!window.veriler || !window.veriler[i]) return;
   if (!confirm("Bu yeri silmek istiyor musunuz?")) return;
 
-  const index = window.markerlar.indexOf(marker);
-  if (index === -1) return;
-
-  // Haritadan kaldır
-  window.harita.removeLayer(marker);
-
-  // Marker ve veri dizilerinden sil
-  window.markerlar.splice(index, 1);
-  window.veriler.splice(index, 1);
+  // Veriden sil
+  window.veriler.splice(i, 1);
 
   // Paneli sıfırla
   const panel = document.getElementById("bilgiPaneli");
-  if (panel) panel.innerHTML = "🗺️ Haritadan bir yeri seçtiğinizde detayları burada görünecek";
+  if (panel) {
+    panel.innerHTML = "🗺️ Haritadan bir yeri seçtiğinizde detayları burada görünecek";
+  }
+
+  // Haritayı sıfırla
+  window.harita.eachLayer(layer => {
+    if (layer instanceof L.Marker) {
+      window.harita.removeLayer(layer);
+    }
+  });
+
+  // Verilerden markerları yeniden çiz
+  window.veriler.forEach((v, idx) => {
+    const marker = L.marker(v.konum).addTo(window.harita);
+    marker.on("click", () => {
+      // buraya istediğin ayrıntı gösterme fonksiyonunu bağlayabilirsin
+      console.log("Seçilen:", v.isim, idx);
+      // markerSil(idx); // direkt silmeye de bağlanabilir
+    });
+  });
 
   // Haritayı varsayılan konuma döndür
-  if (window.harita) window.harita.setView([39.0, 35.0], 6);
-
-  // Silindikten sonra durum
-  alert("Silindikten sonra veriler:\n" + JSON.stringify(window.veriler, null, 2));
-  alert("Silindikten sonra markerlar sayısı: " + window.markerlar.length);
+  window.harita.setView([39.0, 35.0], 6);
 }
+
 // Globale aç
 window.markerSil = markerSil;
 function fotoEkleBaslat(i) { düzenlemeModu(i); }
