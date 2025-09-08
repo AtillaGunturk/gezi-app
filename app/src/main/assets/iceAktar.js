@@ -1,12 +1,3 @@
-// Fotoğraf yolu normalize edici
-function normalizeYol(yol) {
-  if (!yol) return yol;
-  if (yol.startsWith("/data/")) {
-    return "file://" + yol;
-  }
-  return yol;
-}
-
 function verileriIceAktar(file) {
   if (!file) return alert("Dosya seçilmedi!");
 
@@ -30,14 +21,6 @@ function verileriIceAktar(file) {
         return;
       }
 
-      // Fotoğrafları normalize et
-      if (yeni.fotolar) {
-        yeni.fotolar = yeni.fotolar.map(ft => ({
-          yol: normalizeYol(ft.yol),
-          alt: ft.alt
-        }));
-      }
-
       // Aynı kayıt var mı kontrol et
       const mevcut = window.veriler.find(v =>
         v.isim === yeni.isim &&
@@ -50,7 +33,7 @@ function verileriIceAktar(file) {
         // Fotoğrafları birleştir (tekrarsız)
         (yeni.fotolar ?? []).forEach(ft => {
           const zatenVar = (mevcut.fotolar ?? []).some(f =>
-            normalizeYol(f.yol) === ft.yol && f.alt === ft.alt
+            f.yol === ft.yol && f.alt === ft.alt
           );
           if (!zatenVar) {
             if (!mevcut.fotolar) mevcut.fotolar = [];
