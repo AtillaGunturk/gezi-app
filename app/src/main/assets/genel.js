@@ -90,51 +90,44 @@ function ayrintiGoster(yer, i) {
     </div>`;
   document.getElementById("bilgiPaneli").innerHTML = html;
 }
+
 function markerSil(i) {
   if (!window.veriler || !window.veriler[i]) return;
   if (!confirm("Bu yeri silmek istiyor musunuz?")) return;
 
-  // Veriyi sil
+  // 1) Veriyi sil
   window.veriler.splice(i, 1);
 
-  // Paneli sıfırla
+  // 2) Paneli sıfırla
   const panel = document.getElementById("bilgiPaneli");
   if (panel) {
     panel.innerHTML = "🗺️ Haritadan bir yeri seçtiğinizde detayları burada görünecek";
   }
 
-  // Tüm markerları temizle
-  window.harita.eachLayer(layer => {
-    if (layer instanceof L.Marker) {
-      window.harita.removeLayer(layer);
-    }
-  });
+  // 3) Eski markerları kaldır
+  if (window.markerlar) {
+    window.markerlar.forEach(m => window.harita.removeLayer(m));
+  }
+  window.markerlar = [];
 
-  // Tek ikon
+  // 4) İkon
   const icon = L.icon({
     iconUrl: "icons/tr2.png",
     iconSize: [32, 32],
     iconAnchor: [16, 32]
   });
 
-  // Verilerden yeniden marker çiz
+  // 5) Yeniden markerları oluştur (ayrintiGoster ile!)
   window.veriler.forEach((v, idx) => {
     const marker = L.marker(v.konum, { icon }).addTo(window.harita);
+    window.markerlar.push(marker);
 
-    marker.on("click", () => {
-      const panel = document.getElementById("bilgiPaneli");
-      if (panel) {
-        panel.innerHTML = `<b>${v.isim}</b><br>${v.aciklama}<br>
-          <button onclick="markerSil(${idx})">❌ Sil</button>`;
-      }
-    });
+    marker.on("click", () => ayrintiGoster(idx));
   });
 
-  // Haritayı varsayılana döndür
+  // 6) Haritayı varsayılana döndür
   window.harita.setView([39.0, 35.0], 6);
 }
-
-
 // Globale aç
 window.markerSil = markerSil;
 function fotoEkleBaslat(i) { düzenlemeModu(i); }
