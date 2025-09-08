@@ -92,27 +92,20 @@ function ayrintiGoster(yer, i) {
 }
 
 
-  function markerSil(marker) {
-  if (!marker) return;
+function markerSil(i) { if (!window.veriler || !window.veriler[i]) return; if (!confirm("Bu yeri silmek istiyor musunuz?")) return;
 
-  const index = window.markerlar.indexOf(marker);
-  if (index === -1) return;
-  if (!confirm("Bu yeri silmek istiyor musunuz?")) return;
+// Marker kaldır
+      if (window.markerlar && window.markerlar[i]) { window.harita.removeLayer(window.markerlar[i]); window.markerlar.splice(i, 1); }
 
-  // Marker'ı kaldır
-  window.harita.removeLayer(marker);
-  window.markerlar.splice(index, 1);
+// Veri kaldır 
+                       window.veriler.splice(i, 1);
 
-  // Veriyi kaldır
-  window.veriler.splice(index, 1);
+// Paneli tamamen gizle 
+                       document.getElementById("bilgiPaneli").innerHTML = "🗺️ Haritadan bir yeri seçtiğinizde detayları burada görünecek";
 
-  // Paneli sıfırla
-  const panel = document.getElementById("bilgiPaneli");
-  if (panel) panel.innerHTML = "🗺️ Haritadan bir yeri seçtiğinizde detayları burada görünecek";
+// Harita görünümünü varsayılana döndür 
+                       if (window.harita) window.harita.setView([39.0, 35.0], 6);
 
-  // Harita görünümünü varsayılan konuma döndür
-  if (window.harita) window.harita.setView([39.0, 35.0], 6);
-}
 // Globale aç
 window.markerSil = markerSil;
 function fotoEkleBaslat(i) { düzenlemeModu(i); }
