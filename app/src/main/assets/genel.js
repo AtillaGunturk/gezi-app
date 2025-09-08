@@ -91,14 +91,16 @@ function ayrintiGoster(yer, i) {
   document.getElementById("bilgiPaneli").innerHTML = html;
 }
 function markerSil(marker) {
-  const panel = document.getElementById("bilgiPaneli");
-  if (panel) panel.innerHTML = "🗺️ Haritadan bir yeri seçtiğinizde detayları burada görünecek";
-
   if (!marker) return;
+
+  // Silmeden önce panel ve diziler
+  alert("Silmeden önce veriler:\n" + JSON.stringify(window.veriler, null, 2));
+  alert("Silmeden önce markerlar sayısı: " + window.markerlar.length);
+
   if (!confirm("Bu yeri silmek istiyor musunuz?")) return;
 
   const index = window.markerlar.indexOf(marker);
-  if (index === -1) return; // Marker dizide yoksa çık
+  if (index === -1) return;
 
   // Haritadan kaldır
   window.harita.removeLayer(marker);
@@ -107,7 +109,16 @@ function markerSil(marker) {
   window.markerlar.splice(index, 1);
   window.veriler.splice(index, 1);
 
+  // Paneli sıfırla
+  const panel = document.getElementById("bilgiPaneli");
+  if (panel) panel.innerHTML = "🗺️ Haritadan bir yeri seçtiğinizde detayları burada görünecek";
+
+  // Haritayı varsayılan konuma döndür
   if (window.harita) window.harita.setView([39.0, 35.0], 6);
+
+  // Silindikten sonra durum
+  alert("Silindikten sonra veriler:\n" + JSON.stringify(window.veriler, null, 2));
+  alert("Silindikten sonra markerlar sayısı: " + window.markerlar.length);
 }
 // Globale aç
 window.markerSil = markerSil;
