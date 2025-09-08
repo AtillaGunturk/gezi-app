@@ -96,18 +96,20 @@ function markerSil(i) {
   if (!window.veriler || !window.veriler[i]) return;
   if (!confirm("Bu yeri silmek istiyor musunuz?")) return;
 
+  // Marker kaldır
   if (window.markerlar && window.markerlar[i]) {
     window.harita.removeLayer(window.markerlar[i]);
     window.markerlar.splice(i, 1);
   }
 
+  // Veri kaldır
   window.veriler.splice(i, 1);
 
-  if (window.goster) window.goster();
-
+  // Paneli tamamen gizle
   const panel = document.getElementById("bilgiPaneli");
-  if (panel) panel.textContent = "Yer silindi.";
+  if (panel) panel.style.display = "none";
 
+  // Harita görünümünü varsayılana döndür
   if (window.harita) window.harita.setView([39.0, 35.0], 6);
 }
 
