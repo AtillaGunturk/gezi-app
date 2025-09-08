@@ -101,17 +101,22 @@ function markerSil(i) {
   // 3️⃣ Kullanıcı onayı
   if (!confirm("Bu yeri silmek istiyor musunuz?")) return;
 
+  // Silmeden önce verileri göster
+  alert("Silmeden önce veriler:\n" + JSON.stringify(window.veriler, null, 2));
+
   // 4️⃣ Marker referansını sakla
   const marker = window.markerlar[i];
-
-  // 5️⃣ Marker ve veriyi dizilerden sil
-  window.markerlar.splice(i, 1);
-  window.veriler.splice(i, 1);
 
   // 6️⃣ Haritadan kaldır
   if (marker && window.harita) {
     window.harita.removeLayer(marker);
   }
+  // 5️⃣ Marker ve veriyi dizilerden sil
+  window.markerlar.splice(i, 1);
+  window.veriler.splice(i, 1);
+
+  // Silindikten sonra verileri göster
+  alert("Silindikten sonra veriler:\n" + JSON.stringify(window.veriler, null, 2));
 
   // 7️⃣ Haritayı varsayılan konuma döndür
   if (window.harita) {
