@@ -214,10 +214,4 @@ function fotoEkleBaslat(i) { düzenlemeModu(i); }
 window.goster = goster;
 window.ayrintiGoster = ayrintiGoster;
 window.fotoEkleBaslat = fotoEkleBaslat;
-// Globale aç
-window.markerSil = markerSil;
-function fotoEkleBaslat(i) { düzenlemeModu(i); }
-window.goster = goster;
-window.ayrintiGoster = ayrintiGoster;
-window.fotoEkleBaslat = fotoEkleBaslat;
 
