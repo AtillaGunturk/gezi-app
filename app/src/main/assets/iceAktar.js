@@ -11,17 +11,37 @@ function verileriIceAktar(file) {
       return alert("JSON okunamadı: " + err.message);
     }
 
-    // Global veriler dizisi yoksa oluştur
     if (!window.veriler) window.veriler = [];
     const mevcutSayisi = window.veriler.length;
 
     // JSON verilerini mevcut verilerle birleştir
-    json.forEach(yer => {
-      // enlem/boylam sırası [lat, lng] olmalı
-      if (yer.konum && yer.konum.length === 2) {
-        window.veriler.push(yer);
+    json.forEach(yeni => {
+      if (!(yeni.konum && yeni.konum.length === 2)) {
+        console.warn("Geçersiz konum:", yeni);
+        return;
+      }
+
+      // Aynı kayıt var mı kontrol et
+      const mevcut = window.veriler.find(v =>
+        v.isim === yeni.isim &&
+        v.aciklama === yeni.aciklama &&
+        v.konum?.[0] === yeni.konum?.[0] &&
+        v.konum?.[1] === yeni.konum?.[1]
+      );
+
+      if (mevcut) {
+        // Fotoğrafları birleştir (tekrarsız)
+        (yeni.fotolar ?? []).forEach(ft => {
+          const zatenVar = (mevcut.fotolar ?? []).some(f =>
+            f.yol === ft.yol && f.alt === ft.alt
+          );
+          if (!zatenVar) {
+            if (!mevcut.fotolar) mevcut.fotolar = [];
+            mevcut.fotolar.push(ft);
+          }
+        });
       } else {
-        console.warn("Geçersiz konum:", yer);
+        window.veriler.push(yeni);
       }
     });
 
@@ -42,7 +62,7 @@ function verileriIceAktar(file) {
       window.markerlar.push(mk);
     });
 
-    alert(`${window.veriler.length - mevcutSayisi} kayıt eklendi, toplam ${window.veriler.length}`);
+    alert(`${window.veriler.length - mevcutSayisi} yeni kayıt eklendi, toplam ${window.veriler.length}`);
   };
 
   reader.readAsText(file);
