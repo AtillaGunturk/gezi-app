@@ -78,7 +78,7 @@ function ayrintiGoster(yer, i) {
       <div style="margin-bottom:6px; display:inline-block;">
         <img src="${src}" alt="${f.alt || ''}" 
              style="width:80px; height:auto; cursor:pointer; margin:4px; object-fit:cover;"
-             onclick="alert('Fotoğraf tıklanıyor, src: ${safeSrc}'); zoomFoto('${src}')">
+             onclick=" zoomFoto('${src}')">
         <div style="font-size:14px;color:#555">${f.alt || ''}</div>
       </div>`;
   });
