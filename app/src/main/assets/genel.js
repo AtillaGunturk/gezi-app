@@ -105,12 +105,13 @@ function markerSil(i) {
   // Veri kaldır
   window.veriler.splice(i, 1);
 
+  // Harita görünümünü varsayılana döndür
+  if (window.harita) window.harita.setView([39.0, 35.0], 6);
+
   // Paneli tamamen gizle
   const panel = document.getElementById("bilgiPaneli");
   if (panel) panel.style.display = "none";
 
-  // Harita görünümünü varsayılana döndür
-  if (window.harita) window.harita.setView([39.0, 35.0], 6);
 }
 
 // Globale aç
