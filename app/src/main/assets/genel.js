@@ -92,57 +92,26 @@ function ayrintiGoster(yer, i) {
 }
 
 
-  function markerSil(i) {
-  alert("Silinecek index: " + i);
+  function markerSil(marker) {
+  if (!marker) return;
 
-  if (!window.veriler || !window.veriler[i]) {
-    alert("Veri bulunamadı! i=" + i);
-    return;
-  }
-
+  const index = window.markerlar.indexOf(marker);
+  if (index === -1) return;
   if (!confirm("Bu yeri silmek istiyor musunuz?")) return;
 
-  // 1) Veriyi sil
-  alert("Silmeden önce veriler uzunluk: " + window.veriler.length);
-  window.veriler.splice(i, 1);
-  alert("Sildikten sonra veriler uzunluk: " + window.veriler.length);
-  alert("Kalan veriler: " + JSON.stringify(window.veriler));
+  // Marker'ı kaldır
+  window.harita.removeLayer(marker);
+  window.markerlar.splice(index, 1);
 
-  // 2) Paneli sıfırla
+  // Veriyi kaldır
+  window.veriler.splice(index, 1);
+
+  // Paneli sıfırla
   const panel = document.getElementById("bilgiPaneli");
-  if (panel) {
-    panel.innerHTML = "🗺️ Haritadan bir yeri seçtiğinizde detayları burada görünecek";
-  }
+  if (panel) panel.innerHTML = "🗺️ Haritadan bir yeri seçtiğinizde detayları burada görünecek";
 
-  // 3) Eski markerları kaldır
-  if (window.markerlar) {
-    window.markerlar.forEach((m, idx) => {
-      window.harita.removeLayer(m);
-      alert("Marker " + idx + " haritadan kaldırıldı");
-    });
-  }
-  window.markerlar = [];
-
-  // 4) İkon
-  const icon = L.icon({
-    iconUrl: "icons/tr2.png",
-    iconSize: [32, 32],
-    iconAnchor: [16, 32]
-  });
-
-  // 5) Markerları yeniden oluştur
-  window.veriler.forEach((v, idx) => {
-    alert("Yeniden marker ekleniyor: " + v.isim + " (index=" + idx + ")");
-    const marker = L.marker(v.konum, { icon }).addTo(window.harita);
-    window.markerlar.push(marker);
-
-    marker.on("click", () => ayrintiGoster(idx));
-  });
-
-  // 6) Haritayı varsayılana döndür
-  window.harita.setView([39.0, 35.0], 6);
-
-  alert("İşlem tamamlandı. Kalan marker sayısı: " + window.markerlar.length);
+  // Harita görünümünü varsayılan konuma döndür
+  if (window.harita) window.harita.setView([39.0, 35.0], 6);
 }
 // Globale aç
 window.markerSil = markerSil;
