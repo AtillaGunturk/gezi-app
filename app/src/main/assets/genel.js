@@ -90,31 +90,33 @@ function ayrintiGoster(yer, i) {
     </div>`;
   document.getElementById("bilgiPaneli").innerHTML = html;
 }
-
-// Marker silme
-
 function markerSil(i) {
-  // Paneli her durumda sıfırla
+  // 1️⃣ Paneli her durumda sıfırla
   const panel = document.getElementById("bilgiPaneli");
   if (panel) panel.innerHTML = "🗺️ Haritadan bir yeri seçtiğinizde detayları burada görünecek";
 
-  // Marker veya veri yoksa çık
+  // 2️⃣ Marker veya veri yoksa çık
   if (!window.veriler || !window.veriler[i]) return;
 
-  // Kullanıcı onayı
+  // 3️⃣ Kullanıcı onayı
   if (!confirm("Bu yeri silmek istiyor musunuz?")) return;
 
-  // Marker kaldır
-  if (window.markerlar && window.markerlar[i]) {
-    window.harita.removeLayer(window.markerlar[i]);
-    window.markerlar.splice(i, 1);
-  }
+  // 4️⃣ Marker referansını sakla
+  const marker = window.markerlar[i];
 
-  // Veri kaldır
+  // 5️⃣ Marker ve veriyi dizilerden sil
+  window.markerlar.splice(i, 1);
   window.veriler.splice(i, 1);
 
-  // Haritayı varsayılan konuma döndür
-  if (window.harita) window.harita.setView([39.0, 35.0], 6);
+  // 6️⃣ Haritadan kaldır
+  if (marker && window.harita) {
+    window.harita.removeLayer(marker);
+  }
+
+  // 7️⃣ Haritayı varsayılan konuma döndür
+  if (window.harita) {
+    window.harita.setView([39.0, 35.0], 6);
+  }
 }
 // Globale aç
 window.markerSil = markerSil;
