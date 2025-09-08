@@ -204,8 +204,7 @@ function markerSil(i) {
   if (window.harita) window.harita.setView([39.0, 35.0], 6);
 
   // Paneli tamamen gizle
-  const panel = document.getElementById("bilgiPaneli");
-  if (panel) panel.style.display = "none";
+  document.getElementById("bilgiPaneli").style.display = "none";
 
 }
 
