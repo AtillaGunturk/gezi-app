@@ -90,38 +90,24 @@ function ayrintiGoster(yer, i) {
     </div>`;
   document.getElementById("bilgiPaneli").innerHTML = html;
 }
-function markerSil(i) {
-  // 1️⃣ Paneli her durumda sıfırla
+function markerSil(marker) {
   const panel = document.getElementById("bilgiPaneli");
   if (panel) panel.innerHTML = "🗺️ Haritadan bir yeri seçtiğinizde detayları burada görünecek";
 
-  // 2️⃣ Marker veya veri yoksa çık
-  if (!window.veriler || !window.veriler[i]) return;
-
-  // 3️⃣ Kullanıcı onayı
+  if (!marker) return;
   if (!confirm("Bu yeri silmek istiyor musunuz?")) return;
 
-  // Silmeden önce verileri göster
-  alert("Silmeden önce veriler:\n" + JSON.stringify(window.veriler, null, 2));
+  const index = window.markerlar.indexOf(marker);
+  if (index === -1) return; // Marker dizide yoksa çık
 
-  // 4️⃣ Marker referansını sakla
-  const marker = window.markerlar[i];
+  // Haritadan kaldır
+  window.harita.removeLayer(marker);
 
-  // 6️⃣ Haritadan kaldır
-  if (marker && window.harita) {
-    window.harita.removeLayer(marker);
-  }
-  // 5️⃣ Marker ve veriyi dizilerden sil
-  window.markerlar.splice(i, 1);
-  window.veriler.splice(i, 1);
+  // Marker ve veri dizilerinden sil
+  window.markerlar.splice(index, 1);
+  window.veriler.splice(index, 1);
 
-  // Silindikten sonra verileri göster
-  alert("Silindikten sonra veriler:\n" + JSON.stringify(window.veriler, null, 2));
-
-  // 7️⃣ Haritayı varsayılan konuma döndür
-  if (window.harita) {
-    window.harita.setView([39.0, 35.0], 6);
-  }
+  if (window.harita) window.harita.setView([39.0, 35.0], 6);
 }
 // Globale aç
 window.markerSil = markerSil;
