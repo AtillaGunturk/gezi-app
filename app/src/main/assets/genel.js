@@ -100,7 +100,7 @@ function markerSil(i) {
   if (window.markerlar && window.markerlar[i]) {
     window.harita.removeLayer(window.markerlar[i]);
     window.markerlar.splice(i, 1);
-  }
+  
 
   // Veri kaldır
   window.veriler.splice(i, 1);
@@ -108,7 +108,7 @@ function markerSil(i) {
   // Paneli tamamen gizle
   let html="🗺️ Haritadan bir yeri seçtiğinizde detayları burada görünecek.";
   document.getElementById("bilgiPaneli").innerHTML = html;
-
+}
   // Harita görünümünü varsayılana döndür
   if (window.harita) window.harita.setView([39.0, 35.0], 6);
 
