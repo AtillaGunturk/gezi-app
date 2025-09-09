@@ -88,7 +88,7 @@ function ayrintiGoster(yer, i) {
       <button onclick="markerSil(${i})" style="margin-left:8px;color:red">🗑️ Yer Sil</button>
       <button onclick="fotoEkleBaslat(${i})" style="margin-left:8px">➕ Fotoğraf Ekle</button>
     </div>`;
-  document.getElementById("bilgiPaneli").innerHTML = html;
+ document.querySelector("bilgiPaneli").innerHTML = html;
 }
 
 // Marker silme
@@ -107,7 +107,7 @@ function markerSil(i) {
 
   // Paneli tamamen gizle
   let html="🗺️ Haritadan bir yeri seçtiğinizde detayları burada görünecek.";
-  document.getElementById("bilgiPaneli").innerHTML = html;
+ document.querySelector("#demo").innerHTML document.getElementById("bilgiPaneli").innerHTML = html;
 }
   // Harita görünümünü varsayılana döndür
   if (window.harita) window.harita.setView([39.0, 35.0], 6);
