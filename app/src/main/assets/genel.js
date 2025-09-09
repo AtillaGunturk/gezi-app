@@ -32,7 +32,7 @@ function toFileURL(yol) {
   if (yol.startsWith("file://") || yol.startsWith("content://")) return yol;
   return "file://" + yol;
 }
-
+window.goster = goster;
 function zoomFoto(src) {
 
 // <--- ekledik
@@ -120,7 +120,7 @@ function markerSil(i) {
 // Globale aç
 window.markerSil = markerSil;
 function fotoEkleBaslat(i) { düzenlemeModu(i); }
-window.goster = goster;
+
 window.ayrintiGoster = ayrintiGoster;
 window.fotoEkleBaslat = fotoEkleBaslat;
 
