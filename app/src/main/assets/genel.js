@@ -101,16 +101,12 @@ function markerSil(i) {
     window.harita.removeLayer(window.markerlar[i]);
     window.markerlar.splice(i, 1);
   
-
+                  }
   // Veri kaldır
   window.veriler.splice(i, 1);
 
-  // Paneli tamamen gizle
-  
- document.getElementById("bilgiPaneli").textContent= "Silindi ";
-}
   // Harita görünümünü varsayılana döndür
-  window.goster();
+  window.yeniKayitModu();
   if (window.harita) window.harita.setView([39.0, 35.0], 6);
 
 
