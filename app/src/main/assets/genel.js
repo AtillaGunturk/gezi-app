@@ -107,7 +107,7 @@ function markerSil(i) {
 
   // Harita görünümünü varsayılana döndür
   window.yeniKayitModu();
-  if (window.harita) window.harita.setView([39.0, 35.0], 6);
+//  if (window.harita) window.harita.setView([39.0, 35.0], 6);
 
 
   
