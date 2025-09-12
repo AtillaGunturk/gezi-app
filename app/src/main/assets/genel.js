@@ -100,11 +100,11 @@ function markerSil(i) {
   if (window.markerlar && window.markerlar[i]) {
     window.harita.removeLayer(window.markerlar[i]);
     window.markerlar.splice(i, 1);
-  
+  goster();
                   }
   // Veri kaldır
   window.veriler.splice(i, 1);
-ayrintiGoster();
+
   // Harita görünümünü varsayılana döndür
   if (window.harita) window.harita.setView([39.0, 35.0], 6);
 
