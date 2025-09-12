@@ -88,7 +88,7 @@ function ayrintiGoster(yer, i) {
       <button onclick="markerSil(${i})" style="margin-left:8px;color:red">🗑️ Yer Sil</button>
       <button onclick="fotoEkleBaslat(${i})" style="margin-left:8px">➕ Fotoğraf Ekle</button>
     </div>`;
- document.querySelector("bilgiPaneli").innerHTML = html;
+ document.getElementById("bilgiPaneli").innerHTML = html;
 }
 
 // Marker silme
