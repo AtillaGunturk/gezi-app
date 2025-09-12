@@ -90,6 +90,9 @@ function tumMarkerlariYenile() {
 }
 
 function markerSil(i) {
+  if (!window.veriler || !window.veriler[i]) return;
+  if (!confirm("Bu yeri silmek istiyor musunuz?")) return;
+
   // Kaydı verilerden çıkar
   window.veriler.splice(i, 1);
 
@@ -98,6 +101,13 @@ function markerSil(i) {
 
   // Yeni kayıt formuna dön
   yeniKayitModu();
+
+  // Paneli temizle
+  const panel = document.getElementById("bilgiPaneli");
+  if (panel) panel.innerHTML = "";
+
+  // Harita görünümünü varsayılana döndür
+  if (window.harita) window.harita.setView([39.0, 35.0], 6);
 }
 
 // -----------------------------------------------------------
