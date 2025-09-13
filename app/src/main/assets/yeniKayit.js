@@ -51,7 +51,7 @@ function yeniFotoSatiriEkle() {
     // Tarayıcı fallback
     const div = document.createElement("div");
     div.innerHTML = `
-      <input type="file" accept="image/*" style="width:45%" onchange="this.nextElementSibling.src=window.URL.createObjectURL(this.files[0])">
+      <input type="file" accept="image/*" style="width:45%" onchange="this.nextElementSibling.src=window.URL.createObjectURL(event.target.files[0])">
       <input type="text" placeholder="Açıklama" style="width:45%;margin-left:8px">
       <button type="button" onclick="this.parentNode.remove()">🗑️</button>`;
     fotoAlani.appendChild(div);
