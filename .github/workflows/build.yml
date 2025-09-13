@@ -1,0 +1,84 @@
+name: Build APK
+
+on:
+  push:
+    branches: [main, develop, feature/*]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Kodu Çek
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: JDK 17 Kurulumu
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Android SDK Kurulumu
+        uses: android-actions/setup-android@v3
+
+      - name: Gradle Wrapper İzni
+        run: chmod +x ./gradlew
+
+      - name: Gradle Properties Oluştur
+        working-directory: app
+        run: |
+          echo "MY_STORE_PASSWORD=${DEBUG_KEYSTORE_PASSWORD}" >> gradle.properties
+          echo "MY_KEY_ALIAS=${DEBUG_KEY_ALIAS}" >> gradle.properties
+          echo "android.useAndroidX=true" >> gradle.properties
+          echo "android.enableJetifier=true" >> gradle.properties
+        env:
+          DEBUG_KEYSTORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
+          DEBUG_KEY_ALIAS: ${{ secrets.DEBUG_KEY_ALIAS }}
+
+      - name: Keystore Oluştur
+        working-directory: app
+        run: |
+          mkdir -p android
+          printf '%s' "$DEBUG_KEYSTORE_B64" | base64 -d > android/debug.keystore
+        env:
+          DEBUG_KEYSTORE_B64: ${{ secrets.DEBUG_KEYSTORE_B64 }}
+
+      - name: APK Derle (Temizlik Dahil)
+        run: |
+          ./gradlew --stop || true
+          ./gradlew clean
+          rm -rf app/build app/.gradle app/.cxx
+          rm -rf build .gradle .idea *.iml
+          rm -rf ~/.gradle/caches:always ~/.gradle/daemon/ ~/.gradle/native/ ~/.gradle/wrapper/
+          rm -rf ~/.android/build-cache/
+          rm -rf $GRADLE_HOME/caches/build-cache-*
+          ./gradlew :app:assembleRelease --no-daemon --parallel --stacktrace | tee build.log
+        env:
+          MY_STORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
+          MY_KEY_ALIAS: ${{ secrets.DEBUG_KEY_ALIAS }}
+
+      - name: APK Yükle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gezi-signed-apk
+          path: app/build/outputs/apk/release/*.apk
+          if-no-files-found: ignore
+
+      - name: Build Log Yükle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: build.log
+
+
+
+
+
+
+
+
