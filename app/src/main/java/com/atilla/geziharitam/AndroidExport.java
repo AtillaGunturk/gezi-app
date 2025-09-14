@@ -77,6 +77,54 @@ public class AndroidExport {
     }
         }
 
+    // AndroidExport.java içinde (mevcut onPhotoPicked'in yerine koy)
+    @JavascriptInterface
+    public void onPhotoPicked(String uid, Uri uri, String displayName) {
+       try {
+          if (uri == null) return;
+
+        // Benzersiz dosya adı (timestamp + orijinal isim)
+        String name = displayName != null ? (System.currentTimeMillis() + "_" + displayName) : ("IMG_" + System.currentTimeMillis() + ".jpg");
+
+        // TARGET: External app files /fotograflar klasörü
+        File fotoDir = context.getExternalFilesDir("fotograflar");
+        if (fotoDir == null) {
+            // Fallback: internal files (çok nadir)
+            fotoDir = context.getFilesDir();
+        }
+        if (!fotoDir.exists()) {
+            fotoDir.mkdirs();
+        }
+
+        File destFile = new File(fotoDir, name);
+
+        // Kopyala
+        try (InputStream in = context.getContentResolver().openInputStream(uri);
+             OutputStream out = new FileOutputStream(destFile)) {
+            if (in == null) return;
+            byte[] buffer = new byte[8192];
+            int len;
+            while ((len = in.read(buffer)) > 0) {
+                out.write(buffer, 0, len);
+            }
+        }
+
+        // JS'e: 1) görüntüleme için tam file:// URI  2) JSON için göreceli yol
+        String fileUri = "file://" + destFile.getAbsolutePath();
+        String relativePath = "fotograflar/" + destFile.getName();
+
+        String js = String.format(
+            "window.onAndroidFilePicked && window.onAndroidFilePicked('%s','%s','%s');",
+            escapeJs(uid),
+            escapeJs(fileUri),
+            escapeJs(relativePath)
+        );
+
+        webView.post(() -> webView.evaluateJavascript(js, null));
+    } catch (Exception e) {
+        Log.e("AndroidExport", "Fotoğraf işlenirken hata oluştu", e);
+    }
+                }
     // Fotoğraf seçme (JS -> Android)
     @JavascriptInterface
     public void pickPhoto(String uid) {
@@ -86,40 +134,7 @@ public class AndroidExport {
     }
 
     // Fotoğraf seçildikten sonra JS'e bildir (kalıcı yol)
-    public void onPhotoPicked(String uid, Uri uri, String displayName) {
-        try {
-            if (uri == null) return;
-
-            // Benzersiz dosya adı oluştur
-            String name = displayName != null ? System.currentTimeMillis() + "_" + displayName : "IMG_" + System.currentTimeMillis() + ".jpg";
-            File destFile = new File(context.getFilesDir(), name);
-
-            // Fotoğrafı uygulama dizinine kopyala
-            try (InputStream in = context.getContentResolver().openInputStream(uri);
-                 OutputStream out = new FileOutputStream(destFile)) {
-                if (in == null) return;
-                byte[] buffer = new byte[8192];
-                int len;
-                while ((len = in.read(buffer)) > 0) {
-                    out.write(buffer, 0, len);
-                }
-            }
-
-            // JS'e bildir (UID + kalıcı yol + dosya adı)
-            String js = String.format(
-                    "window.onAndroidFilePicked && window.onAndroidFilePicked('%s','%s','%s');",
-                    escapeJs(uid),
-                    escapeJs(destFile.getAbsolutePath()),
-                    escapeJs(name)
-            );
-
-            webView.post(() -> webView.evaluateJavascript(js, null));
-
-        } catch (Exception e) {
-            Log.e("AndroidExport", "Fotoğraf işlenirken hata oluştu", e);
-        }
-    }
-    
+// AndroidExport.java içinde (mevcut onPhotoPicked'in yerine koy)
 
     // Fotoğraf aç (JS -> Android)
     @JavascriptInterface
