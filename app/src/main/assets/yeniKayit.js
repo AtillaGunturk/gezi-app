@@ -16,15 +16,18 @@ if (!window.veriler) window.veriler = [];
 // -----------------------------------------------------------
 // Fotoğraf seçimi (Android veya tarayıcı)
 // -----------------------------------------------------------
-
-window.onAndroidFilePicked = (uid, path, name) => {
+// yeniKayit.js içinde
+window.onAndroidFilePicked = (uid, fileUri, relativePath) => {
   const div = document.createElement("div");
 
   const img = document.createElement("img");
-  img.src = path;
+  img.src = fileUri;                 // gösterim için tam URI (file://...)
   img.className = "thumb";
-  img.title = name;
-  img.onclick = () => zoomFoto(path);
+  img.title = relativePath || fileUri;
+  img.onclick = () => zoomFoto(fileUri);
+
+  // JSON'a göreceli yol kaydetmek için dataset.rel kullanıyoruz
+  img.dataset.rel = relativePath || fileUri;
 
   const input = document.createElement("input");
   input.type = "text";
@@ -42,7 +45,6 @@ window.onAndroidFilePicked = (uid, path, name) => {
 
   fotoAlani.appendChild(div);
 };
-
 function yeniFotoSatiriEkle() {
   if (window.AndroidExport && AndroidExport.pickPhoto) {
     const uid = "uid_" + Date.now();
@@ -127,7 +129,8 @@ async function yeniYerKaydet() {
   fotoAlani.querySelectorAll("div").forEach(div => {
     const img = div.querySelector("img");
     const alt = div.querySelector("input[type=text]").value || "Fotoğraf";
-    if (img?.src) fotolar.push({ yol: img.src, alt });
+   const rel = img?.dataset?.rel || img?.src || "";
+if (rel) fotolar.push({ yol: rel, alt });
   });
 
   const yerForm = document.getElementById("yerForm");
