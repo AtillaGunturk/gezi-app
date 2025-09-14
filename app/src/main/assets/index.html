@@ -84,8 +84,17 @@ input, textarea { padding: 4px; margin-bottom: 4px; font-size: 16px; border: 1px
   <script defer src="yeniKayit.js"></script>
   <script defer src="iceAktar.js"></script>
   <script defer src="disarAktar.js"></script>
+  <script>
+  // sayfa hazır olduğunda
+  window.addEventListener('load', () => {
+    if (window.AndroidExport && AndroidExport.getExternalFilesPath) {
+      try { window._appExternalFilesPath = AndroidExport.getExternalFilesPath(); } catch(e){}
+    }
+  });
+  </script>
 </body>
   </html>
+
 
 
 
