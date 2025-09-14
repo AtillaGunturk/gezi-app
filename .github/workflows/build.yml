@@ -50,7 +50,7 @@ jobs:
         run: |
           ./gradlew --stop || true
           ./gradlew clean
-          rm -rf app/build app/.gradle app/.cxx
+          rm -rf app/build/ app/.gradle/ app/.cxx/
           rm -rf build .gradle .idea *.iml
           rm -rf ~/.gradle/caches:always ~/.gradle/daemon/ ~/.gradle/native/ ~/.gradle/wrapper/
           rm -rf ~/.android/build-cache/
@@ -74,6 +74,7 @@ jobs:
         with:
           name: build-log
           path: build.log
+
 
 
 
