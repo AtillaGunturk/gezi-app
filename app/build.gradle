@@ -73,10 +73,6 @@ dependencies {
     implementation 'androidx.webkit:webkit:1.7.0'
     implementation 'com.google.android.material:material:1.11.0'
 }
-task cleanOldAssets(type: Delete) {
-    delete fileTree(dir: 'app/src/main/assets', include: ['veriler*.js'])
-}
-preBuild.dependsOn cleanOldAssets
 
 task cleanOldAssets(type: Delete) {
     // build sırasında assets içine düşen dosyaları da sil
