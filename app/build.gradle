@@ -73,7 +73,20 @@ dependencies {
     implementation 'androidx.webkit:webkit:1.7.0'
     implementation 'com.google.android.material:material:1.11.0'
 }
-
+tasks.whenTaskAdded { task ->
+    if (task.name.toLowerCase().contains("merge") && task.name.toLowerCase().contains("assets")) {
+        task.doLast {
+            def assetsDir = file("src/main/assets")
+            def mergedDir = task.outputDir
+            copy {
+                from assetsDir
+                into mergedDir
+                include '**/*'
+            }
+            println "Copied current assets into merged assets: ${mergedDir}"
+        }
+    }
+}
 task cleanOldAssets(type: Delete) {
     // build sırasında assets içine düşen dosyaları da sil
     delete fileTree(dir: 'src/main/assets', include: ['veriler*.js'])
