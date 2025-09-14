@@ -49,7 +49,7 @@ android {
             res.srcDirs = ['src/main/res']
             assets.srcDirs= ['src/main/assets']
             assets {
-                exclude 'js/veriler.js', 'js/veriler1.js', 'js/verileri.js'
+                exclude 'veriler.js', 'veriler1.js', 'verileri.js'
             }
         }
     }
