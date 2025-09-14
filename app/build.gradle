@@ -78,11 +78,12 @@ task cleanOldAssets(type: Delete) {
 }
 preBuild.dependsOn cleanOldAssets
 
-task cleanJsFiles(type: Delete) {
-    delete fileTree(dir: 'src/main/assets/js', include: ['veriler.js', 'veriler1.js', 'verileri.js'])
+task cleanOldAssets(type: Delete) {
+    // build sırasında assets içine düşen dosyaları da sil
+    delete fileTree(dir: 'src/main/assets', include: ['veriler*.js'])
+    delete fileTree(dir: "$buildDir/intermediates/assets", include: ['**/veriler*.js'])
 }
-
-preBuild.dependsOn cleanJsFiles
+preBuild.dependsOn cleanOldAssets
 
 tasks.register("cleanManifestLogs", Delete) {
     delete fileTree("${buildDir}/intermediates/merged_manifests") {
