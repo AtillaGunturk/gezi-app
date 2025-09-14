@@ -14,7 +14,15 @@ const ozelIkon = L.icon({
   iconAnchor: [12, 32],
   className: 'gezi-marker'
 });
-
+// global app external files path
+window._appExternalFilesPath = "";
+if (window.AndroidExport && AndroidExport.getExternalFilesPath) {
+  try {
+    window._appExternalFilesPath = AndroidExport.getExternalFilesPath();
+  } catch (e) {
+    window._appExternalFilesPath = "";
+  }
+}
 // Gösterim
 function goster() {
   markerlar.forEach(m => harita.removeLayer(m));
@@ -30,7 +38,14 @@ function goster() {
 function toFileURL(yol) {
   if (!yol) return "";
   if (yol.startsWith("file://") || yol.startsWith("content://")) return yol;
-  return "file://" + yol;
+  // yol göreceli ise => base path ekle
+  if (window._appExternalFilesPath) {
+    // örn: file:///storage/.../files/fotograflar/xxx.jpg
+    return "file://" + window._appExternalFilesPath + "/" + yol;
+  } else {
+    // fallback eski davranış (çok düşük ihtimal)
+    return "file://" + yol;
+  }
 }
 window.goster = goster;
 function zoomFoto(src) {
