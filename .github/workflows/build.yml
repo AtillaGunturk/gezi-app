@@ -23,9 +23,6 @@ jobs:
 
       - name: Android SDK Kurulumu
         uses: android-actions/setup-android@v3
-
-      - name: Gradle Wrapper Yeniden Oluştur
-        run: gradle wrapper --gradle-version 8.6
         
       - name: Gradle Wrapper İzni
         run: chmod +x ./gradlew
@@ -72,6 +69,7 @@ jobs:
         with:
           name: build-log
           path: build.log
+
 
 
 
