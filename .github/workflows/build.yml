@@ -17,7 +17,7 @@ jobs:
       - name: (Temizlik Dahil)
         run: |
           ./gradlew --stop || true
-          ./gradlew clean --no-build-cache --no-daemon 
+          
           rm -rf app/build/
 
       - name: JDK 17 Kurulumu
@@ -53,7 +53,8 @@ jobs:
 
       - name: APK Derle (Temizlik Dahil)
         run: |
-
+          ./gradlew --stop || true
+          ./gradlew clean --no-build-cache --no-daemon
           ./gradlew :app:assembleRelease --no-build-cache --no-daemon --parallel --stacktrace | tee build.log
         env:
           MY_STORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
@@ -73,6 +74,7 @@ jobs:
         with:
           name: build-log
           path: build.log
+
 
 
 
