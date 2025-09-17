@@ -14,12 +14,13 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: main
-      - name: (Temizlik Dahil)
+      # ✅ app altında src hariç her şeyi sil
+      - name: app altında src hariç her şeyi sil
         run: |
-          ./gradlew --stop || true
-          
-          rm -rf app/build/
-
+          shopt -s extglob
+          cd app
+          rm -rf !("src"|"build.gradle")
+          cd
       - name: JDK 17 Kurulumu
         uses: actions/setup-java@v4
         with:
@@ -74,6 +75,7 @@ jobs:
         with:
           name: build-log
           path: build.log
+
 
 
 
