@@ -180,7 +180,8 @@ function düzenlemeModu(i) {
     const img = document.createElement("img");
     img.src = ft.yol;
     img.className = "thumb";
-
+    img.dataset.rel = ft.yol;   // 📌 Göreceli yolu da koru!
+    
     const input = document.createElement("input");
     input.type = "text";
     input.value = ft.alt || "";
