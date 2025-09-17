@@ -17,8 +17,8 @@ jobs:
       - name: (Temizlik Dahil)
         run: |
           ./gradlew --stop || true
-          rm -rf app/build/
           ./gradlew clean --no-build-cache --no-daemon 
+          rm -rf app/build/
 
       - name: JDK 17 Kurulumu
         uses: actions/setup-java@v4
@@ -73,6 +73,7 @@ jobs:
         with:
           name: build-log
           path: build.log
+
 
 
 
