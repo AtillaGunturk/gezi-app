@@ -42,7 +42,14 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-
+    
+    splits {
+        abi {
+            enable true
+            universalApk true  // 👈 bu çok önemli
+        }
+    }
+     
     // 🔧 Hatalı dizin aramalarını engeller
     sourceSets {
         main {
