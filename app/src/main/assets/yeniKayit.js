@@ -16,7 +16,6 @@ if (!window.veriler) window.veriler = [];
 // -----------------------------------------------------------
 // Fotoğraf seçimi (Android veya tarayıcı)
 // -----------------------------------------------------------
-// yeniKayit.js içinde
 window.onAndroidFilePicked = (uid, fileUri, relativePath) => {
   const div = document.createElement("div");
 
@@ -45,6 +44,7 @@ window.onAndroidFilePicked = (uid, fileUri, relativePath) => {
 
   fotoAlani.appendChild(div);
 };
+
 function yeniFotoSatiriEkle() {
   if (window.AndroidExport && AndroidExport.pickPhoto) {
     const uid = "uid_" + Date.now();
@@ -129,8 +129,8 @@ async function yeniYerKaydet() {
   fotoAlani.querySelectorAll("div").forEach(div => {
     const img = div.querySelector("img");
     const alt = div.querySelector("input[type=text]").value || "Fotoğraf";
-   const rel = img?.dataset?.rel || img?.src || "";
-if (rel) fotolar.push({ yol: rel, alt });
+    const rel = img?.dataset?.rel || img?.src || "";
+    if (rel) fotolar.push({ yol: rel, alt });
   });
 
   const yerForm = document.getElementById("yerForm");
@@ -180,8 +180,7 @@ function düzenlemeModu(i) {
     const img = document.createElement("img");
     img.src = ft.yol;
     img.className = "thumb";
-    img.dataset.rel = ft.yol;   // 📌 Göreceli yolu da koru!
-    
+
     const input = document.createElement("input");
     input.type = "text";
     input.value = ft.alt || "";
