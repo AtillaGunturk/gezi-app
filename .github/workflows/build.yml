@@ -69,9 +69,12 @@ jobs:
           path: app/build/outputs/apk/release/*.apk
           if-no-files-found: ignore
 
+      - name: APK Listesi
+        run: ls -l app/build/outputs/apk/release/
       - name: Build Log Yükle
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: build-log
           path: build.log
+
