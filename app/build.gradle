@@ -46,7 +46,6 @@ android {
     splits {
         abi {
             enable false
-            universalApk true  // 👈 bu çok önemli
         }
     }
      
