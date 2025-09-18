@@ -14,7 +14,7 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.webkit.JavascriptInterface;  // <--- eksik
+import android.webkit.JavascriptInterface;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResult;
@@ -27,11 +27,10 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import android.Manifest;
 import android.content.pm.PackageManager;
-import java.io.File;                        // File sınıfı için
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
-import androidx.core.content.FileProvider;  // FileProvider için
-
+import androidx.core.content.FileProvider;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -45,17 +44,16 @@ public class MainActivity extends AppCompatActivity {
     private ActivityResultLauncher<Intent> photoPickerLauncher;
 
     private @Nullable String currentPhotoUid = null;
+    private @Nullable String currentGeziAdi = null;
 
     @SuppressLint({"SetJavaScriptEnabled", "JavascriptInterface"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // WebView oluştur ve ata
         webView = new WebView(this);
         setContentView(webView);
 
-        // WebView ayarları
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
@@ -65,11 +63,9 @@ public class MainActivity extends AppCompatActivity {
         settings.setAllowUniversalAccessFromFileURLs(true);
         settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
 
-        // JS köprüsü
         androidExport = new AndroidExport(this, webView);
         webView.addJavascriptInterface(androidExport, "AndroidExport");
 
-        // File input chooser
         webView.setWebChromeClient(new WebChromeClient() {
             @Override
             public boolean onShowFileChooser(WebView webView,
@@ -88,7 +84,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Sayfa yüklenince storage temizliği
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageFinished(WebView view, String url) {
@@ -105,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
         // 1) <input type="file"> için
         fileChooserLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
-                (ActivityResult result) -> {
+                result -> {
                     if (filePathCallback != null) {
                         Uri[] results = null;
                         if (result.getResultCode() == RESULT_OK && result.getData() != null) {
@@ -131,7 +126,7 @@ public class MainActivity extends AppCompatActivity {
                 }
         );
 
-        // 3) Fotoğraf seçme
+        // 3) Fotoğraf seçme ve kopyalama
         photoPickerLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
@@ -147,48 +142,67 @@ public class MainActivity extends AppCompatActivity {
                             }
 
                             try {
-                                final int flags = Intent.FLAG_GRANT_READ_URI_PERMISSION;
-                                getContentResolver().takePersistableUriPermission(uri, flags);
+                                getContentResolver().takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
                             } catch (Exception e) {
                                 Log.w("MainActivity", "Persistable URI izin alınamadı: " + e.getMessage());
                             }
 
-                            if (currentPhotoUid != null) {
-                                androidExport.onPhotoPicked(currentPhotoUid, uri, displayName);
+                            if (currentPhotoUid != null && currentGeziAdi != null) {
+                                try {
+                                    File destDir = new File(getExternalFilesDir("fotograflar"),
+                                            normalizeGeziAdi(currentGeziAdi));
+                                    if (!destDir.exists()) destDir.mkdirs();
+
+                                    File destFile = new File(destDir, displayName);
+                                    try (InputStream is = getContentResolver().openInputStream(uri);
+                                         FileOutputStream fos = new FileOutputStream(destFile)) {
+                                        byte[] buffer = new byte[4096];
+                                        int read;
+                                        while ((read = is.read(buffer)) != -1) {
+                                            fos.write(buffer, 0, read);
+                                        }
+                                    }
+
+                                    Uri fileUri = Uri.fromFile(destFile);
+                                    androidExport.onPhotoPicked(currentPhotoUid, fileUri, displayName, currentGeziAdi);
+
+                                } catch (Exception ex) {
+                                    ex.printStackTrace();
+                                    Toast.makeText(this, "Fotoğraf kopyalanamadı!", Toast.LENGTH_SHORT).show();
+                                }
+
                                 currentPhotoUid = null;
+                                currentGeziAdi = null;
                             }
                         }
                     }
                 }
         );
 
-        // İzin isteme (Android 9 ve 10+ farklı)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) { // Android 13+
-    if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES)
-            != PackageManager.PERMISSION_GRANTED) {
-        ActivityCompat.requestPermissions(this,
-                new String[]{Manifest.permission.READ_MEDIA_IMAGES},
-                101);
-    }
-} else {
-    // Android 9-12
-    String[] permissions = new String[]{
-            Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
-    };
-    boolean needRequest = false;
-    for (String perm : permissions) {
-        if (ContextCompat.checkSelfPermission(this, perm) != PackageManager.PERMISSION_GRANTED) {
-            needRequest = true;
+        // İzin isteme
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES)
+                    != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.READ_MEDIA_IMAGES},
+                        101);
+            }
+        } else {
+            String[] permissions = new String[]{
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+            };
+            boolean needRequest = false;
+            for (String perm : permissions) {
+                if (ContextCompat.checkSelfPermission(this, perm) != PackageManager.PERMISSION_GRANTED) {
+                    needRequest = true;
+                }
+            }
+            if (needRequest) {
+                ActivityCompat.requestPermissions(this, permissions, 101);
+            }
         }
-    }
-    if (needRequest) {
-        ActivityCompat.requestPermissions(this, permissions, 101);
-    }
-        }
-        
 
-        // WebView’i temiz başlat
         loadFreshWebView();
     }
 
@@ -206,7 +220,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void loadFreshWebView() {
         if (webView == null) return;
-
         webView.getSettings().setCacheMode(WebSettings.LOAD_NO_CACHE);
         webView.clearCache(true);
         webView.clearHistory();
@@ -226,8 +239,9 @@ public class MainActivity extends AppCompatActivity {
         fileExportLauncher.launch(intent);
     }
 
-    public void startPhotoPicker(String uid) {
+    public void startPhotoPicker(String uid, String geziAdi) {
         currentPhotoUid = uid;
+        currentGeziAdi = geziAdi;
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         intent.setType("image/*");
@@ -235,58 +249,48 @@ public class MainActivity extends AppCompatActivity {
         photoPickerLauncher.launch(intent);
     }
 
-  
+    private String normalizeGeziAdi(String geziAdi) {
+        return geziAdi
+                .replace("Ç", "C").replace("ç", "c")
+                .replace("Ğ", "G").replace("ğ", "g")
+                .replace("İ", "I").replace("ı", "i")
+                .replace("Ö", "O").replace("ö", "o")
+                .replace("Ş", "S").replace("ş", "s")
+                .replace("Ü", "U").replace("ü", "u")
+                .replaceAll("[^a-zA-Z0-9]", "_");
+    }
+
     @JavascriptInterface
     public void openPhoto(String pathOrUri) {
-    try {
-        File srcFile;
-
-        if (pathOrUri.startsWith("content://")) {
-            // Content resolver'dan oku
-            Uri uri = Uri.parse(pathOrUri);
-            InputStream is = getContentResolver().openInputStream(uri);
-            if (is == null) throw new Exception("Dosya açılamadı");
-            srcFile = new File(getCacheDir(), "temp_" + System.currentTimeMillis() + ".jpg");
-            FileOutputStream fos = new FileOutputStream(srcFile);
-            byte[] buffer = new byte[4096];
-            int read;
-            while ((read = is.read(buffer)) != -1) {
-                fos.write(buffer, 0, read);
+        try {
+            File srcFile;
+            if (pathOrUri.startsWith("file://")) {
+                srcFile = new File(Uri.parse(pathOrUri).getPath());
+            } else {
+                srcFile = new File(pathOrUri);
             }
-            fos.close();
-            is.close();
-        } else if (pathOrUri.startsWith("file://")) {
-            // file:///data/... -> sadece path kısmını al
-            srcFile = new File(Uri.parse(pathOrUri).getPath());
-        } else {
-            // Doğrudan path verilmişse
-            srcFile = new File(pathOrUri);
+
+            Uri fileUri;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                fileUri = FileProvider.getUriForFile(this,
+                        getPackageName() + ".provider", srcFile);
+            } else {
+                fileUri = Uri.fromFile(srcFile);
+            }
+
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setDataAndType(fileUri, "image/*");
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+            if (intent.resolveActivity(getPackageManager()) != null) {
+                startActivity(intent);
+            } else {
+                Toast.makeText(this, "Görüntüleyici uygulama bulunamadı!", Toast.LENGTH_SHORT).show();
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Fotoğraf açılamadı!", Toast.LENGTH_SHORT).show();
         }
-
-        Uri fileUri;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            fileUri = FileProvider.getUriForFile(
-                    this,
-                    getPackageName() + ".provider",
-                    srcFile
-            );
-        } else {
-            fileUri = Uri.fromFile(srcFile);
-        }
-
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setDataAndType(fileUri, "image/*");
-        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
-        if (intent.resolveActivity(getPackageManager()) != null) {
-            startActivity(intent);
-        } else {
-            Toast.makeText(this, "Görüntüleyici uygulama bulunamadı!", Toast.LENGTH_SHORT).show();
-        }
-
-    } catch (Exception e) {
-        e.printStackTrace();
-        Toast.makeText(this, "Fotoğraf açılamadı!", Toast.LENGTH_SHORT).show();
     }
 }
-                 }

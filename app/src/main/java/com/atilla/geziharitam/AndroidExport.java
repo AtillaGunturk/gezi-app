@@ -34,67 +34,66 @@ public class AndroidExport {
 
     // JSON dosyasını kaydet
     public void onFileSelectedToSave(Uri uri) {
-    if (jsonToSave == null || uri == null) return;
+        if (jsonToSave == null || uri == null) return;
 
-    try {
-        // Mevcut JSON'u oku
-        String existingJson = "";
-        try (InputStream is = context.getContentResolver().openInputStream(uri)) {
-            if (is != null) {
-                byte[] buffer = new byte[is.available()];
-                is.read(buffer);
-                existingJson = new String(buffer, StandardCharsets.UTF_8).trim();
+        try {
+            // Mevcut JSON'u oku
+            String existingJson = "";
+            try (InputStream is = context.getContentResolver().openInputStream(uri)) {
+                if (is != null) {
+                    byte[] buffer = new byte[is.available()];
+                    is.read(buffer);
+                    existingJson = new String(buffer, StandardCharsets.UTF_8).trim();
+                }
+            } catch (Exception e) {
+                Log.w("AndroidExport", "Mevcut JSON okunamadı, yeni dosya oluşturulacak");
             }
+
+            // Mevcut JSON varsa array içine al, yoksa direkt yaz
+            String newJson;
+            if (!existingJson.isEmpty()) {
+                existingJson = existingJson.replaceAll("(?s)^\\s*\\[|\\]\\s*$", ""); // baştaki/sondaki [] kaldır
+                newJson = "[" + existingJson + "," + jsonToSave.substring(1, jsonToSave.length() - 1) + "]";
+            } else {
+                newJson = jsonToSave;
+            }
+
+            // Dosyaya yaz (truncate mode)
+            try (OutputStream outputStream = context.getContentResolver().openOutputStream(uri, "wt")) {
+                if (outputStream != null) {
+                    outputStream.write(newJson.getBytes(StandardCharsets.UTF_8));
+                }
+            }
+
+            webView.post(() -> webView.evaluateJavascript(
+                    "alert('✅ Veriler başarıyla kaydedildi!')", null
+            ));
+
         } catch (Exception e) {
-            Log.w("AndroidExport", "Mevcut JSON okunamadı, yeni dosya oluşturulacak");
+            Log.e("AndroidExport", "Dosya kaydedilemedi", e);
+            webView.post(() -> webView.evaluateJavascript(
+                    "alert('❌ Veriler kaydedilemedi!')", null
+            ));
         }
-
-        // Mevcut JSON varsa array içine al, yoksa direkt yaz
-        String newJson;
-        if (!existingJson.isEmpty()) {
-            existingJson = existingJson.replaceAll("(?s)^\\s*\\[|\\]\\s*$", ""); // baştaki/sondaki [] kaldır
-            newJson = "[" + existingJson + "," + jsonToSave.substring(1, jsonToSave.length() - 1) + "]";
-        } else {
-            newJson = jsonToSave;
-        }
-
-        // Dosyaya yaz (truncate mode)
-        try (OutputStream outputStream = context.getContentResolver().openOutputStream(uri, "wt")) {
-            if (outputStream != null) {
-                outputStream.write(newJson.getBytes(StandardCharsets.UTF_8));
-            }
-        }
-
-        webView.post(() -> webView.evaluateJavascript(
-                "alert('✅ Veriler başarıyla kaydedildi!')", null
-        ));
-
-    } catch (Exception e) {
-        Log.e("AndroidExport", "Dosya kaydedilemedi", e);
-        webView.post(() -> webView.evaluateJavascript(
-                "alert('❌ Veriler kaydedilemedi!')", null
-        ));
     }
-        }
 
-    // AndroidExport.java içinde (mevcut onPhotoPicked'in yerine koy)
+    // Fotoğraf seçildikten sonra JS'e bildir
     @JavascriptInterface
-    public void onPhotoPicked(String uid, Uri uri, String displayName) {
+    public void onPhotoPicked(String uid, Uri uri, String displayName, String geziAdi) {
         try {
             if (uri == null) return;
+
+            // Klasör adı normalize ediliyor (Türkçe karakterler sorun yaratmasın)
+            String klasorAdi = normalizeGeziAdi(geziAdi);
+
+            File fotoDir = new File(context.getExternalFilesDir("fotograflar"), klasorAdi);
+            if (!fotoDir.exists()) fotoDir.mkdirs();
+
             // Benzersiz dosya adı (timestamp + orijinal isim)
-            String name = displayName != null ? (System.currentTimeMillis() + "_" + displayName) : ("IMG_" + System.currentTimeMillis() + ".jpg");
-            // TARGET: External app files /fotograflar klasörü
-            File fotoDir = context.getExternalFilesDir("fotograflar");
-            if (fotoDir == null) {
-                // Fallback: internal files (çok nadir)
-                fotoDir = context.getFilesDir();
-            }
-            if (!fotoDir.exists()) {
-                fotoDir.mkdirs();
-            }
+            String name = System.currentTimeMillis() + "_" + displayName;
             File destFile = new File(fotoDir, name);
-            // Kopyala
+
+            // Fotoğrafı kopyala
             try (InputStream in = context.getContentResolver().openInputStream(uri);
                  OutputStream out = new FileOutputStream(destFile)) {
                 if (in == null) return;
@@ -104,16 +103,19 @@ public class AndroidExport {
                     out.write(buffer, 0, len);
                 }
             }
+
             // JS'e: 1) görüntüleme için tam file:// URI  2) JSON için göreceli yol
             String fileUri = "file://" + destFile.getAbsolutePath();
-            String relativePath = "fotograflar/" + destFile.getName();
+            String jsonPath = "fotograflar/" + klasorAdi + "/" + name;
+
             String js = String.format(
-                "window.onAndroidFilePicked && window.onAndroidFilePicked('%s','%s','%s');",
-                escapeJs(uid),
-                escapeJs(fileUri),
-                escapeJs(relativePath)
+                    "window.onAndroidFilePicked && window.onAndroidFilePicked('%s','%s','%s');",
+                    escapeJs(uid),
+                    escapeJs(fileUri),
+                    escapeJs(jsonPath)
             );
             webView.post(() -> webView.evaluateJavascript(js, null));
+
         } catch (Exception e) {
             Log.e("AndroidExport", "Fotoğraf işlenirken hata oluştu", e);
         }
@@ -123,17 +125,15 @@ public class AndroidExport {
     public String getExternalFilesPath() {
         File dir = context.getExternalFilesDir(null);
         return dir != null ? dir.getAbsolutePath() : "";
-}
+    }
+
     // Fotoğraf seçme (JS -> Android)
     @JavascriptInterface
     public void pickPhoto(String uid) {
         if (context instanceof MainActivity) {
-            ((MainActivity) context).startPhotoPicker(uid);
+            ((MainActivity) context).startPhotoPicker(uid,"varsayılanGezi");
         }
     }
-
-    // Fotoğraf seçildikten sonra JS'e bildir (kalıcı yol)
-// AndroidExport.java içinde (mevcut onPhotoPicked'in yerine koy)
 
     // Fotoğraf aç (JS -> Android)
     @JavascriptInterface
@@ -146,5 +146,17 @@ public class AndroidExport {
     // JS içinde güvenli string
     private String escapeJs(String s) {
         return s == null ? "" : s.replace("'", "\\'");
+    }
+
+    // Gezi adı normalize (Türkçe karakterler ve özel karakterler için)
+    private String normalizeGeziAdi(String geziAdi) {
+        return geziAdi
+                .replace("Ç", "C").replace("ç", "c")
+                .replace("Ğ", "G").replace("ğ", "g")
+                .replace("İ", "I").replace("ı", "i")
+                .replace("Ö", "O").replace("ö", "o")
+                .replace("Ş", "S").replace("ş", "s")
+                .replace("Ü", "U").replace("ü", "u")
+                .replaceAll("[^a-zA-Z0-9]", "_");
     }
 }
