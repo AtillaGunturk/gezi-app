@@ -61,6 +61,13 @@ jobs:
           MY_STORE_PASSWORD: ${{ secrets.DEBUG_KEYSTORE_PASSWORD }}
           MY_KEY_ALIAS: ${{ secrets.DEBUG_KEY_ALIAS }}
 
+      - name: Get Artifact ID
+        run: |
+          ARTIFACT_ID=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          -H "Accept: application/vnd.github+json" \
+          "https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts" \
+          | jq -r '.artifacts[] | select(.name=="gezi-signed-apk") | .id')
+          echo "Artifact ID: $ARTIFACT_ID"
       - name: APK Yükle
         if: always()
         uses: actions/upload-artifact@v4
@@ -77,5 +84,6 @@ jobs:
         with:
           name: build-log
           path: build.log
+
 
 
