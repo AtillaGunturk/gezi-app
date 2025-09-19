@@ -178,7 +178,8 @@ function düzenlemeModu(i) {
   (y.fotolar ?? []).forEach((ft, j) => {
     const div = document.createElement("div");
     const img = document.createElement("img");
-    img.src = ft.yol;
+    img.src = ft.yol.startsWith("file://") ? ft.yol : ft.yol; // veya gerekli dönüşüm
+    img.dataset.rel = ft.yol; // dataset.rel’i de ekle
     img.className = "thumb";
 
     const input = document.createElement("input");
@@ -231,4 +232,5 @@ window.yeniFotoSatiriEkle = yeniFotoSatiriEkle;
 window.yeniYerKaydet = yeniYerKaydet;
 window.düzenlemeModu = düzenlemeModu;
 window.markerSil = markerSil;
+
 window.yeniKayitModu = yeniKayitModu;
