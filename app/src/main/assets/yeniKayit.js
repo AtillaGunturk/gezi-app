@@ -178,10 +178,20 @@ function düzenlemeModu(i) {
   (y.fotolar ?? []).forEach((ft, j) => {
     const div = document.createElement("div");
     const img = document.createElement("img");
-    img.src = ft.yol.startsWith("file://") ? ft.yol : ft.yol; // veya gerekli dönüşüm
-    img.dataset.rel = ft.yol; // dataset.rel’i de ekle
-    img.className = "thumb";
 
+    // Android ve tarayıcı uyumlu yol
+    let fotoYolu = ft.yol || "";
+    if (!fotoYolu.startsWith("file://") && !fotoYolu.startsWith("http")) {
+      // Eski relative yol varsa, Android cihaz için base path ekle
+      fotoYolu = "file:///storage/emulated/0/GeziApp/" + fotoYolu;
+    }
+    img.src = fotoYolu;
+    img.dataset.rel = ft.yol; // JSON kaydı için eski değer saklanır
+    img.className = "thumb";
+    img.title = ft.alt || "Fotoğraf";
+    img.onclick = () => zoomFoto(fotoYolu); // fotoğraf büyütme
+
+    // Açıklama inputu
     const input = document.createElement("input");
     input.type = "text";
     input.value = ft.alt || "";
@@ -189,8 +199,10 @@ function düzenlemeModu(i) {
     input.style = "width: 45%; margin-left: 8px;";
     input.oninput = () => (ft.alt = input.value);
 
+    // Silme butonu
     const silBtn = document.createElement("button");
     silBtn.textContent = "🗑️";
+    silBtn.type = "button";
     silBtn.onclick = () => {
       y.fotolar.splice(j, 1);
       div.remove();
@@ -213,7 +225,6 @@ function düzenlemeModu(i) {
     window.harita.flyTo([parseFloat(y.konum[0]), parseFloat(y.konum[1])], 9);
   }
 }
-
 // -----------------------------------------------------------
 // Yeni kayıt modu (form sıfırlama)
 // -----------------------------------------------------------
@@ -234,3 +245,4 @@ window.düzenlemeModu = düzenlemeModu;
 window.markerSil = markerSil;
 
 window.yeniKayitModu = yeniKayitModu;
+
