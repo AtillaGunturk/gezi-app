@@ -21,7 +21,7 @@ window.onAndroidFilePicked = (uid, fileUri, relativePath) => {
   img.className = "thumb";
   img.dataset.rel = relativePath || fileUri; 
   img.title = relativePath || fileUri;
-  img.onclick = () => zoomFoto(fileUri);
+  img.onclick = () => zoomFoto(relativePath || fileUri);
 
   const input = document.createElement("input");
   input.type = "text";
@@ -128,15 +128,12 @@ function düzenlemeModu(i) {
     const div = document.createElement("div");
     const img = document.createElement("img");
 
-    let fotoYolu = ft.yol || "";
-    if (!fotoYolu.startsWith("file://") && !fotoYolu.startsWith("http")) {
-      fotoYolu = "file:///storage/emulated/0/GeziApp/fotograflar/" + fotoYolu;
-    }
-    img.src = fotoYolu;
+    // zoom için her zaman toFileURL ile mutlak yol
+    img.src = toFileURL(ft.yol);   
     img.dataset.rel = ft.yol;
     img.className = "thumb";
     img.title = ft.alt || "Fotoğraf";
-    img.onclick = () => zoomFoto(fotoYolu);
+    img.onclick = () => zoomFoto(ft.yol);
 
     const input = document.createElement("input");
     input.type = "text"; input.value = ft.alt || "";
