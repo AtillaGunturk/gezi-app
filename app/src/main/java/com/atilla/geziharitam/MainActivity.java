@@ -2,6 +2,7 @@ package com.atilla.geziharitam;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
@@ -17,7 +18,6 @@ import android.webkit.WebViewClient;
 import android.webkit.JavascriptInterface;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
@@ -25,12 +25,14 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
-import androidx.core.content.FileProvider;
+import java.util.Locale;
+import android.webkit.MimeTypeMap;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -149,11 +151,23 @@ public class MainActivity extends AppCompatActivity {
 
                             if (currentPhotoUid != null && currentGeziAdi != null) {
                                 try {
-                                    File destDir = new File(getExternalFilesDir("fotograflar"),
-                                            normalizeGeziAdi(currentGeziAdi));
+                                    // hedef klasör (normalize yok!)
+                                    File destDir = new File(getExternalFilesDir("fotograflar"), currentGeziAdi);
                                     if (!destDir.exists()) destDir.mkdirs();
 
-                                    File destFile = new File(destDir, displayName);
+                                    // --- uzantıyı bul ---
+                                    String ext = getExtensionFromName(displayName);
+                                    if (ext == null) ext = getExtensionFromMime(uri);
+                                    if (ext == null) ext = ".jpg"; // fallback
+
+                                    // --- global sayaç ---
+                                    SharedPreferences prefs = getSharedPreferences("app_prefs", MODE_PRIVATE);
+                                    int counter = prefs.getInt("fotoCounter", 1);
+                                    String filename = counter + ext.toLowerCase(Locale.ROOT);
+                                    prefs.edit().putInt("fotoCounter", counter + 1).apply();
+
+                                    // kopyala
+                                    File destFile = new File(destDir, filename);
                                     try (InputStream is = getContentResolver().openInputStream(uri);
                                          FileOutputStream fos = new FileOutputStream(destFile)) {
                                         byte[] buffer = new byte[4096];
@@ -163,8 +177,11 @@ public class MainActivity extends AppCompatActivity {
                                         }
                                     }
 
+                                    // JS'e bildirilecek yol
                                     Uri fileUri = Uri.fromFile(destFile);
-                                    androidExport.onPhotoPicked(currentPhotoUid, fileUri, displayName, currentGeziAdi);
+                                    String jsonPath = "fotograflar/" + currentGeziAdi + "/" + filename;
+
+                                    androidExport.onPhotoPicked(currentPhotoUid, fileUri.toString(), jsonPath);
 
                                 } catch (Exception ex) {
                                     ex.printStackTrace();
@@ -249,17 +266,6 @@ public class MainActivity extends AppCompatActivity {
         photoPickerLauncher.launch(intent);
     }
 
-    private String normalizeGeziAdi(String geziAdi) {
-        return geziAdi
-                .replace("Ç", "C").replace("ç", "c")
-                .replace("Ğ", "G").replace("ğ", "g")
-                .replace("İ", "I").replace("ı", "i")
-                .replace("Ö", "O").replace("ö", "o")
-                .replace("Ş", "S").replace("ş", "s")
-                .replace("Ü", "U").replace("ü", "u")
-                .replaceAll("[^a-zA-Z0-9]", "_");
-    }
-
     @JavascriptInterface
     public void openPhoto(String pathOrUri) {
         try {
@@ -292,5 +298,21 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
             Toast.makeText(this, "Fotoğraf açılamadı!", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    // --- yardımcı metotlar ---
+    private String getExtensionFromName(String name) {
+        if (name == null) return null;
+        int dot = name.lastIndexOf('.');
+        if (dot != -1 && dot < name.length() - 1) {
+            return name.substring(dot);
+        }
+        return null;
+    }
+
+    private String getExtensionFromMime(Uri uri) {
+        String type = getContentResolver().getType(uri);
+        if (type == null) return null;
+        return "." + MimeTypeMap.getSingleton().getExtensionFromMimeType(type);
     }
 }
